@@ -1,16 +1,16 @@
 # Code of Conduct
 
-Contact: [contact@curiosum.com][0]
+Contact: project maintainers via [GitHub Discussions][2].
 
 ## Why have a Code of Conduct?
 
 As contributors and maintainers of this project, we are committed to providing a friendly, safe and welcoming environment for all, regardless of age, disability, gender, nationality, race, religion, sexuality, or similar personal characteristic.
 
-The goal of the Code of Conduct is to specify a baseline standard of behavior so that people with different social values and communication styles can talk about Kanta effectively, productively, and respectfully, even in face of disagreements. The Code of Conduct also provides a mechanism for resolving conflicts in the community when they arise.
+The goal of the Code of Conduct is to specify a baseline standard of behavior so that people with different social values and communication styles can talk about ExLingo effectively, productively, and respectfully, even in face of disagreements. The Code of Conduct also provides a mechanism for resolving conflicts in the community when they arise.
 
 ## Our Values
 
-These are the values Kanta developers should aspire to:
+These are the values ExLingo developers should aspire to:
 
   * Be friendly and welcoming
   * Be kind
@@ -41,17 +41,16 @@ The following actions are explicitly forbidden:
 
 ## Where does the Code of Conduct apply?
 
-If you contribute to or support Kanta in any way, you are encouraged to follow the Code of Conduct while doing so.
+If you contribute to or support ExLingo in any way, you are encouraged to follow the Code of Conduct while doing so.
 
-Explicit enforcement of the Code of Conduct applies to the official mediums operated by the Kanta project:
+Explicit enforcement of the Code of Conduct applies to the official mediums operated by the ExLingo project:
 
-* The official [Kanta][1] GitHub project and code reviews.
-* The official [GitHub Discussions][2] for Kanta.
-* The official [Kanta channel][3] in Elixir's Slack workspace.
+* The official [ExLingo][1] GitHub project and code reviews.
+* The official [GitHub Discussions][2] for ExLingo.
 
 Project maintainers may block, remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct.
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by emailing: [contact@curiosum.com][0]. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. **All reports will be kept confidential**.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project maintainers. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. **Reports will be handled as confidentially as the available reporting channel allows**.
 
 **The goal of the Code of Conduct is to resolve conflicts in the most harmonious way possible**. We hope that in most cases issues may be resolved through polite discussion and mutual agreement. Bannings and other forceful measures are to be employed only as a last resort. **Do not** post about the issue publicly or try to rally sentiment against a particular individual or group.
 
@@ -59,7 +58,5 @@ Instances of abusive, harassing, or otherwise unacceptable behavior may be repor
 
 This document was derived from the Elixir Code of Conduct (dated Sep/2021), itself based on the Code of Conduct from the Go project (dated Sep/2021) and the Contributor Covenant (v1.4).
 
-[0]: mailto:contact@curiosum.com?subject=Kanta:%20Code%20of%20Conduct%20Report
-[1]: https://github.com/curiosum-dev/kanta/
-[2]: https://github.com/curiosum-dev/kanta/discussions
-[3]: https://elixir-lang.slack.com/archives/C099BMEN5BP
+[1]: https://github.com/123fahrschule/ex_lingo/
+[2]: https://github.com/123fahrschule/ex_lingo/discussions

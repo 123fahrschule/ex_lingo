@@ -1,9 +1,9 @@
-defmodule Kanta.MixProject do
+defmodule ExLingo.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :kanta,
+      app: :ex_lingo,
       description: "User-friendly translations manager for Elixir/Phoenix projects.",
       package: package(),
       version: "0.5.1",
@@ -24,7 +24,7 @@ defmodule Kanta.MixProject do
   def application do
     [
       extra_applications: [:uri_query, :logger],
-      mod: {Kanta.Application, []}
+      mod: {ExLingo.Application, []}
     ]
   end
 
@@ -77,7 +77,7 @@ defmodule Kanta.MixProject do
   defp package do
     [
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/curiosum-dev/kanta"},
+      links: %{"GitHub" => "https://github.com/123fahrschule/ex_lingo"},
       files: ~w(lib priv dist CHANGELOG.md LICENSE.md mix.exs README.md)
     ]
   end
@@ -94,7 +94,7 @@ defmodule Kanta.MixProject do
     [
       extras: ["README.md", "docs/how-to-write-plugins.md", "CHANGELOG.md"],
       groups_for_extras: [
-        "Kanta Guide": ~r/README|how-to-write-plugins/
+        "ExLingo Guide": ~r/README|how-to-write-plugins/
       ],
       assets: %{"docs/assets" => "assets", "assets/images/readme" => "assets/images/readme"},
       main: "readme",

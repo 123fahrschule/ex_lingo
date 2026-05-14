@@ -1,21 +1,21 @@
 # How to write plugins?
 
-Kanta allows you to expand its core features using plugins.
+ExLingo allows you to expand its core features using plugins.
 
-A plugin refers to any module that initiates a process and exposes a `start_link/1` function. During startup, Kanta automatically inserts each plugin into its supervision tree.
+A plugin refers to any module that initiates a process and exposes a `start_link/1` function. During startup, ExLingo automatically inserts each plugin into its supervision tree.
 
-Plugins have the capability to enhance Kanta's user interface by defining their own Phoenix components.
+Plugins have the capability to enhance ExLingo's user interface by defining their own Phoenix components.
 
-At Curiosum, we currently maintain two plugins:
+Typical plugin packages include:
 
-- [DeepL Plugin](https://github.com/curiosum-dev/kanta_deep_l_plugin)
-- [PO Writer Plugin](https://github.com/curiosum-dev/kanta_po_writer_plugin)
+- DeepL plugin
+- PO Writer plugin
 
 Feel welcome to explore their code for a deeper understanding of their setup.
 
 ## Getting started
 
-The first thing you have to do after creating brand new mix project is a module which name will be an entry point for your plugin. It also must contain a GenServer that will be added to Kanta's supervisor.
+The first thing you have to do after creating brand new mix project is a module which name will be an entry point for your plugin. It also must contain a GenServer that will be added to ExLingo's supervisor.
 
 ```bash
 mix new your_plugin_name
@@ -26,7 +26,7 @@ mix new your_plugin_name
 ```elixir
 defmodule YourPluginName do
   @moduledoc """
-  Kanta YourPluginName integration plugin
+  ExLingo YourPluginName integration plugin
   """
 
   use GenServer
@@ -41,10 +41,9 @@ defmodule YourPluginName do
 end
 ```
 
-Let's add this custom plugin to your testing app that uses Kanta.
-For a smooth initiation, we've got your back with our [kanta-example-app](https://github.com/curiosum-dev/kanta-example-app). Use it as the foundation for your testing app that incorporates Kanta and your custom plugin.
+Let's add this custom plugin to your testing app that uses ExLingo.
 
-First, add your plugin to `deps` list, then to Kanta's `plugins` config.
+First, add your plugin to `deps` list, then to ExLingo's `plugins` config.
 
 **mix.exs**:
 
@@ -58,7 +57,7 @@ end
 **config/config.exs**:
 
 ```
-config :kanta_test, Kanta,
+config :ex_lingo_test, ExLingo,
   plugins: [
     {YourPluginName, []}
   ]
@@ -66,7 +65,7 @@ config :kanta_test, Kanta,
 
 ## Tweaking UI
 
-First, add `phoenix_live_view` and `kanta` to your plugins deps:
+First, add `phoenix_live_view` and `ex_lingo` to your plugins deps:
 
 **mix.exs**:
 
@@ -74,21 +73,21 @@ First, add `phoenix_live_view` and `kanta` to your plugins deps:
 defp deps do
 [
     {:phoenix_live_view, "~> 0.18"},
-    {:kanta, ">= 0.1.3"},
+    {:ex_lingo, ">= 0.1.3"},
 ]
 end
 ```
 
 ### Adding panel to dashboard
 
-With a simple creation of a component named `YourPluginName.DashboardComponent`, you can seamlessly integrate your plugin's panel into the Kanta dashboard. The components name plays a crucial role, because it's derived from the module name passed in the configuration file's `plugins` list.
+With a simple creation of a component named `YourPluginName.DashboardComponent`, you can seamlessly integrate your plugin's panel into the ExLingo dashboard. The components name plays a crucial role, because it's derived from the module name passed in the configuration file's `plugins` list.
 
 **lib/dashboard_component**:
 
 ```elixir
 defmodule YourPluginName.DashboardComponent do
   @moduledoc """
-  Phoenix LiveComponent for Kanta dashboard
+  Phoenix LiveComponent for ExLingo dashboard
   """
 
   use Phoenix.LiveComponent
@@ -114,7 +113,7 @@ defmodule YourPluginName.DashboardComponent do
 end
 ```
 
-![Preview of plugin's panel added to the Kanta dashboard](assets/images/dashboard.png)
+![Preview of plugin's panel added to the ExLingo dashboard](assets/images/dashboard.png)
 
 #### Need async or more control over the process?
 You can use `DashboardLive` instead. Which would render as a child live view.
@@ -124,7 +123,7 @@ This way you can write async code and have a separate process for your component
 ```elixir
 defmodule YourPluginName.DashboardLive do
   @moduledoc """
-  Phoenix child live view for Kanta dashboard
+  Phoenix child live view for ExLingo dashboard
   """
 
   use Phoenix.LiveView, container: {:div, style: "grid-column: 1 / -1;"}
@@ -157,13 +156,13 @@ Enhance the translation edit view with a touch of personalization, by creating a
 ```elixir
 defmodule YourPluginName.FormComponent do
   @moduledoc """
-  Phoenix LiveComponent for Kanta translation form
+  Phoenix LiveComponent for ExLingo translation form
   """
 
   use Phoenix.LiveComponent
 
-  alias Kanta.Translations
-  alias Kanta.Translations.Message
+  alias ExLingo.Translations
+  alias ExLingo.Translations.Message
 
   def render(assigns) do
     ~H"""
@@ -199,15 +198,15 @@ defmodule YourPluginName.FormComponent do
 end
 ```
 
-![Preview of plugin's button added to the Kanta form component](assets/images/form-component.png)
+![Preview of plugin's button added to the ExLingo form component](assets/images/form-component.png)
 
-Kanta passes keyword list with values that you can use inside your component:
+ExLingo passes keyword list with values that you can use inside your component:
 
 - `id` - name of your plugin
-- `message` - `Kanta.Translations.Message` struct, for example
+- `message` - `ExLingo.Translations.Message` struct, for example
 
   ```elixir
-  %Kanta.Translations.Message{
+  %ExLingo.Translations.Message{
     id: 1,
     msgid: "Actions",
     message_type: :singular,
@@ -222,10 +221,10 @@ Kanta passes keyword list with values that you can use inside your component:
   }
   ```
 
-- `locale` - `Kanta.Translations.Locale` struct, for example:
+- `locale` - `ExLingo.Translations.Locale` struct, for example:
 
   ```elixir
-  %Kanta.Translations.Locale{
+  %ExLingo.Translations.Locale{
       id: 4,
       iso639_code: "it",
       name: "Italian",
@@ -240,10 +239,10 @@ Kanta passes keyword list with values that you can use inside your component:
     }
   ```
 
-- `translation` - either `Kanta.Translations.SingularTranslation` or `Kanta.Translations.PluralTranslation`, for example
+- `translation` - either `ExLingo.Translations.SingularTranslation` or `ExLingo.Translations.PluralTranslation`, for example
 
   ```elixir
-  %Kanta.Translations.SingularTranslation{
+  %ExLingo.Translations.SingularTranslation{
     id: 91,
     original_text: nil,
     translated_text: "Azioni",
@@ -263,9 +262,9 @@ Securely power your plugin with credentials or API keys. As the second tuple ele
 **config/config.exs**:
 
 ```
-config :kanta_test, Kanta,
+config :ex_lingo_test, ExLingo,
   plugins: [
-    {YourPluginName, [credentials: %{token: :curiosum}]}
+    {YourPluginName, [credentials: %{token: :ex_lingo}]}
   ]
 ```
 
@@ -273,13 +272,13 @@ Then they can be accessed inside your plugin with
 
 ```elixir
 defp get_credentials do
-    case Enum.find(Kanta.config().plugins, &(elem(&1, 0) == YourPluginName)) do
+    case Enum.find(ExLingo.config().plugins, &(elem(&1, 0) == YourPluginName)) do
       nil -> raise "missing credentials"
       {_, config} -> Keyword.get(config, :credentials)
     end
 end
 ```
 
-## Kanta internal API
+## ExLingo internal API
 
-Kanta revolves around the finders, handlers, services, and values pattern. This pattern boosts coding efficiency. Learn more: [Four Patterns to Save your Codebase and your Sanity](https://remote.com/blog/introducing-phx_gen_solid#finders-handlers-services-and-values).
+ExLingo revolves around the finders, handlers, services, and values pattern. This pattern boosts coding efficiency. Learn more: [Four Patterns to Save your Codebase and your Sanity](https://remote.com/blog/introducing-phx_gen_solid#finders-handlers-services-and-values).

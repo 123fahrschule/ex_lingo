@@ -1,5 +1,5 @@
 name: Bug Report
-description: File a bug report to help us improve Kanta
+description: File a bug report to help us improve ExLingo
 title: "[Bug]: "
 labels: ["bug", "triage"]
 assignees:
@@ -12,10 +12,10 @@ body:
         Thanks for taking the time to fill out this bug report! Please provide as much detail as possible to help us understand and reproduce the issue.
 
   - type: input
-    id: kanta-version
+    id: ex_lingo-version
     attributes:
-      label: Kanta version
-      description: What version of Kanta are you using?
+      label: ExLingo version
+      description: What version of ExLingo are you using?
       placeholder: e.g., 0.4.1
     validations:
       required: true
@@ -57,7 +57,7 @@ body:
       label: Steps to reproduce
       description: Detailed steps to reproduce the behavior
       placeholder: |
-        1. Set up Kanta with...
+        1. Set up ExLingo with...
         2. Configure translations for...
         3. Perform translation operation...
         4. See error...
@@ -72,13 +72,13 @@ body:
       render: elixir
       placeholder: |
         # config/config.exs
-        config :my_app, Kanta,
+        config :my_app, ExLingo,
           endpoint: MyAppWeb.Endpoint,
           repo: MyApp.Repo,
           otp_name: :my_app
 
         # Or show the problematic translation code
-        Kanta.get_translation("hello", "en")
+        ExLingo.get_translation("hello", "en")
 
   - type: textarea
     id: expected-behavior
@@ -119,6 +119,6 @@ body:
           required: true
         - label: I have provided all the requested information
           required: true
-        - label: This is a bug report, not a feature request or question. For general questions, please use [Kanta Slack channel](https://elixir-lang.slack.com/archives/C099BMEN5BP) or [GitHub Discussions](https://github.com/curiosum-dev/kanta/discussions).
+        - label: This is a bug report, not a feature request or question. For general questions, please use [GitHub Discussions](https://github.com/123fahrschule/ex_lingo/discussions).
           required: true
 

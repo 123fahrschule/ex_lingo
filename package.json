@@ -1,5 +1,5 @@
 {
-  "name": "kanta",
+  "name": "ex_lingo",
   "version": "0.4.1",
   "description": "Translations management library for Elixir/Phoenix projects",
   "license": "MIT",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/curiosum-dev/kanta.git"
+    "url": "git://github.com/123fahrschule/ex_lingo.git"
   },
   "files": [
     "README.md",

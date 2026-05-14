@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 ## [0.5.0] - 2025-11-03
 
 ### Breaking Changes
-- **Gettext 1.0.0 Migration**: This version requires updating your Gettext module definition to use the new backend adapter system. You must define `use Kanta.Gettext.Backend` in your Gettext module and configure the adapter.
+- **Gettext 1.0.0 Migration**: This version requires updating your Gettext module definition to use the new backend adapter system. You must define `use ExLingo.Gettext.Backend` in your Gettext module and configure the adapter.
 
 ### Added
 - Gettext versions v0.26 and v1.0.0 compatibility with via custom backend adapter system
@@ -39,7 +39,7 @@ Signed-off-by: Michał Buszkiewicz <michal@curiosum.com>
 ## [0.4.1] - 2024-10-09
 
 ### Added
-- Expand Kanta.Query module (#86)
+- Expand ExLingo.Query module (#86)
 - Button for manual cache clearing (#85)
 - Application source support
 - Support for multiline msgids (#56)
@@ -126,7 +126,7 @@ Signed-off-by: Jan Jakůbek <jan.jakubek96@gmail.com>
 
 ### Changed
 - Update phoenix_live_view to 0.20
-- Update Kanta version to 0.3.0
+- Update ExLingo version to 0.3.0
 - Improve translations search (#21)
 - Improve efficiency of messages list query
 - Require opts keyword list in join_resource/3
@@ -148,7 +148,7 @@ Signed-off-by: Jan Jakůbek <jan.jakubek96@gmail.com>
 
 ### Changed
 - Add badges (#28)
-- Update README to match Kanta version (#26)
+- Update README to match ExLingo version (#26)
 
 ## [0.2.0] - 2023-09-04
 
@@ -172,7 +172,7 @@ Signed-off-by: Jan Jakůbek <jan.jakubek96@gmail.com>
 - Down migration order (#14)
 - prefix() calls into prefix (#14)
 - Phoenix VerifiedRoutes issues & missing views (#10)
-- Kanta in mix release projects (#8)
+- ExLingo in mix release projects (#8)
 
 ### Changed
 - Fallback to public prefix for messages (#14)
@@ -189,7 +189,7 @@ Signed-off-by: Jan Jakůbek <jan.jakubek96@gmail.com>
 
 ## [0.1.0] - 2023-05-18
 
-Initial version of Kanta translations manager.
+Initial version of ExLingo translations manager.
 
 ### Added
 - Basic rwd (responsive web design)
@@ -212,7 +212,7 @@ Initial version of Kanta translations manager.
 - Update deps & readme
 - Rework translation listings
 - Change translations to singular translations
-- Mimic LiveDashboard mechanism in Kanta (#3)
+- Mimic LiveDashboard mechanism in ExLingo (#3)
 - Adjust gettext repo for plural messages handling
 - Mainly UI adjusts
 - Small refactoring

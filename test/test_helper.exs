@@ -1,17 +1,17 @@
-Application.ensure_all_started(:kanta)
+Application.ensure_all_started(:ex_lingo)
 
-Kanta.Test.Repo.start_link()
+ExLingo.Test.Repo.start_link()
 
-Kanta.start_link(
-  endpoint: Kanta.Test.Endpoint,
-  repo: Kanta.Test.Repo,
-  otp_name: :kanta,
+ExLingo.start_link(
+  endpoint: ExLingo.Test.Endpoint,
+  repo: ExLingo.Test.Repo,
+  otp_name: :ex_lingo,
   plugins: []
 )
 
 ExUnit.start()
 
 # clear translations cache
-Kanta.Cache.delete_all()
+ExLingo.Cache.delete_all()
 
-Ecto.Adapters.SQL.Sandbox.mode(Kanta.Test.Repo, :manual)
+Ecto.Adapters.SQL.Sandbox.mode(ExLingo.Test.Repo, :manual)

@@ -93,7 +93,7 @@ MIX_ENV=test mix dialyzer
 - [ ] No impact on existing translations
 - [ ] Affects translation extraction process
 - [ ] Affects translation storage/retrieval
-- [ ] Affects Kanta UI/dashboard
+- [ ] Affects ExLingo UI/dashboard
 - [ ] Affects plugin system
 - [ ] Database schema changes
 
@@ -122,11 +122,11 @@ MIX_ENV=test mix dialyzer
 # For API changes, show usage example:
 
 # Example: New translation extraction feature
-Kanta.extract_translations_from_po_files(domain: "errors")
+ExLingo.extract_translations_from_po_files(domain: "errors")
 
 # Example: New plugin integration
 defmodule MyApp.CustomTranslationPlugin do
-  use Kanta.Plugin
+  use ExLingo.Plugin
   # implementation
 end
 ```
@@ -148,5 +148,5 @@ end
 
 ---
 
-<!-- Thank you for contributing to Kanta! -->
+<!-- Thank you for contributing to ExLingo! -->
 

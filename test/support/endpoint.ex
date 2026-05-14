@@ -1,5 +1,5 @@
-defmodule Kanta.Test.Endpoint do
+defmodule ExLingo.Test.Endpoint do
   @moduledoc false
 
-  use Phoenix.Endpoint, otp_app: :kanta
+  use Phoenix.Endpoint, otp_app: :ex_lingo
 end

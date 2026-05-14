@@ -1,15 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: 💬 GitHub Discussions
-    url: https://github.com/curiosum-dev/kanta/discussions
+    url: https://github.com/123fahrschule/ex_lingo/discussions
     about: Ask questions and discuss ideas with the community
   - name: 📚 Documentation
-    url: https://hexdocs.pm/kanta
+    url: https://hexdocs.pm/ex_lingo
     about: Read the official documentation
-  - name: 📝 Curiosum Blog
-    url: https://curiosum.com/blog?search=kanta
-    about: Read blog posts about Kanta updates and tutorials
-  - name: 🏢 Contact Curiosum
-    url: https://curiosum.com/contact
-    about: Get in touch with the team behind Kanta
-

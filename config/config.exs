@@ -1,6 +1,6 @@
 import Config
 
-config :kanta, Kanta.Cache,
+config :ex_lingo, ExLingo.Cache,
   primary: [
     gc_interval: :timer.hours(24),
     backend: :ets
@@ -56,14 +56,14 @@ if config_env() == :dev do
 end
 
 if config_env() == :test do
-  config :kanta,
-    ecto_repos: [Kanta.Test.Repo]
+  config :ex_lingo,
+    ecto_repos: [ExLingo.Test.Repo]
 
-  config :kanta, Kanta.Test.Repo,
+  config :ex_lingo, ExLingo.Test.Repo,
     username: System.get_env("POSTGRES_USERNAME", "postgres"),
     password: System.get_env("POSTGRES_PASSWORD", "postgres"),
     hostname: System.get_env("POSTGRES_HOSTNAME", "localhost"),
-    database: "kanta_test",
+    database: "ex_lingo_test",
     port: 5432,
     pool: Ecto.Adapters.SQL.Sandbox,
     pool_size: 10

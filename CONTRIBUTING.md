@@ -1,6 +1,6 @@
-# Contributing to Kanta
+# Contributing to ExLingo
 
-Thank you for your interest in contributing to Kanta! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to ExLingo! This document provides guidelines and information for contributors.
 
 ## Code of Conduct
 
@@ -17,7 +17,7 @@ This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participatin
 * PostgreSQL (for database-related work)
 * Git
 
-Developing and testing Kanta requires a database as it stores translation data in Ecto schemas. The library integrates closely with Phoenix LiveView for the web interface.
+Developing and testing ExLingo requires a database as it stores translation data in Ecto schemas. The library integrates closely with Phoenix LiveView for the web interface.
 
 #### Setup
 
@@ -27,9 +27,9 @@ Just clone the repository, install dependencies normally, develop and run tests 
 
 ### Before proceeding: where to discuss things?
 
-The best place to discuss fresh ideas for the library's future and ask any sorts of questions (not strictly constituting an issue as defined below) is the [Kanta Slack channel][0]. You can also use [GitHub Discussions][1].
+The best place to discuss fresh ideas for the library's future and ask any sorts of questions (not strictly constituting an issue as defined below) is [GitHub Discussions][1].
 
-For example, if you've got a general question about Kanta's development direction, or about its intended behaviour in a specific translation management scenario, it's more convenient to start a discussion on Slack or GitHub than to file an issue right away.
+For example, if you've got a general question about ExLingo's development direction, or about its intended behaviour in a specific translation management scenario, it's more convenient to start a GitHub discussion than to file an issue right away.
 
 However, if there's clearly a bug you'd like to report, or you have a specific feature idea that you'd like to explain, it's perfect material for a GitHub issue inside the project!
 
@@ -41,7 +41,7 @@ Before creating an issue, please:
 2. **Use the issue templates** when available
 3. **For bug reports, provide detailed information**:
    - Elixir/OTP/Phoenix versions
-   - Kanta version
+   - ExLingo version
    - Database type (PostgreSQL or other)
    - Minimal reproduction case
    - Expected vs actual behavior
@@ -102,9 +102,9 @@ MIX_ENV=test mix credo
 
 Key principles:
 - **Clarity over cleverness** - write readable code that's easy to understand and consume for translation management workflows. Use macros wisely and only when needed.
-* **Focused dependencies** - Kanta relies on Phoenix LiveView for the UI, Ecto for data persistence, and Gettext for translation management. New dependencies should be justified and align with the translation management scope.
+* **Focused dependencies** - ExLingo relies on Phoenix LiveView for the UI, Ecto for data persistence, and Gettext for translation management. New dependencies should be justified and align with the translation management scope.
 - **Follow Elixir/Phoenix conventions** - use standard patterns and don't fight the platform. Avoid [common Elixir anti-patterns](https://hexdocs.pm/elixir/what-anti-patterns.html). Write functional, idiomatic Elixir code that integrates well with Phoenix applications.
-- **Document public APIs** - include `@doc` and `@moduledoc` extensively. Avoid `@moduledoc false` unless a module is deeply private. Type extensively with `@spec`, use `Kanta.Types` where applicable, and avoid vague types like `map()`, `any()`, or `term()` where possible.
+- **Document public APIs** - include `@doc` and `@moduledoc` extensively. Avoid `@moduledoc false` unless a module is deeply private. Type extensively with `@spec`, use `ExLingo.Types` where applicable, and avoid vague types like `map()`, `any()`, or `term()` where possible.
 - **Handle errors gracefully** - consider correct error propagation and follow Phoenix/LiveView conventions for error handling in the UI components.
 
 ### Testing
@@ -135,26 +135,20 @@ Releases are handled by maintainers:
 
 ### Getting help
 
-- [Kanta Slack channel][0] - for chat, questions and general discussion
 - [GitHub Discussions][1] - for questions and general discussion
 - [GitHub Issues][2] - for bug reports and feature requests
-- [Curiosum Blog][4] - for updates, tutorials and other content
 
 ### Recognition
 
-We are eager to publicly recognize your valuable input as a Kanta contributor! Your contributions will be highlighted in subsequent release notes, as well as blog posts announcing community contributions.
+We are eager to publicly recognize your valuable input as an ExLingo contributor! Your contributions will be highlighted in subsequent release notes, as well as blog posts announcing community contributions.
 
 ## Questions?
 
 Feel free to:
-- Join us on [Kanta Slack][0]
-- Open a [GitHub Discussion](https://github.com/curiosum-dev/kanta/discussions)
-- Contact us at [Curiosum](https://curiosum.com/contact)
-- Check our [blog](https://curiosum.com/blog?search=kanta) for updates
+- Open a [GitHub Discussion][1]
+- Open a [GitHub Issue][2] for bugs or concrete feature requests
 
-Thank you for contributing to Kanta! 🎉
+Thank you for contributing to ExLingo!
 
-[0]: https://elixir-lang.slack.com/archives/C099BMEN5BP
-[1]: https://github.com/curiosum-dev/kanta/discussions
-[2]: https://github.com/curiosum-dev/kanta/issues
-[4]: https://curiosum.com/blog?search=kanta
+[1]: https://github.com/123fahrschule/ex_lingo/discussions
+[2]: https://github.com/123fahrschule/ex_lingo/issues

@@ -1,4 +1,4 @@
-defmodule Kanta.Test.DataCase do
+defmodule ExLingo.Test.DataCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -18,17 +18,17 @@ defmodule Kanta.Test.DataCase do
 
   using do
     quote do
-      alias Kanta.Test.Repo
+      alias ExLingo.Test.Repo
 
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import Kanta.Test.DataCase
+      import ExLingo.Test.DataCase
     end
   end
 
   setup tags do
-    Kanta.Test.DataCase.setup_sandbox(tags)
+    ExLingo.Test.DataCase.setup_sandbox(tags)
     :ok
   end
 
@@ -36,7 +36,7 @@ defmodule Kanta.Test.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Kanta.Test.Repo, shared: not tags[:async])
+    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(ExLingo.Test.Repo, shared: not tags[:async])
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
   end
 

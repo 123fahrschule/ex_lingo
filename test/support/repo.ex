@@ -1,7 +1,7 @@
-defmodule Kanta.Test.Repo do
+defmodule ExLingo.Test.Repo do
   @moduledoc false
 
   use Ecto.Repo,
-    otp_app: :kanta,
+    otp_app: :ex_lingo,
     adapter: Ecto.Adapters.Postgres
 end

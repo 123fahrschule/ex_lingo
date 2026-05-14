@@ -1,4 +1,4 @@
-defmodule Kanta.Test.Backend do
+defmodule ExLingo.Test.Backend do
   @moduledoc false
 
   use Gettext.Backend,

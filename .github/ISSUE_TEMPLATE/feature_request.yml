@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest a new feature or enhancement for Kanta
+description: Suggest a new feature or enhancement for ExLingo
 title: "[Feature]: "
 labels: ["enhancement", "triage"]
 assignees:
@@ -55,11 +55,11 @@ body:
         # Example of how you'd like to use this feature
 
         # For API features:
-        Kanta.bulk_import_translations(file_path, locale: "en")
+        ExLingo.bulk_import_translations(file_path, locale: "en")
 
         # For plugin features:
         defmodule MyApp.CustomTranslationPlugin do
-          use Kanta.Plugin
+          use ExLingo.Plugin
 
           def translate(text, from_locale, to_locale) do
             # custom translation logic
@@ -94,7 +94,7 @@ body:
           required: true
         - label: I have checked the roadmap in the README
           required: true
-        - label: This is a feature request, not a bug report or question. For general questions, please use [Kanta Slack channel](https://elixir-lang.slack.com/archives/C099BMEN5BP) or [GitHub Discussions](https://github.com/curiosum-dev/kanta/discussions).
+        - label: This is a feature request, not a bug report or question. For general questions, please use [GitHub Discussions](https://github.com/123fahrschule/ex_lingo/discussions).
           required: true
 
 

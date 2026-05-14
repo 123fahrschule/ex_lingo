@@ -1,9 +1,9 @@
 {
-  "name": "kanta",
+  "name": "ex_lingo",
   "version": "0.1.0",
   "description": "The Phoenix translations management framework.",
   "license": "MIT",
-  "main": "./assets/js/kanta.js",
+  "main": "./assets/js/app.js",
   "repository": {},
   "scripts": {
     "build": "webpack --mode production",
