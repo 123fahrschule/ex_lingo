@@ -34,30 +34,33 @@ defmodule Kanta.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:expo, ">= 0.3.0"},
-      {:ecto, "~> 3.12"},
-      {:ecto_sql, "~> 3.12"},
-      {:phoenix, "~> 1.7"},
+      {:expo, "~> 1.1"},
+      {:ecto, "~> 3.13"},
+      {:ecto_sql, "~> 3.13"},
+      {:phoenix, "~> 1.8"},
       {:phoenix_view, "~> 2.0"},
-      {:phoenix_live_view, ">= 0.20.0"},
-      {:phoenix_html, "~> 4.0"},
+      {:phoenix_live_view, "~> 1.1"},
+      {:phoenix_html, "~> 4.3"},
       {:phoenix_html_helpers, "~> 1.0"},
-      {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
-      {:jason, "~> 1.0"},
-      {:nebulex, "~> 2.5"},
-      {:scrivener, "~> 2.0"},
-      {:scrivener_ecto, "~> 3.0"},
-      {:uri_query, "~> 0.2"},
+      {:tailwind, "~> 0.4.1", runtime: Mix.env() == :dev},
+      {:jason, "~> 1.4"},
+      {:telemetry, "~> 1.4"},
+      {:nebulex, "~> 3.0"},
+      {:nebulex_distributed, "~> 3.2"},
+      {:nebulex_local, "~> 3.0"},
+      {:scrivener, "~> 2.7"},
+      {:scrivener_ecto, "~> 3.1"},
+      {:uri_query, "~> 0.2.0"},
       # DEV
-      {:versioce, "~> 2.0.0"},
+      {:versioce, "~> 2.0"},
       {:git_cli, "~> 0.3.0"},
-      {:esbuild, "~> 0.7", only: :dev},
+      {:esbuild, "~> 0.10.0", only: :dev},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.27", only: :dev, runtime: false},
-      {:gettext, ">= 0.26.0"},
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.40.2", only: :dev, runtime: false},
+      {:gettext, "~> 1.0"},
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
-      {:postgrex, "~> 0.16", only: :test}
+      {:postgrex, "~> 0.22.2", only: :test}
     ]
   end
 
