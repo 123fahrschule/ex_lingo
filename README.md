@@ -109,7 +109,7 @@ _Note: Official documentation for ExLingo library is [available on hexdocs][hexd
 
 ### Prerequisites
 
-- Elixir (tested on 1.19.0)
+- Elixir 1.18+ (tested on 1.19.0)
 - Phoenix (tested on 1.7.x and 1.8.x with LiveView 1.x)
 - Ecto SQL (tested on 3.13)
 - PostgreSQL 15+ or SQLite 3.31.0+

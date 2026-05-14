@@ -8,9 +8,11 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Add CircleCI configuration for dependency audits, asset builds, formatting, compilation, Credo, Dialyzer, and test execution with PostgreSQL.
-- Add explicit `@tailwindcss/forms` npm dependency used by the Tailwind configuration.
+- Add Cognit `0.2.13` as the standard UI component library for the ExLingo dashboard.
 
 ### Changed
+- Rework the dashboard, translation tables, filters, forms, tabs, pagination, and app shell to use Cognit components, typography, tokens, and icons.
+- Raise the minimum Elixir version to `~> 1.18` to match Cognit's runtime requirement.
 - Update Hex dependencies to current compatible releases, including Phoenix, Phoenix LiveView, Ecto, Gettext, Nebulex, ExDoc, and Postgrex.
 - Update npm dependencies to resolve audit findings, including Alpine.js, Babel, Autoprefixer, PostCSS, Tailwind CSS 3.4.19, and transitive lockfile updates.
 - Update README badges and project links for the independent ExLingo repository and CircleCI workflow.
@@ -23,6 +25,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 - Remove GitHub Actions, GitHub issue and pull request templates, Lefthook configuration, commitlint hook, Code of Conduct, and Contributing guide from the forked project.
+- Remove the obsolete `@tailwindcss/forms` npm dependency after switching to the Cognit Tailwind preset.
 
 ### Security
 - Resolve npm audit findings previously reported as 11 vulnerabilities.

@@ -141,6 +141,5 @@ workflows:
           matrix:
             parameters:
               elixir_image:
-                - 1.17.3-erlang-27.2.2-node
                 - 1.18.4-erlang-27.2.2-node
                 - 1.19.5-erlang-27.2.2-node

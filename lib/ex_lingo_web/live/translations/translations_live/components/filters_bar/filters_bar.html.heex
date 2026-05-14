@@ -1,4 +1,5 @@
-<div>
+<.card>
+  <.card_content class="p-4">
   <.form :let={form} for={@filters} phx-change="change" class="grid grid-cols-12 gap-4">
     <div class="col-span-12 2xl:col-span-3">
       <SearchInput.render 
@@ -68,8 +69,11 @@
     </div>
     <div class="col-span-6 lg:col-span-3 2xl:col-span-1 flex flex-col justify-end">
       <div class="h-10 flex items-center">
-      <.link navigate={dashboard_path(@socket, "/locales/#{@locale_id}/translations")} class="font-semibold text-primary-dark dark:text-accent-dark">Clear filters</.link>
+        <.button as={&Phoenix.Component.link/1} navigate={dashboard_path(@socket, "/locales/#{@locale_id}/translations")} variant="ghost">
+          Clear filters
+        </.button>
       </div>
     </div>
   </.form>
-</div>
+  </.card_content>
+</.card>

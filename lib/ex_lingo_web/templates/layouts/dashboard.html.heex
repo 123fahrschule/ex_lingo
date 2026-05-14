@@ -9,7 +9,7 @@
     <link rel="stylesheet" nonce={csp_nonce(@conn, :style)} href={asset_path(@conn, :css)}>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=KoHo:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
     <script nonce={csp_nonce(@conn, :script)} src={asset_path(@conn, :js)} defer></script>
     <script>
       if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -30,106 +30,83 @@
     </script>
   </head>
   <body>
-    <main>
-      <div style="min-height: 640px">
-        <div class="h-screen flex overflow-hidden bg-base-light dark:bg-base-dark">
-          <div class="hidden border-r border-slate-200 bg-white md:flex md:flex-shrink-0">
-            <div class="flex flex-col w-72 bg-white dark:bg-stone-900">
-              <div class="flex flex-col h-0 flex-1">
-                <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-                  <div class="flex justify-start items-center mb-4">
-                    <Logo.render class="ml-4 w-10 h-10 text-primary-dark dark:text-accent-light" />
-                    <div class="ml-4 text-4xl text-primary-dark dark:text-accent-light font-medium">ExLingo</div>
-                  </div>
-                  <div class="border-b border-slate-50 opacity-50" />
-                  <nav class="mt-5 flex-1 px-2 space-y-3">
-                    <%= link to: dashboard_path(@conn, "/dashboard"), class: "bg-white dark:bg-base-dark transition-all hover:bg-slate-100 dark:hover:bg-stone-800 border-slate-300 dark:border-accent-dark shadow-md text-primary-dark dark:text-accent-dark group flex items-center px-2 py-2 text-sm font-semibold rounded-md" do %>
-                      <Icons.inspect class="mr-3 flex-shrink-0 h-6 w-6 text-primary-dark dark:text-accent-dark" />
-                      Dashboard
-                    <% end %>
-                    <%= link to: dashboard_path(@conn, "/locales"), class: "bg-white dark:bg-base-dark transition-all hover:bg-slate-100 dark:hover:bg-stone-800 border-slate-300 dark:border-accent-dark shadow-md text-primary-dark dark:text-accent-dark group flex items-center px-2 py-2 text-sm font-semibold rounded-md" do %>
-                      <Icons.languages class="mr-3 flex-shrink-0 h-6 w-6 text-primary-dark dark:text-accent-dark" />
-                      Locales
-                    <% end %>
-                    <%= link to: dashboard_path(@conn, "/domains"), class: "bg-white dark:bg-base-dark transition-all hover:bg-slate-100 dark:hover:bg-stone-800 border-slate-300 dark:border-accent-dark shadow-md text-primary-dark dark:text-accent-dark group flex items-center px-2 py-2 text-sm font-semibold rounded-md" do %>
-                      <Icons.album class="mr-3 flex-shrink-0 h-6 w-6 text-primary-dark dark:text-accent-dark" />
-                        Domains
-                    <% end %>
-                    <%= link to: dashboard_path(@conn, "/contexts"), class: "bg-white dark:bg-base-dark transition-all hover:bg-slate-100 dark:hover:bg-stone-800 border-slate-300 dark:border-accent-dark shadow-md text-primary-dark dark:text-accent-dark group flex items-center px-2 py-2 text-sm font-semibold rounded-md" do %>
-                      <Icons.box class="mr-3 flex-shrink-0 h-6 w-6 text-primary-dark dark:text-accent-dark" />
-                        Contexts
-                    <% end %>
-                    <%= link to: dashboard_path(@conn, "/application_sources"), class: "bg-white dark:bg-base-dark transition-all hover:bg-slate-100 dark:hover:bg-stone-800 border-slate-300 dark:border-accent-dark shadow-md text-primary-dark dark:text-accent-dark group flex items-center px-2 py-2 text-sm font-semibold rounded-md" do %>
-                      <Icons.computer class="mr-3 flex-shrink-0 h-6 w-6 text-primary-dark dark:text-accent-dark" />
-                        Applications
-                    <% end %>
-                  </nav>
-                </div>
+    <.sidebar_provider>
+      <.sidebar id="sidebar" collapsible="icon">
+        <.sidebar_header>
+          <div class="flex min-w-0 items-center gap-3 px-2 py-1">
+            <Logo.render class="size-8 shrink-0 text-primary" />
+            <div class="min-w-0 group-data-[collapsible=icon]:hidden">
+              <div class="truncate text-h5 text-sidebar-foreground">ExLingo</div>
+              <div class="truncate text-body-xs text-sidebar-foreground/70">Translations</div>
+            </div>
+          </div>
+        </.sidebar_header>
+        <.sidebar_separator />
+        <.sidebar_content>
+          <.sidebar_group>
+            <.sidebar_group_label>Workspace</.sidebar_group_label>
+            <.sidebar_group_content>
+              <.sidebar_menu>
+                <.sidebar_menu_item>
+                  <.sidebar_menu_button href={dashboard_path(@conn, "/dashboard")}>
+                    <.icon name="dashboard" decorative /> <span>Dashboard</span>
+                  </.sidebar_menu_button>
+                </.sidebar_menu_item>
+                <.sidebar_menu_item>
+                  <.sidebar_menu_button href={dashboard_path(@conn, "/locales")}>
+                    <.icon name="translate" decorative /> <span>Locales</span>
+                  </.sidebar_menu_button>
+                </.sidebar_menu_item>
+                <.sidebar_menu_item>
+                  <.sidebar_menu_button href={dashboard_path(@conn, "/domains")}>
+                    <.icon name="folder_managed" decorative /> <span>Domains</span>
+                  </.sidebar_menu_button>
+                </.sidebar_menu_item>
+                <.sidebar_menu_item>
+                  <.sidebar_menu_button href={dashboard_path(@conn, "/contexts")}>
+                    <.icon name="category" decorative /> <span>Contexts</span>
+                  </.sidebar_menu_button>
+                </.sidebar_menu_item>
+                <.sidebar_menu_item>
+                  <.sidebar_menu_button href={dashboard_path(@conn, "/application_sources")}>
+                    <.icon name="apps" decorative /> <span>Applications</span>
+                  </.sidebar_menu_button>
+                </.sidebar_menu_item>
+              </.sidebar_menu>
+            </.sidebar_group_content>
+          </.sidebar_group>
+        </.sidebar_content>
+        <.sidebar_footer>
+          <div class="px-2 text-body-xs text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden">
+            ExLingo
+          </div>
+        </.sidebar_footer>
+      </.sidebar>
 
-                <div class="p-4 text-primary-dark dark:text-accent-dark font-medium flex justify-center">
-                  ExLingo
-                </div>
-              </div>
+      <.sidebar_inset>
+        <.topbar>
+          <div class="mr-auto min-w-0">
+            <div class="truncate text-body-sm font-medium text-muted-foreground">
+              Translation management
             </div>
           </div>
-          <div x-data={"{ open: false }"} class="relative flex flex-col w-0 flex-1 overflow-hidden">
-            <div class="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3">
-              <button @click="open = !open" class="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-slate-500 dark:text-content-light hover:text-primary-dark hover:dark:text-accent-dark focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary focus:dark:ring-accent-dark">
-                <span class="sr-only">Open sidebar</span>
-                <Icons.menu class="h-6 w-6" />
-              </button>
-            </div>
-            <div
-              x-show="open"
-              x-transition:enter="transition ease-in duration-400"
-              x-transition:enter-start="opacity-0 -translate-y-20"
-              x-transition:enter-end="opacity-100 translate-y-0"
-              x-transition:leave="transition ease-in duration-100"
-              x-transition:leave-start="opacity-100 translate-y-20"
-              x-transition:leave-end="opacity-0 translate-y-0"
-              class="mt-2 py-4 mx-4 rounded-md bg-white dark:bg-stone-900 border border-primary-dark dark:border-accent-dark"
-            >
-              <div class="flex-1 flex flex-col overflow-y-auto">
-                <div class="flex justify-start items-center mb-4">
-                  <Logo.render class="ml-4 w-10 h-10 text-primary-dark dark:text-accent-light" />
-                  <div class="ml-4 text-4xl text-primary-dark dark:text-accent-light fotn-medium">ExLingo</div>
-                </div>
-                <div class="border-b border-slate-50 opacity-50" />
-                <nav class="mt-5 flex-1 px-2 pb-2 space-y-3">
-                  <%= link to: dashboard_path(@conn, "/dashboard"), class: "bg-white dark:bg-base-dark transition-all hover:bg-slate-100 dark:hover:bg-stone-800 border-slate-300 dark:border-accent-dark shadow-md text-primary-dark dark:text-accent-dark group flex items-center px-2 py-2 text-sm font-semibold rounded-md" do %>
-                    <Icons.inspect class="mr-3 flex-shrink-0 h-6 w-6 text-primary-dark dark:text-accent-dark" />
-                    Dashboard
-                  <% end %>
-                  <%= link to: dashboard_path(@conn, "/locales"), class: "bg-white dark:bg-base-dark transition-all hover:bg-slate-100 dark:hover:bg-stone-800 border-slate-300 dark:border-accent-dark shadow-md text-primary-dark dark:text-accent-dark group flex items-center px-2 py-2 text-sm font-semibold rounded-md" do %>
-                    <Icons.languages class="mr-3 flex-shrink-0 h-6 w-6 text-primary-dark dark:text-accent-dark" />
-                    Locales
-                  <% end %>
-                  <%= link to: dashboard_path(@conn, "/domains"), class: "bg-white dark:bg-base-dark transition-all hover:bg-slate-100 dark:hover:bg-stone-800 border-slate-300 dark:border-accent-dark shadow-md text-primary-dark dark:text-accent-dark group flex items-center px-2 py-2 text-sm font-semibold rounded-md" do %>
-                    <Icons.album class="mr-3 flex-shrink-0 h-6 w-6 text-primary-dark dark:text-accent-dark" />
-                      Domains
-                  <% end %>
-                  <%= link to: dashboard_path(@conn, "/contexts"), class: "bg-white dark:bg-base-dark transition-all hover:bg-slate-100 dark:hover:bg-stone-800 border-slate-300 dark:border-accent-dark shadow-md text-primary-dark dark:text-accent-dark group flex items-center px-2 py-2 text-sm font-semibold rounded-md" do %>
-                    <Icons.box class="mr-3 flex-shrink-0 h-6 w-6 text-primary-dark dark:text-accent-dark" />
-                      Contexts
-                  <% end %>
-                </nav>
-              </div>
-            </div>
-            <main class="flex-1 relative z-0 overflow-y-auto focus:outline-none">
-              <div phx-click={Phoenix.LiveView.JS.dispatch("toggle_dark_mode")} class="cursor-pointer absolute top-5 right-5 h-10 w-10 p-4 bg-white dark:bg-stone-900 border border-primary-dark dark:border-accent-dark hover:bg-stone-50 hover:dark:bg-stone-600 rounded-full flex justify-center items-center">
-                <div>
-                  <Icons.moon class="h-5 w-5 text-primary-dark dark:text-accent-dark" />
-                </div>
-              </div>
-              <div class="py-6">
-                <div class="px-4 sm:px-6 md:px-8">
-                  <%= @inner_content %>
-                </div>
-              </div>
-            </main>
-          </div>
-        </div>
-      </div>
-    </main>
+          <.button
+            type="button"
+            variant="ghost"
+            size="icon"
+            phx-click={Phoenix.LiveView.JS.dispatch("toggle_dark_mode")}
+            aria-label="Toggle dark mode"
+          >
+            <.icon name="dark_mode" size="sm" decorative />
+          </.button>
+        </.topbar>
+
+        <.page>
+          <.page_content>
+            <%= @inner_content %>
+          </.page_content>
+        </.page>
+      </.sidebar_inset>
+    </.sidebar_provider>
 </body>
 </html>

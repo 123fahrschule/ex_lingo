@@ -6,9 +6,7 @@ defmodule ExLingoWeb.Components.Shared.Pagination do
   It handles edge cases like ellipses for many pages and proper accessibility attributes.
   """
 
-  use Phoenix.Component
-
-  alias ExLingoWeb.Components.Icons
+  use ExLingoWeb, :component
 
   # Simple type definitions for pagination entries
   @type page_entry :: {:page, integer()}
@@ -33,59 +31,60 @@ defmodule ExLingoWeb.Components.Shared.Pagination do
     assigns = assign(assigns, current_page: p_num, total_pages: total_pages)
 
     ~H"""
-    <nav aria-label="Pagination" class="border-t border-gray-200 px-4 mb-4 flex items-center justify-between sm:px-0">
-      <div class="-mt-px w-0 flex-1 flex">
-        <button
+    <nav
+      aria-label="Pagination"
+      class="flex flex-col items-center justify-between gap-3 border-t border-border px-4 py-4 sm:flex-row sm:px-0"
+    >
+      <div class="flex flex-1 justify-start">
+        <.button
           type="button"
+          variant="ghost"
+          size="sm"
           phx-click={@on_page_change}
           phx-value-index={@current_page - 1}
           disabled={@current_page == 1}
           aria-label="Previous page"
-          class={[
-            navigation_button_class(),
-            if(@current_page == 1, do: disabled_class(), else: enabled_class())
-          ]}
+          class={if(@current_page == 1, do: "pointer-events-none opacity-40", else: nil)}
         >
-          <Icons.arrow_left class="mr-3 h-5 w-5" />
+          <.icon name="arrow_back" size="sm" decorative />
           Previous
-        </button>
+        </.button>
       </div>
-      <div class="hidden md:-mt-px md:flex">
+      <div class="hidden items-center gap-1 md:flex">
         <%= for entry <- calculate_pages(@current_page, @total_pages, @surrounding_pages_number) do %>
           <%= case entry do %>
             <% {:page, page_number} -> %>
-              <button
+              <.button
                 type="button"
+                variant={if page_number == @current_page, do: "default", else: "ghost"}
+                size="sm"
                 phx-click={@on_page_change}
                 phx-value-index={page_number}
                 aria-label={"Page #{page_number}"}
                 aria-current={if page_number == @current_page, do: "page", else: "false"}
-                class={
-                  if page_number == @current_page, do: active_page_class(), else: inactive_page_class()
-                }
+                class="min-w-9"
               >
                 <%= page_number %>
-              </button>
+              </.button>
             <% :ellipsis -> %>
-              <span class="border-transparent text-gray-500 dark:text-content-light/80 border-t-2 pt-4 px-4 inline-flex items-center text-sm font-medium" aria-hidden="true">…</span>
+              <span class="px-2 text-sm text-muted-foreground" aria-hidden="true">…</span>
           <% end %>
         <% end %>
       </div>
-      <div class="-mt-px w-0 flex-1 flex justify-end">
-        <button
+      <div class="flex flex-1 justify-end">
+        <.button
           type="button"
+          variant="ghost"
+          size="sm"
           phx-click={@on_page_change}
           phx-value-index={@current_page + 1}
           disabled={@current_page == @total_pages}
           aria-label="Next page"
-          class={[
-            navigation_button_class(),
-            if(@current_page == @total_pages, do: disabled_class(), else: enabled_class())
-          ]}
+          class={if(@current_page == @total_pages, do: "pointer-events-none opacity-40", else: nil)}
         >
           Next
-          <Icons.arrow_right class="ml-3 h-5 w-5" />
-        </button>
+          <.icon name="arrow_forward" size="sm" decorative />
+        </.button>
       </div>
     </nav>
     """
@@ -139,25 +138,4 @@ defmodule ExLingoWeb.Components.Shared.Pagination do
   # Don't add last page if total_pages is 1
   defp add_last_page(list, 1), do: list
   defp add_last_page(list, total_pages), do: list ++ [{:page, total_pages}]
-
-  # Helper functions for CSS classes
-  defp active_page_class do
-    "border-primary-dark dark:border-accent-dark text-primary-dark dark:text-accent-dark border-t-2 pt-4 px-4 inline-flex items-center text-sm font-medium cursor-pointer"
-  end
-
-  defp inactive_page_class do
-    "border-transparent text-gray-500 dark:text-content-light/80 hover:text-gray-700 hover:dark:text-white hover:border-gray-300 border-t-2 pt-4 px-4 inline-flex items-center text-sm font-medium cursor-pointer"
-  end
-
-  defp navigation_button_class do
-    "border-t-2 border-transparent pt-4 pr-1 inline-flex items-center text-sm font-medium text-gray-500 dark:text-content-light"
-  end
-
-  defp disabled_class do
-    "pointer-events-none opacity-20"
-  end
-
-  defp enabled_class do
-    "opacity-100 cursor-pointer hover:text-gray-700 hover:dark:text-white hover:border-gray-300"
-  end
 end

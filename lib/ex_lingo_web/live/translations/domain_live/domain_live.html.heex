@@ -1,32 +1,12 @@
-<div>
-  <div>
-    <nav class="sm:hidden" aria-label="Back">
-      <.link navigate={dashboard_path(@socket, "/domains")} class="flex items-center text-sm font-medium text-slate-500 hover:text-slate-700">
-        <Icons.chevron_left class="flex-shrink-0 -ml-1 mr-1 h-5 w-5 text-slate-400" aria-hidden="true" />
-        Back
-      </.link>
-    </nav>
-    <nav class="hidden sm:flex" aria-label="Breadcrumb">
-      <ol class="flex items-center space-x-4">
-        <li>
-          <div>
-            <.link navigate={dashboard_path(@socket, "/domains")} class="text-sm font-medium text-slate-500 hover:text-slate-700">Domains</.link>
-          </div>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <Icons.chevron_right class="flex-shrink-0 h-5 w-5 text-slate-400" aria-hidden="true" />
-            <.link navigate="#" aria-current="page" class="ml-4 text-sm font-medium text-slate-500 hover:text-slate-700"><%= @domain.name %></.link>
-          </div>
-        </li>
-      </ol>
-    </nav>
-  </div>
-  <div class="mt-2 md:flex md:items-center md:justify-between">
-    <div class="flex-1 min-w-0">
-      <h2 class="text-2xl font-bold leading-7 text-primary-dark dark:text-accent-dark sm:text-3xl sm:truncate">
-        <%= @domain.name %>
-      </h2>
-    </div>
-  </div>
-</div>
+<.breadcrumb>
+  <.breadcrumb_list>
+    <.breadcrumb_item>
+      <.breadcrumb_link href={dashboard_path(@socket, "/domains")}>Domains</.breadcrumb_link>
+    </.breadcrumb_item>
+    <.breadcrumb_separator />
+    <.breadcrumb_item>
+      <.breadcrumb_page>{@domain.name}</.breadcrumb_page>
+    </.breadcrumb_item>
+  </.breadcrumb_list>
+</.breadcrumb>
+<.page_header title={@domain.name} class="px-0" />

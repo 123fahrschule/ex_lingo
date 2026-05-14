@@ -1,6 +1,26 @@
 import Alpine from "alpinejs";
 import { Select } from "./components/shared/select";
 import { Toggle } from "./components/shared/toggle";
+import { SaladUIHook } from "../../deps/cognit/assets/js/ui/core/hook";
+import "../../deps/cognit/assets/js/ui/components/dialog.js";
+import "../../deps/cognit/assets/js/ui/components/select.js";
+import "../../deps/cognit/assets/js/ui/components/tabs.js";
+import "../../deps/cognit/assets/js/ui/components/radio_group.js";
+import "../../deps/cognit/assets/js/ui/components/popover.js";
+import "../../deps/cognit/assets/js/ui/components/hover-card.js";
+import "../../deps/cognit/assets/js/ui/components/collapsible.js";
+import "../../deps/cognit/assets/js/ui/components/tooltip.js";
+import "../../deps/cognit/assets/js/ui/components/accordion.js";
+import "../../deps/cognit/assets/js/ui/components/slider.js";
+import "../../deps/cognit/assets/js/ui/components/switch.js";
+import "../../deps/cognit/assets/js/ui/components/dropdown_menu.js";
+import "../../deps/cognit/assets/js/copy_button.js";
+import { FlashMessage } from "../../deps/cognit/assets/js/hooks/flash_message.js";
+import { LocaleSelect } from "../../deps/cognit/assets/js/hooks/locale_select.js";
+import { Pagination } from "../../deps/cognit/assets/js/hooks/pagination.js";
+import { Sidebar } from "../../deps/cognit/assets/js/hooks/sidebar.js";
+import { SidebarMenu } from "../../deps/cognit/assets/js/hooks/sidebar_menu.js";
+import { getCognitParams } from "../../deps/cognit/assets/js/connect_params.js";
 
 let socketPath =
   document.querySelector("html").getAttribute("phx-socket") || "/live";
@@ -13,6 +33,12 @@ Alpine.start();
 
 let Hooks = {};
 
+Hooks.FlashMessage = FlashMessage;
+Hooks.LocaleSelect = LocaleSelect;
+Hooks.Pagination = Pagination;
+Hooks.Sidebar = Sidebar;
+Hooks.SidebarMenu = SidebarMenu;
+Hooks.SaladUI = SaladUIHook;
 Hooks.Select = Select;
 Hooks.Toggle = Toggle;
 
@@ -27,6 +53,7 @@ let liveSocket = new LiveView.LiveSocket(socketPath, Phoenix.Socket, {
   },
   params: () => {
     return {
+      ...getCognitParams(),
       _csrf_token: csrfToken,
     };
   },

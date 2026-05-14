@@ -7,7 +7,7 @@ defmodule ExLingo.MixProject do
       description: "User-friendly translations manager for Elixir/Phoenix projects.",
       package: package(),
       version: "0.5.1",
-      elixir: "~> 1.14",
+      elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [
         warnings_as_errors: true
@@ -42,6 +42,7 @@ defmodule ExLingo.MixProject do
       {:phoenix_live_view, "~> 1.1"},
       {:phoenix_html, "~> 4.3"},
       {:phoenix_html_helpers, "~> 1.0"},
+      {:cognit, github: "123fahrschule/cognit", tag: "0.2.13"},
       {:tailwind, "~> 0.4.1", runtime: Mix.env() == :dev},
       {:jason, "~> 1.4"},
       {:telemetry, "~> 1.4"},

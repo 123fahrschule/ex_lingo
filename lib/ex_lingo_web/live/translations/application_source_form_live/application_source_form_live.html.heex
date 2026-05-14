@@ -1,71 +1,74 @@
-<div>
-  <div class="mb-6">
-    <div>
-      <div>
-        <nav class="sm:hidden" aria-label="Back">
-          <.link navigate={dashboard_path(@socket, "/application_sources")} class="flex items-center text-sm font-medium text-slate-400 hover:text-slate-200">
-            <Icons.chevron_left class="flex-shrink-0 -ml-1 mr-1 h-5 w-5 text-slate-500" aria-hidden="true" />
-            Back
-          </.link>
-        </nav>
-        <nav class="hidden sm:flex mb-2" aria-label="Breadcrumb">
-          <ol class="flex items-center space-x-4">
-            <li>
-              <div>
-                <.link patch={"/application_sources"} class="cursor-pointer text-sm font-medium text-slate-400 hover:text-slate-200">Application Sources</.link>
-              </div>
-            </li>
-          </ol>
-        </nav>
-      </div>
-      <div class="mt-2 md:flex md:items-center md:justify-between">
-        <div class="flex-1 min-w-0">
-          <h2 class="text-xl font-bold leading-7 text-slate-600 dark:text-content-light sm:text-2xl sm:truncate">
-            <%= if Map.has_key?(assigns, :application_source), do: "Updating application source", else: "Creating application source" %>
-          </h2>
+<div class="space-y-6">
+  <.breadcrumb>
+    <.breadcrumb_list>
+      <.breadcrumb_item>
+        <.breadcrumb_link href={dashboard_path(@socket, "/application_sources")}>
+          Application Sources
+        </.breadcrumb_link>
+      </.breadcrumb_item>
+      <.breadcrumb_separator />
+      <.breadcrumb_item>
+        <.breadcrumb_page>
+          <%= if Map.has_key?(assigns, :application_source), do: "Edit", else: "New" %>
+        </.breadcrumb_page>
+      </.breadcrumb_item>
+    </.breadcrumb_list>
+  </.breadcrumb>
+
+  <.page_header
+    title={
+      if Map.has_key?(assigns, :application_source),
+        do: "Update application source",
+        else: "Create application source"
+    }
+    class="px-0 pt-0"
+  />
+
+  <.card class="max-w-3xl">
+    <.card_header>
+      <.card_title>Application Source</.card_title>
+      <.card_description>
+        Define the source label and color used in translation lists.
+      </.card_description>
+    </.card_header>
+    <.card_content>
+      <.form for={@form} phx-change="validate" phx-submit="submit" class="space-y-6">
+        <.form_item>
+          <.form_label field={@form[:name]}>Name</.form_label>
+          <.form_control>
+            <.input field={@form[:name]} type="text" />
+          </.form_control>
+          <.form_message field={@form[:name]} translate={false} />
+        </.form_item>
+
+        <.form_item>
+          <.form_label field={@form[:description]}>Description</.form_label>
+          <.form_control>
+            <.textarea field={@form[:description]} rows="4" />
+          </.form_control>
+          <.form_message field={@form[:description]} translate={false} />
+        </.form_item>
+
+        <.form_item>
+          <.form_label field={@form[:color]}>Color</.form_label>
+          <.form_control>
+            <input
+              type="color"
+              name={@form[:color].name}
+              id={@form[:color].id}
+              value={@form[:color].value}
+              class="h-9 w-full rounded-md border border-input bg-background p-1 shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            />
+          </.form_control>
+          <.form_message field={@form[:color]} translate={false} />
+        </.form_item>
+
+        <div class="flex justify-end">
+          <.button type="submit" phx-disable-with="Saving...">
+            <.icon name="save" size="sm" decorative /> Save
+          </.button>
         </div>
-      </div>
-    </div>
-  </div>
-  <.form for={@form} phx-change="validate" phx-submit="submit" class="bg-white dark:bg-stone-900 shadow rounded-md mt-4 px-4 py-4 space-y-4">
-    <div class="pb-5 border-b border-slate-200 sm:flex sm:items-center sm:justify-between">
-      <h3 class="text-lg leading-6 font-medium text-primary-dark dark:text-accent-dark">
-        Application Source
-      </h3>
-    </div>
-    <div class="grid grid-cols-2 gap-4 lg:gap-8">
-      <div class="col-span-2 space-y-4">
-        <div>
-          <label for={@form[:name].id} class="block text-sm font-bold text-slate-700 dark:text-content-light">Name</label>
-          <input type="text" name={@form[:name].name} id={@form[:name].id} value={@form[:name].value} class="bg-slate-100 dark:bg-stone-700 shadow-sm focus:ring-primary focus:dark:ring-accent-dark focus:border-primary focus:dark:border-accent-dark block w-full sm:text-sm border-slate-300 rounded-md" />
-          <p :for={{error, _} <- @form[:name].errors} class="mt-3 text-sm leading-6 text-rose-600">
-            <%= error %>
-          </p>        
-        </div>
-        <div>
-          <label for={@form[:description].id} class="block text-sm font-bold text-slate-700 dark:text-content-light">Description</label>
-          <div class="mt-1">
-            <textarea type="text" name={@form[:description].name} id={@form[:description].id} class="bg-slate-100 dark:bg-stone-700 shadow-sm focus:ring-primary focus:dark:ring-accent-dark focus:border-primary focus:dark:border-accent-dark block w-full sm:text-sm border-slate-300 rounded-md"><%= @form[:description].value %></textarea>
-          </div>
-          <p :for={{error, _} <- @form[:description].errors} class="mt-3 text-sm leading-6 text-rose-600">
-            <%= error %>
-          </p>  
-        </div>
-        <div>
-          <label for={@form[:color].id} class="block text-sm font-bold text-slate-700 dark:text-content-light">Color</label>
-          <div class="mt-1">
-            <input type="color" name={@form[:color].name} id={@form[:color].id} value={@form[:color].value} class="bg-white dark:bg-base-dark text-content-dark dark:text-content-light shadow-sm focus:ring-primary focus:dark:ring-accent-dark focus:border-primary focus:dark:border-accent-dark block w-full sm:text-sm border-slate-300 rounded-md" />
-          </div>
-          <p :for={{error, _} <- @form[:color].errors} class="mt-3 text-sm leading-6 text-rose-600">
-            <%= error %>
-          </p>  
-        </div>
-      </div>
-      <div class="col-span-2">
-        <button type="submit" class="w-full flex items-center justify-center px-4 py-4 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary dark:bg-accent-dark hover:bg-primary-dark hover:dark:bg-accent-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-primary focus:dark:ring-accent-dark">
-          Save
-        </button>
-      </div>
-    </div>
-  </.form>
+      </.form>
+    </.card_content>
+  </.card>
 </div>

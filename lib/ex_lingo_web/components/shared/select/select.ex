@@ -5,8 +5,6 @@ defmodule ExLingoWeb.Components.Shared.Select do
 
   use ExLingoWeb, :live_component
 
-  alias ExLingoWeb.Components.Icons
-
   def update(assigns, socket) do
     %{field: field, options: options} = assigns
 

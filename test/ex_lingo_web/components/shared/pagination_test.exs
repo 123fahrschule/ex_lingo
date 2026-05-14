@@ -102,11 +102,11 @@ defmodule ExLingoWeb.Components.Shared.PaginationTest do
 
       # Previous button is enabled
       assert html =~ ~r/<button[^>]*phx-value-index="4"[^>]*>.*Previous/s
-      refute html =~ ~r/<button[^>]*disabled[^>]*>.*Previous/s
+      refute disabled_button?(html, "Previous page")
 
       # Next button is enabled
       assert html =~ ~r/<button[^>]*phx-value-index="6"[^>]*>.*Next/s
-      refute html =~ ~r/<button[^>]*disabled[^>]*>.*Next/s
+      refute disabled_button?(html, "Next page")
 
       # Current page has special styling
       assert html =~ ~r/<button[^>]*aria-current="page"[^>]*>\s*5\s*<\/button>/s
@@ -123,11 +123,11 @@ defmodule ExLingoWeb.Components.Shared.PaginationTest do
         )
 
       # Previous button is disabled
-      assert html =~ ~r/<button[^>]*disabled[^>]*>.*Previous/s
+      assert disabled_button?(html, "Previous page")
 
       # Next button is enabled
       assert html =~ ~r/<button[^>]*phx-value-index="2"[^>]*>.*Next/s
-      refute html =~ ~r/<button[^>]*phx-value-index="2"[^>]*disabled[^>]*>.*Next/s
+      refute disabled_button?(html, "Next page")
     end
 
     test "disables next button on last page" do
@@ -139,10 +139,10 @@ defmodule ExLingoWeb.Components.Shared.PaginationTest do
 
       # Previous button is enabled
       assert html =~ ~r/<button[^>]*phx-value-index="9"[^>]*>.*Previous/s
-      refute html =~ ~r/<button[^>]*phx-value-index="9"[^>]*disabled[^>]*>.*Previous/s
+      refute disabled_button?(html, "Previous page")
 
       # Next button is disabled
-      assert html =~ ~r/<button[^>]*disabled[^>]*>.*Next/s
+      assert disabled_button?(html, "Next page")
     end
 
     test "renders single page correctly" do
@@ -153,8 +153,8 @@ defmodule ExLingoWeb.Components.Shared.PaginationTest do
         })
 
       # Both navigation buttons are disabled
-      assert html =~ ~r/<button[^>]*disabled[^>]*>.*Previous/s
-      assert html =~ ~r/<button[^>]*disabled[^>]*>.*Next/s
+      assert disabled_button?(html, "Previous page")
+      assert disabled_button?(html, "Next page")
 
       # Only shows page 1
       assert html =~ ~r/<button[^>]*aria-current="page"[^>]*>\s*1\s*<\/button>/s
@@ -198,5 +198,17 @@ defmodule ExLingoWeb.Components.Shared.PaginationTest do
       refute html =~ ~r/<button[^>]*>\s*3\s*<\/button>/s
       refute html =~ ~r/<button[^>]*>\s*7\s*<\/button>/s
     end
+  end
+
+  defp disabled_button?(html, label) do
+    html
+    |> button_open_tag(label)
+    |> then(&Regex.match?(~r/\sdisabled(?:\s|=|>)/, &1))
+  end
+
+  defp button_open_tag(html, label) do
+    escaped_label = Regex.escape(label)
+    [_, tag] = Regex.run(~r/(<button[^>]*aria-label="#{escaped_label}"[^>]*>)/, html)
+    tag
   end
 end

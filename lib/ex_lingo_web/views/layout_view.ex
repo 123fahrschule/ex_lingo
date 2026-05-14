@@ -2,7 +2,6 @@ defmodule ExLingoWeb.LayoutView do
   @moduledoc false
   use ExLingoWeb, :html
 
-  alias ExLingoWeb.Components.Icons
   alias ExLingoWeb.Components.Shared.Logo
 
   embed_templates "../templates/layouts/*"

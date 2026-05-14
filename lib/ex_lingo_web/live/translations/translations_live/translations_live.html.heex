@@ -1,37 +1,16 @@
-
-<div>
-  <div>
-    <nav class="sm:hidden" aria-label="Back">
-      <.link navigate={dashboard_path(@socket, "/locales")} class="flex items-center text-sm font-medium text-slate-500 hover:text-slate-700">
-        <Icons.chevron_left class="flex-shrink-0 -ml-1 mr-1 h-5 w-5 text-slate-400 dark:text-content-light" aria-hidden="true" />
-        Back
-      </.link>
-    </nav>
-    <nav class="hidden sm:flex" aria-label="Breadcrumb">
-      <ol class="flex items-center space-x-4">
-        <li>
-          <div>
-            <.link navigate={dashboard_path(@socket, "/locales")} class="text-sm font-medium text-slate-500 dark:text-content-light hover:text-slate-700 dark:hover:text-white">Locales</.link>
-          </div>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <Icons.chevron_right class="flex-shrink-0 h-5 w-5 text-slate-400" aria-hidden="true" />
-            <.link navigate="#" aria-current="page" class="ml-4 text-sm font-medium text-slate-500 dark:text-content-light hover:text-slate-700 dark:hover:text-white"><%= @locale.native_name %></.link>
-          </div>
-        </li>
-      </ol>
-    </nav>
-  </div>
-  <div class="mt-2 md:flex md:items-center md:justify-between">
-    <div class="flex-1 min-w-0">
-      <h2 class="text-2xl font-bold leading-7 text-primary-dark dark:text-accent-dark sm:text-3xl sm:truncate">
-        <%= @locale.native_name %>
-      </h2>
-    </div>
-  </div>
-</div>
-<div class="mt-4">
+<.breadcrumb>
+  <.breadcrumb_list>
+    <.breadcrumb_item>
+      <.breadcrumb_link href={dashboard_path(@socket, "/locales")}>Locales</.breadcrumb_link>
+    </.breadcrumb_item>
+    <.breadcrumb_separator />
+    <.breadcrumb_item>
+      <.breadcrumb_page>{@locale.native_name}</.breadcrumb_page>
+    </.breadcrumb_item>
+  </.breadcrumb_list>
+</.breadcrumb>
+<.page_header title={@locale.native_name} class="px-0" />
+<div class="space-y-4">
   <.live_component module={FiltersBar} filters={@filters} not_translated_default={@not_translated_default} stale_default={@stale_default} application_sources_empty?={@application_sources_empty?} locale_id={@locale.id} id="filters-bar" />
   <.live_component module={MessagesTable} messages={@messages} filters={@filters} locale={@locale} application_sources_empty?={@application_sources_empty?} stale_message_ids={@stale_message_ids} fuzzy_matches={@fuzzy_matches} id="messages-table" />
   <Pagination.render metadata={@messages_metadata} on_page_change="page_changed" />

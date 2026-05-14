@@ -1,18 +1,12 @@
-<div>
-  <div class="mt-2 md:flex md:items-center md:justify-between">
-    <div class="flex-1 min-w-0">
-      <h2 class="text-2xl font-bold leading-7 text-primary-dark dark:text-accent-dark sm:text-3xl sm:truncate">
-        Application Sources
-      </h2>
-    </div>
-  </div>
-</div>
-<div class="mt-4">
-  <div class="flex gap-2 justify-end">
-    <.link navigate={dashboard_path(@socket, "/application_sources/new")} class="font-semibold text-primary-dark dark:text-accent-dark">
+<.page_header title="Application Sources" class="px-0 pt-0">
+  <:actions>
+    <.button as={&Phoenix.Component.link/1} navigate={dashboard_path(@socket, "/application_sources/new")}>
+      <.icon name="add" size="sm" decorative />
       Create application source
-    </.link>
-  </div>
+    </.button>
+  </:actions>
+</.page_header>
+<div>
   <.live_component module={ApplicationSourcesTable} id="application_sources-table" application_sources={@application_sources} />
   <Pagination.render metadata={@application_sources_metadata} on_page_change="page_changed" />
 </div>

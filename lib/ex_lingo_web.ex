@@ -132,6 +132,8 @@ defmodule ExLingoWeb do
 
       import ExLingo.Utils.ModuleUtils
 
+      use Cognit
+
       alias ExLingoWeb.Components.Icons
       alias ExLingoWeb.Router.Helpers, as: Routes
       unquote(verified_routes())
