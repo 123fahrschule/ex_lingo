@@ -1,6 +1,33 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Breaking Changes
+- Rename the project identity from Kanta to ExLingo, including OTP app name, package metadata, module namespaces, file paths, migrations, routes, docs, and asset package names.
+
+### Added
+- Add CircleCI configuration for dependency audits, asset builds, formatting, compilation, Credo, Dialyzer, and test execution with PostgreSQL.
+- Add explicit `@tailwindcss/forms` npm dependency used by the Tailwind configuration.
+
+### Changed
+- Update Hex dependencies to current compatible releases, including Phoenix, Phoenix LiveView, Ecto, Gettext, Nebulex, ExDoc, and Postgrex.
+- Update npm dependencies to resolve audit findings, including Alpine.js, Babel, Autoprefixer, PostCSS, Tailwind CSS 3.4.19, and transitive lockfile updates.
+- Update README badges and project links for the independent ExLingo repository and CircleCI workflow.
+- Update license attribution for the independent ExLingo development line.
+- Rebuild distributable JavaScript and CSS assets with the updated dependency set.
+
+### Fixed
+- Update Nebulex cache configuration for the current adapter packages.
+- Replace `length/1` emptiness checks that caused Credo warnings in the new CI pipeline.
+
+### Removed
+- Remove GitHub Actions, GitHub issue and pull request templates, Lefthook configuration, commitlint hook, Code of Conduct, and Contributing guide from the forked project.
+
+### Security
+- Resolve npm audit findings previously reported as 11 vulnerabilities.
+- Verify Hex dependencies with `mix deps.audit`.
+
 ## [0.5.1] - 2025-11-12
 ### Fixed
 - Fix bug when context is nil in PO file (#134)

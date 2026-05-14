@@ -32,8 +32,8 @@
 If you're working on an Elixir/Phoenix project and need to manage translations, you know how time-consuming and error-prone it can be. That's where ExLingo comes in. Our tool simplifies the process of managing translations by providing an intuitive interface for adding, editing, and deleting translations. Our tool also makes it easy to keep translations up-to-date as your project evolves. With ExLingo, you can streamline your workflow and focus on building great software, not managing translations.
 
 <div>
-  <a href="https://github.com/123fahrschule/ex_lingo/actions/workflows/development.yml">
-    <img alt="CI Status" src="https://github.com/123fahrschule/ex_lingo/actions/workflows/development.yml/badge.svg">
+  <a href="https://dl.circleci.com/status-badge/redirect/gh/123fahrschule/ex_lingo/tree/main">
+    <img alt="CI Status" src="https://dl.circleci.com/status-badge/img/gh/123fahrschule/ex_lingo/tree/main.svg?style=svg">
   </a>
   <a href="https://hex.pm/packages/ex_lingo">
     <img alt="Hex Version" src="https://img.shields.io/hexpm/v/ex_lingo.svg">
@@ -88,10 +88,9 @@ If you're working on an Elixir/Phoenix project and need to manage translations, 
       <li><a href="#running-tests">Running Tests</a></li>
     </ul>
   </li>
-  <li><a href="#contributing">Contributing</a></li>
+  <li><a href="#community">Community</a></li>
   <li><a href="#license">License</a></li>
   <li><a href="#contact">Contact</a></li>
-  <li><a href="#acknowledgments">Acknowledgments</a></li>
 </ul>
 
 ---
@@ -408,7 +407,7 @@ config :ex_lingo,
 ### Roadmap
 
 - [ ] Typespecs, tests, better docs
-- [ ] CI/CD
+- [x] CI/CD
 - [ ] Gettext extract/merge automation
 - [ ] Google Translate, Yandex Translate, LibreTranslate Plugins
 - [ ] File import/export
@@ -437,23 +436,6 @@ First-time setup (or if tests are failing due to database issues):
 # Setup test database and run migrations
 MIX_ENV=test mix ecto.drop && MIX_ENV=test mix ecto.create && MIX_ENV=test mix ecto.migrate
 ```
-
-<!-- CONTRIBUTING -->
-
-### Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. We prefer gitflow and Conventional commits style but we don't require that. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'feat: Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- LICENSE -->
 

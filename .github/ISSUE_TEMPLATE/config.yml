@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: 💬 GitHub Discussions
-    url: https://github.com/123fahrschule/ex_lingo/discussions
-    about: Ask questions and discuss ideas with the community
-  - name: 📚 Documentation
-    url: https://hexdocs.pm/ex_lingo
-    about: Read the official documentation

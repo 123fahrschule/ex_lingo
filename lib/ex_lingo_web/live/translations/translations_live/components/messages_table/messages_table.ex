@@ -149,7 +149,7 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
 
     assigns = assign(assigns, :translations, translations)
 
-    if length(translations) > 0 do
+    if translations != [] do
       ~H"""
         <div>
           <%= for plural_translation <- Enum.sort_by(@translations, & &1[:index], :asc) do %>

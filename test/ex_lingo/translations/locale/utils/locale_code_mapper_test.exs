@@ -193,7 +193,7 @@ defmodule ExLingo.Translations.Locale.Utils.LocaleCodeMapperTest do
     test "returns array of hex color codes" do
       colors = LocaleCodeMapper.get_colors("en")
       assert is_list(colors)
-      assert length(colors) >= 1
+      assert colors != []
 
       # Verify all colors are hex color codes
       Enum.each(colors, fn color ->
@@ -259,7 +259,7 @@ defmodule ExLingo.Translations.Locale.Utils.LocaleCodeMapperTest do
           assert is_binary(native_name) and String.length(native_name) > 0
           assert is_binary(family) and family != "unknown"
           assert is_binary(wiki_url) and String.starts_with?(wiki_url, "https://")
-          assert is_list(colors) and length(colors) >= 1
+          assert is_list(colors) and colors != []
         end
       end)
     end

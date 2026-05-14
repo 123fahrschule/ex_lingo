@@ -10,7 +10,7 @@ defmodule ExLingo.PoFiles.POFileParserTest do
       po_files = POFileParser.find_po_files(@test_base_path)
 
       assert is_list(po_files)
-      assert length(po_files) > 0
+      assert po_files != []
 
       # Verify structure of returned maps
       for po_file <- po_files do
@@ -60,7 +60,7 @@ defmodule ExLingo.PoFiles.POFileParserTest do
       parsed_files = POFileParser.parse_all_po_files(@test_base_path, ["it"])
 
       assert is_list(parsed_files)
-      assert length(parsed_files) > 0
+      assert parsed_files != []
 
       # Verify structure includes messages
       for po_file <- parsed_files do
@@ -73,7 +73,7 @@ defmodule ExLingo.PoFiles.POFileParserTest do
       parsed_files = POFileParser.parse_all_po_files(@test_base_path, ["it"])
 
       # Get first file with messages
-      file_with_messages = Enum.find(parsed_files, fn file -> length(file.messages) > 0 end)
+      file_with_messages = Enum.find(parsed_files, fn file -> file.messages != [] end)
 
       assert file_with_messages != nil
 
@@ -112,7 +112,7 @@ defmodule ExLingo.PoFiles.POFileParserTest do
       default_context_keys =
         Enum.filter(keys, fn {_msgid, _domain, context} -> context == "default" end)
 
-      assert length(default_context_keys) > 0
+      assert default_context_keys != []
     end
 
     test "extracts keys from messages with custom context" do

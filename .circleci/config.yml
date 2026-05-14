@@ -1,0 +1,146 @@
+version: 2.1
+
+executors:
+  elixir_node_postgres:
+    parameters:
+      elixir_image:
+        type: string
+    docker:
+      - image: cimg/elixir:<< parameters.elixir_image >>
+        environment:
+          MIX_ENV: dev
+          POSTGRES_USERNAME: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOSTNAME: localhost
+          SECRET_KEY_BASE: circleci-secret-key-base-for-ex-lingo-tests-change-me-circleci-secret-key-base
+      - image: postgres:16-alpine
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+
+jobs:
+  build_and_test:
+    parameters:
+      elixir_image:
+        type: string
+    executor:
+      name: elixir_node_postgres
+      elixir_image: << parameters.elixir_image >>
+    resource_class: medium
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-mix-<< parameters.elixir_image >>-{{ checksum "mix.lock" }}
+            - v1-mix-<< parameters.elixir_image >>-
+
+      - restore_cache:
+          keys:
+            - v1-dialyzer-<< parameters.elixir_image >>-{{ checksum "mix.lock" }}
+            - v1-dialyzer-<< parameters.elixir_image >>-
+
+      - restore_cache:
+          keys:
+            - v1-npm-{{ checksum "assets/package-lock.json" }}
+            - v1-npm-
+
+      - run:
+          name: Install Hex and Rebar
+          command: |
+            mix local.hex --force
+            mix local.rebar --force
+
+      - run:
+          name: Install Mix dependencies
+          command: |
+            mix deps.get
+            MIX_ENV=test mix deps.get
+
+      - save_cache:
+          key: v1-mix-<< parameters.elixir_image >>-{{ checksum "mix.lock" }}
+          paths:
+            - deps
+            - _build
+
+      - run:
+          name: Install npm dependencies
+          command: npm ci --prefix assets
+
+      - save_cache:
+          key: v1-npm-{{ checksum "assets/package-lock.json" }}
+          paths:
+            - ~/.npm
+
+      - run:
+          name: Audit dependencies
+          command: |
+            mix deps.audit
+            npm audit --prefix assets --audit-level=moderate
+
+      - run:
+          name: Install asset binaries
+          command: |
+            mix esbuild.install --if-missing
+            mix tailwind.install --if-missing
+
+      - run:
+          name: Build assets
+          command: mix assets.build
+
+      - run:
+          name: Check formatting
+          command: mix format --check-formatted
+
+      - run:
+          name: Compile
+          command: mix compile --warnings-as-errors
+
+      - run:
+          name: Run Credo
+          command: mix credo
+
+      - run:
+          name: Run Dialyzer
+          command: mix dialyzer -Wno_match --format short
+
+      - save_cache:
+          key: v1-dialyzer-<< parameters.elixir_image >>-{{ checksum "mix.lock" }}
+          paths:
+            - .dialyzer
+
+      - run:
+          name: Wait for Postgres
+          command: |
+            for _ in $(seq 1 30); do
+              if timeout 1 bash -c "</dev/tcp/${POSTGRES_HOSTNAME}/5432"; then
+                exit 0
+              fi
+
+              sleep 1
+            done
+
+            echo "Postgres did not become ready in time"
+            exit 1
+
+      - run:
+          name: Prepare test database
+          command: |
+            MIX_ENV=test mix ecto.drop --quiet || true
+            MIX_ENV=test mix ecto.create
+            MIX_ENV=test mix ecto.migrate
+
+      - run:
+          name: Run tests
+          command: MIX_ENV=test mix test
+
+workflows:
+  ci:
+    jobs:
+      - build_and_test:
+          matrix:
+            parameters:
+              elixir_image:
+                - 1.17.3-erlang-27.2.2-node
+                - 1.18.4-erlang-27.2.2-node
+                - 1.19.5-erlang-27.2.2-node
