@@ -2,7 +2,7 @@ defmodule ExLingoWeb.LayoutView do
   @moduledoc false
   use ExLingoWeb, :html
 
-  alias ExLingoWeb.Components.Shared.Logo
+  import Cognit.Components.AppSideNav
 
   embed_templates "../templates/layouts/*"
 
@@ -16,6 +16,9 @@ defmodule ExLingoWeb.LayoutView do
   def live_socket_path(conn) do
     [Enum.map(conn.script_name, &["/" | &1]) | conn.private.live_socket_path]
   end
+
+  def asset_path(conn, :favicon), do: dashboard_path(conn, "/favicon.ico")
+  def asset_path(conn, :favicon_svg), do: dashboard_path(conn, "/favicon.svg")
 
   def asset_path(conn, asset) when asset in [:css, :js] do
     hash = ExLingoWeb.Assets.current_hash(asset)

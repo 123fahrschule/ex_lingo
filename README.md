@@ -1,7 +1,5 @@
 # ExLingo Guide
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/f0352656-397d-4d90-999a-d3adbae1095f">
-
   <h1>ExLingo</h1>
   <p><strong>User-friendly translations manager for Elixir/Phoenix projects</strong></p>
 
@@ -17,11 +15,6 @@
 ## About The Project
 
 <div align="left">
-  <a href="https://github.com/123fahrschule/ex_lingo">
-    <img src="https://github.com/user-attachments/assets/8839cbec-970b-4fd8-a028-2d9de05a2af6" alt="Logo" height="80">
-  </a>
-  <br />
-  <br />
   <p style="margin-top: 3rem; font-size: 14pt;" align="left">
     <a href="https://github.com/123fahrschule/ex_lingo/issues">Report Bug</a>
     ·

@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no, user-scalable=no"/>
     <meta name="csrf-token" content={Phoenix.Controller.get_csrf_token()} />
     <title><%= assigns[:page_title] || "ExLingo Dashboard" %></title>
+    <link rel="icon" href={asset_path(@conn, :favicon)} sizes="any">
+    <link rel="icon" href={asset_path(@conn, :favicon_svg)} type="image/svg+xml">
     <link rel="stylesheet" nonce={csp_nonce(@conn, :style)} href={asset_path(@conn, :css)}>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,13 +35,7 @@
     <.sidebar_provider>
       <.sidebar id="sidebar" collapsible="icon">
         <.sidebar_header>
-          <div class="flex min-w-0 items-center gap-3 px-2 py-1">
-            <Logo.render class="size-8 shrink-0 text-primary" />
-            <div class="min-w-0 group-data-[collapsible=icon]:hidden">
-              <div class="truncate text-h5 text-sidebar-foreground">ExLingo</div>
-              <div class="truncate text-body-xs text-sidebar-foreground/70">Translations</div>
-            </div>
-          </div>
+          <.app_side_nav title="ExLingo" />
         </.sidebar_header>
         <.sidebar_separator />
         <.sidebar_content>

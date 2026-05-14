@@ -18,7 +18,7 @@ defmodule ExLingoWeb do
   """
 
   def static_paths do
-    ~w(assets fonts images favicon.ico robots.txt)
+    ~w(assets fonts images favicon.ico favicon.svg robots.txt)
   end
 
   def html do

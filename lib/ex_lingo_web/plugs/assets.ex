@@ -17,6 +17,14 @@ defmodule ExLingoWeb.Assets do
   js_path = Path.join(__DIR__, "../../../dist/js/app.js")
   @external_resource js_path
 
+  favicon_path = Path.join(__DIR__, "../../../priv/static/favicon.ico")
+  @external_resource favicon_path
+  @favicon File.read!(favicon_path)
+
+  favicon_svg_path = Path.join(__DIR__, "../../../priv/static/favicon.svg")
+  @external_resource favicon_svg_path
+  @favicon_svg File.read!(favicon_svg_path)
+
   @js """
   #{for path <- phoenix_js_paths, do: path |> File.read!() |> String.replace("//# sourceMappingURL=", "// ")}
   #{File.read!(js_path)}
@@ -27,7 +35,7 @@ defmodule ExLingoWeb.Assets do
     :js => Base.encode16(:crypto.hash(:md5, @js), case: :lower)
   }
 
-  def init(asset) when asset in [:css, :js], do: asset
+  def init(asset) when asset in [:css, :js, :favicon, :favicon_svg], do: asset
 
   def call(conn, asset) do
     {contents, content_type} = contents_and_type(asset)
@@ -42,6 +50,8 @@ defmodule ExLingoWeb.Assets do
 
   defp contents_and_type(:css), do: {@css, "text/css"}
   defp contents_and_type(:js), do: {@js, "text/javascript"}
+  defp contents_and_type(:favicon), do: {@favicon, "image/x-icon"}
+  defp contents_and_type(:favicon_svg), do: {@favicon_svg, "image/svg+xml"}
 
   @doc """
   Returns the current hash for the given `asset`.

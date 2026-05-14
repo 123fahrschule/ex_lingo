@@ -22,6 +22,8 @@ defmodule ExLingoWeb.Router do
           live_session session_name, session_opts do
             get "/css-:md5", ExLingoWeb.Assets, :css, as: :ex_lingo_dashboard_asset
             get "/js-:md5", ExLingoWeb.Assets, :js, as: :ex_lingo_dashboard_asset
+            get "/favicon.ico", ExLingoWeb.Assets, :favicon, as: :ex_lingo_dashboard_asset
+            get "/favicon.svg", ExLingoWeb.Assets, :favicon_svg, as: :ex_lingo_dashboard_asset
 
             scope "/", ExLingoWeb do
               live "/", Dashboard.DashboardLive, :index, route_opts

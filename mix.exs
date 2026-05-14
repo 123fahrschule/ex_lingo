@@ -98,8 +98,7 @@ defmodule ExLingo.MixProject do
         "ExLingo Guide": ~r/README|how-to-write-plugins/
       ],
       assets: %{"docs/assets" => "assets", "assets/images/readme" => "assets/images/readme"},
-      main: "readme",
-      logo: "logo.png"
+      main: "readme"
     ]
   end
 end

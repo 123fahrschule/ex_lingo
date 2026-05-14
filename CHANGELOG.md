@@ -9,9 +9,11 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Add CircleCI configuration for dependency audits, asset builds, formatting, compilation, Credo, Dialyzer, and test execution with PostgreSQL.
 - Add Cognit `0.2.13` as the standard UI component library for the ExLingo dashboard.
+- Add favicon assets generated from the Cognit brand logo.
 
 ### Changed
 - Rework the dashboard, translation tables, filters, forms, tabs, pagination, and app shell to use Cognit components, typography, tokens, and icons.
+- Replace the custom ExLingo sidebar logo with the Cognit app-side-nav branding used by Absence.
 - Raise the minimum Elixir version to `~> 1.18` to match Cognit's runtime requirement.
 - Update Hex dependencies to current compatible releases, including Phoenix, Phoenix LiveView, Ecto, Gettext, Nebulex, ExDoc, and Postgrex.
 - Update npm dependencies to resolve audit findings, including Alpine.js, Babel, Autoprefixer, PostCSS, Tailwind CSS 3.4.19, and transitive lockfile updates.
@@ -24,6 +26,7 @@ All notable changes to this project will be documented in this file.
 - Replace `length/1` emptiness checks that caused Credo warnings in the new CI pipeline.
 
 ### Removed
+- Remove the legacy ExLingo logo component and old logo image artifacts.
 - Remove GitHub Actions, GitHub issue and pull request templates, Lefthook configuration, commitlint hook, Code of Conduct, and Contributing guide from the forked project.
 - Remove the obsolete `@tailwindcss/forms` npm dependency after switching to the Cognit Tailwind preset.
 
