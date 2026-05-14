@@ -23,7 +23,7 @@ defmodule ExLingo.Translations.SingularTranslations do
   def create_singular_translation(attrs, opts \\ []) do
     attrs
     |> then(&SingularTranslation.changeset(%SingularTranslation{}, &1))
-    |> Repo.get_repo().insert(opts)
+    |> Repo.get_repo().insert(Repo.opts(opts))
     |> case do
       {:ok, singular_translation} ->
         cache_key =
@@ -44,7 +44,7 @@ defmodule ExLingo.Translations.SingularTranslations do
 
   def update_singular_translation(translation, attrs, opts \\ []) do
     SingularTranslation.changeset(translation, attrs)
-    |> Repo.get_repo().update(opts)
+    |> Repo.get_repo().update(Repo.opts(opts))
     |> case do
       {:ok, translation} ->
         cache_key =

@@ -26,11 +26,11 @@ defmodule ExLingo.Translations.ApplicationSources.Finders.GetApplicationSource d
 
   defp find_in_cache(cache_key) do
     case Cache.get(cache_key) do
-      nil ->
-        {:error, :application_source, :not_cached}
-
-      cached_application_source ->
+      {:ok, %ApplicationSource{} = cached_application_source} ->
         {:ok, cached_application_source}
+
+      _ ->
+        {:error, :application_source, :not_cached}
     end
   end
 

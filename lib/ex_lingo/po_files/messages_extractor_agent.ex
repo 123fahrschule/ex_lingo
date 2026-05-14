@@ -57,18 +57,16 @@ defmodule ExLingo.PoFiles.MessagesExtractorAgent do
   end
 
   defp message_extractor_available? do
-    # Message extractor requires columns added in version 3 of Postgres migration and version 2 of SQLite migration.
-    migrator =
-      case ExLingo.Repo.get_adapter_name() do
-        :postgres -> ExLingo.Migrations.Postgresql
-        :sqlite -> ExLingo.Migrations.SQLite3
-      end
+    # Message extractor requires columns added in version 3 of the PostgreSQL migration.
+    ExLingo.Repo.get_adapter_name()
+    migrator = ExLingo.Migrations.Postgresql
 
-    migrated_version = migrator.migrated_version(%{repo: ExLingo.Repo.get_repo()})
+    migrated_version =
+      migrator.migrated_version(%{
+        repo: ExLingo.Repo.get_repo(),
+        prefix: ExLingo.Repo.configured_prefix() || "public"
+      })
 
-    case ExLingo.Repo.get_adapter_name() do
-      :postgres -> migrated_version >= 3
-      :sqlite -> migrated_version >= 2
-    end
+    migrated_version >= 3
   end
 end

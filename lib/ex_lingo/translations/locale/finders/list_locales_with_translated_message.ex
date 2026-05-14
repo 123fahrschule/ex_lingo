@@ -18,7 +18,7 @@ defmodule ExLingo.Translations.Locale.Finders.ListLocalesWithTranslatedMessage d
         where: not is_nil(st.translated_text) or not is_nil(st.original_text),
         distinct: l.id
 
-    Repo.get_repo().all(query)
+    Repo.get_repo().all(query, Repo.opts())
   end
 
   def find(%Message{id: message_id, message_type: :plural}) do
@@ -30,6 +30,6 @@ defmodule ExLingo.Translations.Locale.Finders.ListLocalesWithTranslatedMessage d
         where: not is_nil(pt.translated_text) or not is_nil(pt.original_text),
         distinct: l.id
 
-    Repo.get_repo().all(query)
+    Repo.get_repo().all(query, Repo.opts())
   end
 end

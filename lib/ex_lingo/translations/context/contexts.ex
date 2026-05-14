@@ -5,6 +5,7 @@ defmodule ExLingo.Translations.Contexts do
 
   alias ExLingo.Translations.Context
   alias ExLingo.Translations.Contexts.Finders.{GetContext, ListAllContexts, ListContexts}
+  alias ExLingo.Repo
 
   def list_contexts(params \\ []) do
     ListContexts.find(params)
@@ -21,6 +22,6 @@ defmodule ExLingo.Translations.Contexts do
   def create_context(attrs, opts \\ []) do
     %Context{}
     |> Context.changeset(attrs)
-    |> ExLingo.Repo.get_repo().insert(opts)
+    |> Repo.get_repo().insert(Repo.opts(opts))
   end
 end

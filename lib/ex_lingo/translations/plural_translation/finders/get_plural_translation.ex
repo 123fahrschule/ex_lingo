@@ -26,11 +26,11 @@ defmodule ExLingo.Translations.PluralTranslations.Finders.GetPluralTranslation d
 
   defp find_in_cache(cache_key) do
     case Cache.get(cache_key) do
-      nil ->
-        {:error, :plural_translation, :not_cached}
-
-      cached_plural_translation ->
+      {:ok, %PluralTranslation{} = cached_plural_translation} ->
         {:ok, cached_plural_translation}
+
+      _ ->
+        {:error, :plural_translation, :not_cached}
     end
   end
 

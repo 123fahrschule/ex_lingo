@@ -31,11 +31,11 @@ defmodule ExLingo.Query do
       end
 
       def one(query \\ base(), opts \\ []) do
-        Repo.get_repo().one(query, opts)
+        Repo.get_repo().one(query, Repo.opts(opts))
       end
 
       def all(query \\ base(), opts \\ []) do
-        Repo.get_repo().all(query, opts)
+        Repo.get_repo().all(query, Repo.opts(opts))
       end
 
       @default_page_size 100
@@ -67,7 +67,7 @@ defmodule ExLingo.Query do
               module: Repo.get_repo(),
               page_number: page,
               page_size: per_page || @default_page_size,
-              options: []
+              options: Repo.opts()
             }
           )
 
@@ -358,7 +358,9 @@ defmodule ExLingo.Query do
 
         case repo.__adapter__() do
           Ecto.Adapters.Postgres ->
-            if Postgresql.migrated_version(%{repo: repo}) >= 2 do
+            opts = %{repo: repo, prefix: Repo.configured_prefix() || "public"}
+
+            if Postgresql.migrated_version(opts) >= 2 do
               search_query_fuzzy(query, search_term)
             else
               search_query_legacy(query, search_term)

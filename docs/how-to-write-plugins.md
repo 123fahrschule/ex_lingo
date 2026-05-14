@@ -279,6 +279,79 @@ defp get_credentials do
 end
 ```
 
+## AI translation provider plugins
+
+AI translation suggestion providers should implement `ExLingo.AI.Translations.Provider`. ExLingo core builds a normalized request and the provider returns only suggested translation text.
+
+```elixir
+defmodule YourAIProvider do
+  use GenServer
+
+  @behaviour ExLingo.AI.Translations.Provider
+
+  def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: opts[:name])
+  def init(opts), do: {:ok, opts}
+
+  def provider_name, do: "Your AI Provider"
+  def available_models, do: ["small-model", "medium-model"]
+  def default_model, do: "small-model"
+
+  def suggest_translation(%ExLingo.AI.Translations.SuggestionRequest{} = request) do
+    # Use request.source_text, request.target_locale, request.current_translation,
+    # and request.glossary_entries to call the external service.
+    {:ok, "translated text only"}
+  end
+end
+```
+
+The contract is intentionally small:
+
+- Return `{:ok, suggestion_text}` for success.
+- Return `{:error, reason}` for failures.
+- Do not return confidence, notes, JSON wrappers, alternatives, Markdown, or explanations.
+- Use only `request.glossary_entries`; ExLingo has already filtered them by source locale, target locale, source text, and scope.
+
+Provider plugins can validate configuration by exposing `validate/1`. ExLingo calls it during startup.
+
+```elixir
+def validate(opts) do
+  cond do
+    not Keyword.keyword?(opts) ->
+      {:error, "expected provider options to be a keyword list"}
+
+    not is_list(opts[:allowed_models]) ->
+      {:error, "expected :allowed_models to be a list"}
+
+    true ->
+      :ok
+  end
+end
+```
+
+To render the AI suggestion UI, configure the generic UI plugin and at least one provider:
+
+```elixir
+config :ex_lingo_test, ExLingo,
+  plugins: [
+    {ExLingo.AI.Translations.Plugin, source_locale: "en"},
+    {YourAIProvider, api_key: {:system, "YOUR_AI_PROVIDER_API_KEY"}}
+  ]
+```
+
+The bundled OpenAI provider uses the same contract:
+
+```elixir
+config :ex_lingo_test, ExLingo,
+  plugins: [
+    {ExLingo.AI.Translations.Plugin, source_locale: "en"},
+    {ExLingo.AI.Providers.OpenAI,
+     api_key: {:system, "OPENAI_API_KEY"},
+     endpoint: "https://api.openai.com/v1/responses",
+     allowed_models: ["gpt-5.4-nano", "gpt-5.4-mini", "gpt-4o-mini"],
+     default_model: "gpt-5.4-nano"}
+  ]
+```
+
 ## ExLingo internal API
 
 ExLingo revolves around the finders, handlers, services, and values pattern. This pattern boosts coding efficiency. Learn more: [Four Patterns to Save your Codebase and your Sanity](https://remote.com/blog/introducing-phx_gen_solid#finders-handlers-services-and-values).

@@ -6,7 +6,7 @@ defmodule ExLingo.Migrations.Postgresql do
   use Ecto.Migration
 
   @initial_version 1
-  @current_version 4
+  @current_version 5
   @default_prefix "public"
 
   @doc false
@@ -22,9 +22,11 @@ defmodule ExLingo.Migrations.Postgresql do
 
     cond do
       initial == 0 ->
+        create_schema(opts)
         change(@initial_version..opts.version, :up, opts)
 
       initial < opts.version ->
+        create_schema(opts)
         change((initial + 1)..opts.version, :up, opts)
 
       true ->
@@ -85,8 +87,17 @@ defmodule ExLingo.Migrations.Postgresql do
     execute "COMMENT ON TABLE #{inspect(prefix)}.ex_lingo_messages IS '#{version}'"
   end
 
+  defp create_schema(%{create_schema: true, quoted_prefix: quoted_prefix}) do
+    execute "CREATE SCHEMA IF NOT EXISTS #{quoted_prefix}"
+  end
+
+  defp create_schema(_opts), do: :ok
+
   defp with_defaults(opts, version) do
-    opts = Enum.into(opts, %{prefix: @default_prefix, version: version})
+    opts = Enum.into(opts, %{})
+    repo = Map.get(opts, :repo) || repo()
+    repo_prefix = repo.default_options(:all) |> Keyword.get(:prefix)
+    opts = Map.merge(%{prefix: repo_prefix || @default_prefix, version: version}, opts)
 
     opts
     |> Map.put_new(:create_schema, opts.prefix != @default_prefix)

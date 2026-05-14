@@ -17,11 +17,11 @@ defmodule ExLingo.Translations.Locales do
   end
 
   def create_locale(attrs, opts \\ []) do
-    %Locale{} |> Locale.changeset(attrs) |> Repo.get_repo().insert(opts)
+    %Locale{} |> Locale.changeset(attrs) |> Repo.get_repo().insert(Repo.opts(opts))
   end
 
   def update_locale(locale, attrs \\ %{}, opts \\ []) do
     Locale.changeset(locale, attrs)
-    |> Repo.get_repo().update(opts)
+    |> Repo.get_repo().update(Repo.opts(opts))
   end
 end

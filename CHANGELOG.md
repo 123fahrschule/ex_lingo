@@ -5,11 +5,15 @@ All notable changes to this project will be documented in this file.
 
 ### Breaking Changes
 - Rename the project identity from Kanta to ExLingo, including OTP app name, package metadata, module namespaces, file paths, migrations, routes, docs, and asset package names.
+- Remove non-PostgreSQL storage adapter support. ExLingo now supports PostgreSQL repositories only.
 
 ### Added
 - Add CircleCI configuration for dependency audits, asset builds, formatting, compilation, Credo, Dialyzer, and test execution with PostgreSQL.
 - Add Cognit `0.2.13` as the standard UI component library for the ExLingo dashboard.
 - Add favicon assets generated from the Cognit brand logo.
+- Add core glossary storage and dashboard management UI for approved translation terminology.
+- Add AI translation suggestions with a provider plugin contract and an OpenAI provider implementation.
+- Add PostgreSQL schema prefix configuration for ExLingo data, including automatic schema creation during ExLingo migrations.
 
 ### Changed
 - Rework the dashboard, translation tables, filters, forms, tabs, pagination, and app shell to use Cognit components, typography, tokens, and icons.
@@ -18,6 +22,7 @@ All notable changes to this project will be documented in this file.
 - Update Hex dependencies to current compatible releases, including Phoenix, Phoenix LiveView, Ecto, Gettext, Nebulex, ExDoc, and Postgrex.
 - Update npm dependencies to resolve audit findings, including Alpine.js, Babel, Autoprefixer, PostCSS, Tailwind CSS 3.4.19, and transitive lockfile updates.
 - Update README badges and project links for the independent ExLingo repository and CircleCI workflow.
+- Document dedicated ExLingo repos, PostgreSQL schema prefix setup, and AI provider configuration in README/plugin docs.
 - Update license attribution for the independent ExLingo development line.
 - Rebuild distributable JavaScript and CSS assets with the updated dependency set.
 
@@ -27,6 +32,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 - Remove the legacy ExLingo logo component and old logo image artifacts.
+- Remove historical non-PostgreSQL migration modules and adapter branches.
 - Remove GitHub Actions, GitHub issue and pull request templates, Lefthook configuration, commitlint hook, Code of Conduct, and Contributing guide from the forked project.
 - Remove the obsolete `@tailwindcss/forms` npm dependency after switching to the Cognit Tailwind preset.
 
@@ -85,7 +91,6 @@ Signed-off-by: Michał Buszkiewicz <michal@curiosum.com>
 - Chevrons to `Icons` module
 - Missing @moduledoc
 - Versioce for version bumping
-- Support for SQLite3 (#51)
 - Doc to `compiling?` function
 - Child LV dashboard components support (#42)
 - Docs to DashboardLive

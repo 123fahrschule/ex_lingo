@@ -10,13 +10,12 @@ defmodule ExLingo.Translations.Messages.Finders.ListAllMessages do
   @available_filters ~w(domain_id context_id application_source_id)
 
   def find(params \\ []) do
-    repo = ExLingo.Repo.get_repo()
     filters = params[:filter] || %{}
     query_filters = Map.take(filters, @available_filters)
 
     base()
     |> filter_query(query_filters)
     |> preload_resources(params[:preloads] || [])
-    |> repo.all()
+    |> ExLingo.Repo.get_repo().all(ExLingo.Repo.opts())
   end
 end

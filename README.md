@@ -62,6 +62,8 @@ If you're working on an Elixir/Phoenix project and need to manage translations, 
     <ul>
       <li><a href="#extracting-from-po-files">Extracting from PO files</a></li>
       <li><a href="#storing-messages-in-the-database">Storing messages in the database</a></li>
+      <li><a href="#translation-glossary">Translation glossary</a></li>
+      <li><a href="#ai-translation-suggestions">AI translation suggestions</a></li>
       <li><a href="#detection-of-stale-messages">Detection of stale messages</a></li>
       <li><a href="#translation-progress">Translation progress</a></li>
     </ul>
@@ -69,6 +71,7 @@ If you're working on an Elixir/Phoenix project and need to manage translations, 
   <li>
     <a href="#plugins">Plugins</a>
     <ul>
+      <li><a href="#ai-translation-suggestions-plugin">AI translation suggestions</a></li>
       <li><a href="#po-writer">PO Writer</a></li>
       <li><a href="#deepl">DeepL</a></li>
       <li><a href="#ex_lingosync">Translation synchronization</a></li>
@@ -105,7 +108,7 @@ _Note: Official documentation for ExLingo library is [available on hexdocs][hexd
 - Elixir 1.18+ (tested on 1.19.0)
 - Phoenix (tested on 1.7.x and 1.8.x with LiveView 1.x)
 - Ecto SQL (tested on 3.13)
-- PostgreSQL 15+ or SQLite 3.31.0+
+- PostgreSQL 15+
 
 ### Installation
 
@@ -159,12 +162,15 @@ Add to `config/config.exs` file:
 # config/config.exs
 config :my_app, ExLingo,
   endpoint: MyAppWeb.Endpoint, # Your app Endpoint module
-  repo: MyApp.Repo, # Your app Repo module
+  repo: MyApp.Repo, # Your app Repo module, or a dedicated ExLingo repo
   otp_name: :my_app, # Name of your OTP app
+  prefix: nil, # Optional PostgreSQL schema, e.g. "ex_lingo"
   plugins: []
 ```
 
 Ecto repo module is used mostly for translations persistency. We also need endpoint to use VerifiedRoutes and project_root to locate the project's .po files.
+
+You can store ExLingo data in another database by configuring `repo:` with a dedicated Ecto repo, for example `MyApp.ExLingoRepo`. You can also store ExLingo tables in a PostgreSQL schema by setting `prefix: "ex_lingo"` and running the ExLingo migration with the same prefix. When a non-`public` prefix is used, ExLingo creates the PostgreSQL schema automatically during its migration by default.
 
 ### Database migrations
 
@@ -177,8 +183,7 @@ mix ecto.gen.migration add_ex_lingo_translations_table
 Open the generated migration file and set up `up` and `down` functions.
 
 **Current Migration Versions:**
-- PostgreSQL: **v4** (adds default context support for Gettext >= `0.26` backend)
-- SQLite: **v3** (adds default context support for Gettext >= `0.26` backend)
+- PostgreSQL: **v5** (adds translation glossary support)
 
 If you're upgrading from an earlier version of ExLingo, update your migration version to the latest.
 
@@ -189,24 +194,7 @@ defmodule MyApp.Repo.Migrations.AddExLingoTranslationsTable do
   use Ecto.Migration
 
   def up do
-    ExLingo.Migration.up(version: 4, prefix: prefix()) # Prefix is needed if you are using multitenancy with i.e. triplex
-  end
-
-  # We specify `version: 1` because we want to rollback all the way down including the first migration.
-  def down do
-    ExLingo.Migration.down(version: 1, prefix: prefix()) # Prefix is needed if you are using multitenancy with i.e. triplex
-  end
-end
-```
-
-#### SQLite
-
-```elixir
-defmodule MyApp.Repo.Migrations.AddExLingoTranslationsTable do
-  use Ecto.Migration
-
-  def up do
-    ExLingo.Migration.up(version: 3)
+    ExLingo.Migration.up(version: 5)
   end
 
   # We specify `version: 1` because we want to rollback all the way down including the first migration.
@@ -214,6 +202,30 @@ defmodule MyApp.Repo.Migrations.AddExLingoTranslationsTable do
     ExLingo.Migration.down(version: 1)
   end
 end
+```
+
+#### PostgreSQL schema
+
+To use a dedicated PostgreSQL schema, pass the same prefix to the migration and ExLingo runtime configuration. The migration runs `CREATE SCHEMA IF NOT EXISTS` automatically, so the host application does not need a separate migration just to create the schema.
+
+```elixir
+# migration
+def up, do: ExLingo.Migration.up(version: 5, prefix: "ex_lingo")
+def down, do: ExLingo.Migration.down(version: 1, prefix: "ex_lingo")
+
+# config/config.exs
+config :my_app, ExLingo,
+  endpoint: MyAppWeb.Endpoint,
+  repo: MyApp.Repo,
+  otp_name: :my_app,
+  prefix: "ex_lingo",
+  plugins: []
+```
+
+If your database user is not allowed to create schemas and the schema is managed externally, disable automatic schema creation explicitly:
+
+```elixir
+def up, do: ExLingo.Migration.up(version: 5, prefix: "ex_lingo", create_schema: false)
 ```
 
 After that run:
@@ -298,6 +310,18 @@ Messages and translations from .po files are stored in tables created by the ExL
 
 With Gettext version >= `0.26`, ExLingo uses a custom backend adapter system (`ExLingo.Backend.Adapter.CachedDB`) that fetches translations from the database/cache at runtime instead of compiled PO files. The caching mechanism prevents constant requests to the database when downloading translations, so you don't have to worry about a delay in application performance.
 
+### Translation glossary
+
+ExLingo can store approved terminology in `ex_lingo_glossary_entries`. Each glossary entry defines a source locale, target locale, source term, target term, optional usage guidance, and optional scope by domain, context, or application source.
+
+The glossary is core translation data. Provider plugins can use it, but the terminology is not tied to a specific AI provider.
+
+### AI translation suggestions
+
+AI translation suggestions can be added to the translation edit screen through plugins. The user-facing result is intentionally only the suggested translation text. ExLingo does not ask providers for confidence scores, notes, rationale, or alternatives.
+
+When a suggestion is requested, ExLingo matches only glossary entries that apply to the current source locale, target locale, source text, and optional message scope. Irrelevant glossary entries are not sent to the provider.
+
 ### Detection of stale messages
 
 ![Stale Dashboard Tiles](assets/images/readme/stale-dashboard.png)
@@ -321,6 +345,42 @@ ExLingo tracks the progress of your application's translation into other languag
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Plugins
+
+### AI translation suggestions plugin
+
+AI translation suggestions use two plugin roles:
+
+- `ExLingo.AI.Translations.Plugin` adds the UI to the translation edit form.
+- A provider plugin, such as `ExLingo.AI.Providers.OpenAI`, performs the external API request.
+
+Configure the source locale once for the UI plugin and configure provider credentials and models on the provider plugin:
+
+```elixir
+# config/config.exs
+config :my_app, ExLingo,
+  endpoint: MyAppWeb.Endpoint,
+  repo: MyApp.Repo,
+  otp_name: :my_app,
+  plugins: [
+    {ExLingo.AI.Translations.Plugin, source_locale: "en"},
+    {ExLingo.AI.Providers.OpenAI,
+     api_key: {:system, "OPENAI_API_KEY"},
+     allowed_models: ["gpt-5.4-nano", "gpt-5.4-mini", "gpt-4o-mini"],
+     default_model: "gpt-5.4-nano"}
+  ]
+```
+
+`OPENAI_API_KEY` is read from the environment by default. You can also override the endpoint for tests, proxies, or compatible gateways:
+
+```elixir
+{ExLingo.AI.Providers.OpenAI,
+ api_key: {:system, "OPENAI_API_KEY"},
+ endpoint: "https://api.openai.com/v1/responses",
+ allowed_models: ["gpt-5.4-nano", "gpt-5.4-mini"],
+ default_model: "gpt-5.4-nano"}
+```
+
+Future providers can use the same provider contract by implementing `ExLingo.AI.Translations.Provider` and returning `{:ok, suggestion_text}` or `{:error, reason}` from `suggest_translation/1`.
 
 ### DeepL
 

@@ -7,6 +7,7 @@ defmodule ExLingo.Config do
           otp_name: atom(),
           repo: module(),
           endpoint: module(),
+          prefix: String.t() | nil,
           plugins: false | [module() | {module() | Keyword.t()}],
           disable_api_authorization: boolean(),
           id_parse_function: mfa() | (term() -> {:ok, term()} | term())
@@ -16,6 +17,7 @@ defmodule ExLingo.Config do
             otp_name: nil,
             repo: nil,
             endpoint: nil,
+            prefix: nil,
             plugins: [],
             disable_api_authorization: false,
             id_parse_function: {ExLingo.Utils.ParamParsers, :default_id_parser, 1}
@@ -65,6 +67,12 @@ defmodule ExLingo.Config do
     else
       {:error, "expected :endpoint to be loaded"}
     end
+  end
+
+  defp validate_opt(_opts, {:prefix, prefix}) when is_binary(prefix) or is_nil(prefix), do: :ok
+
+  defp validate_opt(_opts, {:prefix, prefix}) do
+    {:error, "expected :prefix to be a string or nil, got: #{inspect(prefix)}"}
   end
 
   defp validate_opt(_opts, {:otp_name, otp_name}) do

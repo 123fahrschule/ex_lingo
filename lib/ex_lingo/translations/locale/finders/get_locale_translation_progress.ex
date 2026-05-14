@@ -31,7 +31,7 @@ defmodule ExLingo.Translations.Locale.Finders.GetLocaleTranslationProgress do
         select: count(),
         union: ^singular_translations_query
 
-    ExLingo.Repo.get_repo().all(plural_translations_query) |> Enum.sum()
+    ExLingo.Repo.get_repo().all(plural_translations_query, ExLingo.Repo.opts()) |> Enum.sum()
   end
 
   defp translated_count(locale_id) do
@@ -48,6 +48,6 @@ defmodule ExLingo.Translations.Locale.Finders.GetLocaleTranslationProgress do
         select: count(),
         union: ^singular_translations_query
 
-    ExLingo.Repo.get_repo().all(plural_translations_query) |> Enum.sum()
+    ExLingo.Repo.get_repo().all(plural_translations_query, ExLingo.Repo.opts()) |> Enum.sum()
   end
 end

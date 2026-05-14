@@ -1,0 +1,95 @@
+<div class="space-y-4">
+  <%= if Enum.empty?(@provider_options) do %>
+    <div class="rounded-md border border-border bg-muted p-4 text-body-sm text-muted-foreground">
+      No AI translation provider is configured.
+    </div>
+  <% else %>
+    <% provider = selected_provider(assigns) %>
+    <.form for={%{}} as={:ai_suggestion} phx-submit="request_suggestion" phx-target={@myself} class="space-y-4">
+      <div class="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+        <.form_item>
+          <.form_label for={"#{@id}-provider"}>Provider</.form_label>
+          <select
+            id={"#{@id}-provider"}
+            name="ai_suggestion[provider_id]"
+            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-body-sm shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          >
+            <option :for={option <- @provider_options} value={option.id} selected={option.id == provider.id}>
+              {option.name}
+            </option>
+          </select>
+        </.form_item>
+
+        <.form_item>
+          <.form_label for={"#{@id}-model"}>Model</.form_label>
+          <select
+            id={"#{@id}-model"}
+            name="ai_suggestion[model]"
+            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-body-sm shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          >
+            <option
+              :for={model <- provider.models}
+              value={model}
+              selected={model == (@selected_model || provider.default_model)}
+            >
+              {model}
+            </option>
+          </select>
+        </.form_item>
+
+        <div class="flex items-end">
+          <.button type="submit" phx-disable-with="Generating...">
+            <.icon name="auto_awesome" size="sm" decorative />
+            Suggest
+          </.button>
+        </div>
+      </div>
+    </.form>
+
+    <div :if={@error} class="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-body-sm text-destructive">
+      {@error}
+    </div>
+
+    <div :if={@suggestion} class="space-y-4 rounded-md border border-border p-4">
+      <div>
+        <p class="text-body-sm font-medium text-foreground">Suggestion</p>
+        <p class="mt-2 whitespace-pre-wrap text-body-sm text-muted-foreground">{@suggestion}</p>
+      </div>
+
+      <div :if={!@adapting?} class="flex flex-wrap justify-end gap-2">
+        <.button type="button" variant="outline" phx-click="adapt_suggestion" phx-target={@myself}>
+          Adapt
+        </.button>
+        <.button type="button" phx-click="accept_suggestion" phx-target={@myself}>
+          <.icon name="check" size="sm" decorative />
+          Accept
+        </.button>
+      </div>
+
+      <.form
+        :if={@adapting?}
+        for={%{"adapted_text" => @adapted_text}}
+        as={:ai_suggestion}
+        phx-submit="save_adapted_suggestion"
+        phx-target={@myself}
+        class="space-y-4"
+      >
+        <.form_item>
+          <.form_label for={"#{@id}-adapted-text"}>Adapted suggestion</.form_label>
+          <.textarea
+            id={"#{@id}-adapted-text"}
+            name="ai_suggestion[adapted_text]"
+            value={@adapted_text}
+            rows="5"
+          />
+        </.form_item>
+        <div class="flex justify-end">
+          <.button type="submit" phx-disable-with="Saving...">
+            <.icon name="save" size="sm" decorative />
+            Save
+          </.button>
+        </div>
+      </.form>
+    </div>
+  <% end %>
+</div>

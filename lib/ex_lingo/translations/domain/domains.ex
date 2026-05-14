@@ -23,6 +23,6 @@ defmodule ExLingo.Translations.Domains do
   def create_domain(attrs, opts \\ []) do
     %Domain{}
     |> Domain.changeset(attrs)
-    |> Repo.get_repo().insert(opts)
+    |> Repo.get_repo().insert(Repo.opts(opts))
   end
 end

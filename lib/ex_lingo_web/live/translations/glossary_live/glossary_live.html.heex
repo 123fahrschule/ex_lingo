@@ -1,0 +1,51 @@
+<.page_header title="Glossary" class="px-0 pt-0">
+  <:actions>
+    <.button as={&Phoenix.Component.link/1} navigate={dashboard_path(@socket, "/glossary/new")}>
+      <.icon name="add" size="sm" decorative />
+      Create glossary entry
+    </.button>
+  </:actions>
+</.page_header>
+
+<div class="space-y-4">
+  <.card>
+    <.card_content class="pt-6">
+      <.form for={@filters} as={:filters} phx-change="filter" class="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+        <.form_item>
+          <.form_label for="filters_source_locale">Source locale</.form_label>
+          <.input
+            id="filters_source_locale"
+            name="source_locale"
+            type="text"
+            value={Map.get(@filters, "source_locale", "")}
+            placeholder="en"
+          />
+        </.form_item>
+
+        <.form_item>
+          <.form_label for="filters_target_locale">Target locale</.form_label>
+          <.input
+            id="filters_target_locale"
+            name="target_locale"
+            type="text"
+            value={Map.get(@filters, "target_locale", "")}
+            placeholder="de"
+          />
+        </.form_item>
+
+        <div class="flex items-end">
+          <.button type="button" variant="outline" phx-click="clear_filters">
+            Clear
+          </.button>
+        </div>
+      </.form>
+    </.card_content>
+  </.card>
+
+  <.live_component
+    module={GlossaryEntriesTable}
+    id="glossary-entries-table"
+    glossary_entries={@glossary_entries}
+  />
+  <Pagination.render metadata={@glossary_entries_metadata} on_page_change="page_changed" />
+</div>

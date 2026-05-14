@@ -26,11 +26,11 @@ defmodule ExLingo.Translations.Contexts.Finders.GetContext do
 
   defp find_in_cache(cache_key) do
     case Cache.get(cache_key) do
-      nil ->
-        {:error, :context, :not_cached}
-
-      cached_context ->
+      {:ok, %Context{} = cached_context} ->
         {:ok, cached_context}
+
+      _ ->
+        {:error, :context, :not_cached}
     end
   end
 

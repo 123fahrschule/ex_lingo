@@ -25,23 +25,29 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
     |> Enum.each(&apply(&1, [opts]))
   end
 
-  def up_application_sources(_opts) do
-    create_if_not_exists table(@ex_lingo_application_sources) do
+  def up_application_sources(opts) do
+    prefix = opts.prefix
+
+    create_if_not_exists table(@ex_lingo_application_sources, prefix: prefix) do
       add(:name, :string)
       add(:description, :text)
       add(:color, :string, null: false, default: Colors.default_color())
       timestamps()
     end
 
-    create_if_not_exists unique_index(@ex_lingo_application_sources, [:name])
+    create_if_not_exists unique_index(@ex_lingo_application_sources, [:name], prefix: prefix)
   end
 
-  def up_ex_lingo_messages(_opts) do
-    alter table(@ex_lingo_messages) do
-      add(:application_source_id, references(@ex_lingo_application_sources), null: true)
+  def up_ex_lingo_messages(opts) do
+    prefix = opts.prefix
+
+    alter table(@ex_lingo_messages, prefix: prefix) do
+      add(:application_source_id, references(@ex_lingo_application_sources, prefix: prefix),
+        null: true
+      )
     end
 
-    drop unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid])
+    drop unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid], prefix: prefix)
 
     create_if_not_exists unique_index(
                            @ex_lingo_messages,
@@ -51,25 +57,32 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
                              :domain_id,
                              :msgid
                            ],
+                           prefix: prefix,
                            nulls_distinct: false
                          )
   end
 
-  def down_application_sources(_opts) do
-    drop table(@ex_lingo_application_sources)
+  def down_application_sources(opts) do
+    drop table(@ex_lingo_application_sources, prefix: opts.prefix)
   end
 
-  def down_ex_lingo_messages(_opts) do
-    drop unique_index(@ex_lingo_messages, [
-           :application_source_id,
-           :context_id,
-           :domain_id,
-           :msgid
-         ])
+  def down_ex_lingo_messages(opts) do
+    prefix = opts.prefix
 
-    create_if_not_exists unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid])
+    drop unique_index(
+           @ex_lingo_messages,
+           [
+             :application_source_id,
+             :context_id,
+             :domain_id,
+             :msgid
+           ], prefix: prefix)
 
-    alter table(@ex_lingo_messages) do
+    create_if_not_exists unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid],
+                           prefix: prefix
+                         )
+
+    alter table(@ex_lingo_messages, prefix: prefix) do
       remove(:application_source_id)
     end
   end

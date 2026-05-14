@@ -4,6 +4,7 @@ defmodule ExLingo.Translations.ApplicationSources do
   """
 
   alias ExLingo.Translations.ApplicationSource
+  alias ExLingo.Repo
 
   alias ExLingo.Translations.ApplicationSources.Finders.{
     GetApplicationSource,
@@ -21,13 +22,13 @@ defmodule ExLingo.Translations.ApplicationSources do
   def create_application_source(attrs, opts \\ []) do
     %ApplicationSource{}
     |> ApplicationSource.changeset(attrs)
-    |> ExLingo.Repo.get_repo().insert(opts)
+    |> Repo.get_repo().insert(Repo.opts(opts))
   end
 
   def update_application_source(%ApplicationSource{} = application_source, attrs, opts \\ []) do
     application_source
     |> ApplicationSource.changeset(attrs)
-    |> ExLingo.Repo.get_repo().update(opts)
+    |> Repo.get_repo().update(Repo.opts(opts))
   end
 
   def change_application_source(%ApplicationSource{} = application_source, params \\ %{}) do

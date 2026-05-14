@@ -23,7 +23,7 @@ defmodule ExLingo.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:uri_query, :logger],
+      extra_applications: [:uri_query, :logger, :inets, :ssl],
       mod: {ExLingo.Application, []}
     ]
   end

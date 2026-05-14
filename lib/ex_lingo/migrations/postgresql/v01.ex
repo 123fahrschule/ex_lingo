@@ -39,8 +39,10 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
     |> Enum.each(&apply(&1, [opts]))
   end
 
-  defp up_locales(_opts) do
-    create_if_not_exists table(@ex_lingo_locales) do
+  defp up_locales(opts) do
+    prefix = opts.prefix
+
+    create_if_not_exists table(@ex_lingo_locales, prefix: prefix) do
       add(:iso639_code, :string)
       add(:name, :string)
       add(:native_name, :string)
@@ -51,29 +53,33 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
       timestamps()
     end
 
-    create_if_not_exists unique_index(@ex_lingo_locales, [:iso639_code])
+    create_if_not_exists unique_index(@ex_lingo_locales, [:iso639_code], prefix: prefix)
   end
 
-  defp up_domains(_opts) do
-    create_if_not_exists table(@ex_lingo_domains) do
+  defp up_domains(opts) do
+    prefix = opts.prefix
+
+    create_if_not_exists table(@ex_lingo_domains, prefix: prefix) do
       add(:name, :string)
       add(:description, :text)
       add(:color, :string, null: false, default: Colors.default_color())
       timestamps()
     end
 
-    create_if_not_exists unique_index(@ex_lingo_domains, [:name])
+    create_if_not_exists unique_index(@ex_lingo_domains, [:name], prefix: prefix)
   end
 
-  defp up_contexts(_opts) do
-    create_if_not_exists table(@ex_lingo_contexts) do
+  defp up_contexts(opts) do
+    prefix = opts.prefix
+
+    create_if_not_exists table(@ex_lingo_contexts, prefix: prefix) do
       add(:name, :string)
       add(:description, :text)
       add(:color, :string, null: false, default: Colors.default_color())
       timestamps()
     end
 
-    create_if_not_exists unique_index(@ex_lingo_contexts, [:name])
+    create_if_not_exists unique_index(@ex_lingo_contexts, [:name], prefix: prefix)
   end
 
   defp up_messages(opts) do
@@ -90,11 +96,11 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
     drop_message_type_query = "DROP TYPE gettext_message_type"
     execute(create_if_not_exists_message_type_query, drop_message_type_query)
 
-    create_if_not_exists table(@ex_lingo_messages) do
+    create_if_not_exists table(@ex_lingo_messages, prefix: prefix) do
       add(:msgid, :text)
       add(:message_type, :gettext_message_type, null: false)
-      add(:domain_id, references(@ex_lingo_domains), null: true)
-      add(:context_id, references(@ex_lingo_contexts), null: true)
+      add(:domain_id, references(@ex_lingo_domains, prefix: prefix), null: true)
+      add(:context_id, references(@ex_lingo_contexts, prefix: prefix), null: true)
       timestamps()
     end
 
@@ -110,59 +116,69 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
       CREATE INDEX IF NOT EXISTS #{@ex_lingo_messages}_searchable_idx ON #{prefix}.#{@ex_lingo_messages} USING gin(searchable);
     """
 
-    create_if_not_exists unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid])
+    create_if_not_exists unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid],
+                           prefix: prefix
+                         )
   end
 
-  defp up_singular_translations(_opts) do
-    create_if_not_exists table(@ex_lingo_singular_translations) do
+  defp up_singular_translations(opts) do
+    prefix = opts.prefix
+
+    create_if_not_exists table(@ex_lingo_singular_translations, prefix: prefix) do
       add(:original_text, :text)
       add(:translated_text, :text, null: true)
-      add(:locale_id, references(@ex_lingo_locales))
-      add(:message_id, references(@ex_lingo_messages))
+      add(:locale_id, references(@ex_lingo_locales, prefix: prefix))
+      add(:message_id, references(@ex_lingo_messages, prefix: prefix))
       timestamps()
     end
 
-    create_if_not_exists unique_index(@ex_lingo_singular_translations, [:locale_id, :message_id])
+    create_if_not_exists unique_index(@ex_lingo_singular_translations, [:locale_id, :message_id],
+                           prefix: prefix
+                         )
   end
 
-  defp up_plural_translations(_opts) do
-    create_if_not_exists table(@ex_lingo_plural_translations) do
+  defp up_plural_translations(opts) do
+    prefix = opts.prefix
+
+    create_if_not_exists table(@ex_lingo_plural_translations, prefix: prefix) do
       add(:nplural_index, :integer)
       add(:original_text, :text)
       add(:translated_text, :text, null: true)
-      add(:locale_id, references(@ex_lingo_locales))
-      add(:message_id, references(@ex_lingo_messages))
+      add(:locale_id, references(@ex_lingo_locales, prefix: prefix))
+      add(:message_id, references(@ex_lingo_messages, prefix: prefix))
       timestamps()
     end
 
-    create_if_not_exists unique_index(@ex_lingo_plural_translations, [
-                           :locale_id,
-                           :message_id,
-                           :nplural_index
-                         ])
+    create_if_not_exists unique_index(
+                           @ex_lingo_plural_translations,
+                           [
+                             :locale_id,
+                             :message_id,
+                             :nplural_index
+                           ], prefix: prefix)
   end
 
-  defp down_locales(_opts) do
-    drop table(@ex_lingo_locales)
+  defp down_locales(opts) do
+    drop table(@ex_lingo_locales, prefix: opts.prefix)
   end
 
-  defp down_domains(_opts) do
-    drop table(@ex_lingo_domains)
+  defp down_domains(opts) do
+    drop table(@ex_lingo_domains, prefix: opts.prefix)
   end
 
-  defp down_contexts(_opts) do
-    drop table(@ex_lingo_contexts)
+  defp down_contexts(opts) do
+    drop table(@ex_lingo_contexts, prefix: opts.prefix)
   end
 
-  defp down_messages(_opts) do
-    drop table(@ex_lingo_messages)
+  defp down_messages(opts) do
+    drop table(@ex_lingo_messages, prefix: opts.prefix)
   end
 
-  defp down_singular_translations(_opts) do
-    drop table(@ex_lingo_singular_translations)
+  defp down_singular_translations(opts) do
+    drop table(@ex_lingo_singular_translations, prefix: opts.prefix)
   end
 
-  defp down_plural_translations(_opts) do
-    drop table(@ex_lingo_plural_translations)
+  defp down_plural_translations(opts) do
+    drop table(@ex_lingo_plural_translations, prefix: opts.prefix)
   end
 end

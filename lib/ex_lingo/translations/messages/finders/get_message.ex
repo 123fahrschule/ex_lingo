@@ -27,11 +27,11 @@ defmodule ExLingo.Translations.Messages.Finders.GetMessage do
 
   defp find_in_cache(cache_key) do
     case Cache.get(cache_key) do
-      nil ->
-        {:error, :message, :not_cached}
-
-      cached_message ->
+      {:ok, %Message{} = cached_message} ->
         {:ok, cached_message}
+
+      _ ->
+        {:error, :message, :not_cached}
     end
   end
 
@@ -66,7 +66,7 @@ defmodule ExLingo.Translations.Messages.Finders.GetMessage do
   defp database_fallback_public_prefix(result, _, _, _), do: result
 
   defp public_prefix?(repo_opts) do
-    config_prefix = Repo.get_repo().default_options(:all) |> Keyword.get(:prefix, :unset)
+    config_prefix = Repo.configured_prefix() || :unset
     opts_prefix = Keyword.get(repo_opts, :prefix, :unset)
     config_prefix in [nil, "public"] or opts_prefix in [nil, "public"]
   end

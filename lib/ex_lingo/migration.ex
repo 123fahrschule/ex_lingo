@@ -62,8 +62,7 @@ defmodule ExLingo.Migration do
   ## Isolation with Prefixes
 
   ExLingo supports namespacing through PostgreSQL schemas, also called "prefixes" in Ecto. With
-  prefixes your jobs table can reside outside of your primary schema (usually public) and you can
-  have multiple separate job tables.
+  prefixes your ExLingo tables can reside outside of your primary schema (usually public).
 
   To use a prefix you first have to specify it within your migration:
 
@@ -77,8 +76,9 @@ defmodule ExLingo.Migration do
   end
   ```
 
-  The migration will create the "private" schema and all tables, functions and triggers within
-  that schema. With the database migrated you'll then specify the prefix in your configuration:
+  The migration will automatically create the "private" schema with `CREATE SCHEMA IF NOT EXISTS`
+  and then create all ExLingo tables in that schema. With the database migrated you'll then specify
+  the prefix in your configuration:
 
   ```elixir
   config :my_app, ExLingo,
@@ -192,8 +192,11 @@ defmodule ExLingo.Migration do
 
   defp migrator do
     case repo().__adapter__() do
-      Ecto.Adapters.Postgres -> ExLingo.Migrations.Postgresql
-      Ecto.Adapters.SQLite3 -> ExLingo.Migrations.SQLite3
+      Ecto.Adapters.Postgres ->
+        ExLingo.Migrations.Postgresql
+
+      adapter ->
+        raise ArgumentError, "ExLingo supports PostgreSQL repos only, got: #{inspect(adapter)}"
     end
   end
 end

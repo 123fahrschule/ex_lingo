@@ -26,11 +26,11 @@ defmodule ExLingo.Translations.SingularTranslations.Finders.GetSingularTranslati
 
   defp find_in_cache(cache_key) do
     case Cache.get(cache_key) do
-      nil ->
-        {:error, :singular_translation, :not_cached}
-
-      cached_singular_translation ->
+      {:ok, %SingularTranslation{} = cached_singular_translation} ->
         {:ok, cached_singular_translation}
+
+      _ ->
+        {:error, :singular_translation, :not_cached}
     end
   end
 

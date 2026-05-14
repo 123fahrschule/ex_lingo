@@ -12,7 +12,7 @@ defmodule ExLingo.Translations.SingularTranslations.Finders.ListTranslatedSingul
   def find do
     base()
     |> translated_query()
-    |> Repo.get_repo().all()
+    |> Repo.get_repo().all(Repo.opts())
   end
 
   defp translated_query(query) do

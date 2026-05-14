@@ -1,0 +1,69 @@
+<.table_container>
+  <.table aria-label="Glossary entries">
+    <.table_header>
+      <.table_row>
+        <.table_head>Direction</.table_head>
+        <.table_head>Source term</.table_head>
+        <.table_head>Target term</.table_head>
+        <.table_head>Scope</.table_head>
+        <.table_head>Actions</.table_head>
+      </.table_row>
+    </.table_header>
+    <.table_body>
+      <.table_row :if={Enum.empty?(@glossary_entries)}>
+        <.table_cell colspan="5" class="text-muted-foreground">
+          No glossary entries found.
+        </.table_cell>
+      </.table_row>
+      <.table_row
+        :for={glossary_entry <- @glossary_entries}
+        class="cursor-pointer"
+        phx-click="edit_glossary_entry"
+        phx-value-id={glossary_entry.id}
+        phx-target={@myself}
+      >
+        <.table_cell>
+          <.badge variant="outline" class="uppercase">
+            {glossary_entry.source_locale} → {glossary_entry.target_locale}
+          </.badge>
+        </.table_cell>
+        <.table_cell class="font-medium text-foreground">
+          {glossary_entry.source_term}
+        </.table_cell>
+        <.table_cell class="text-foreground">
+          {glossary_entry.target_term}
+        </.table_cell>
+        <.table_cell class="text-muted-foreground">
+          {scope_label(glossary_entry)}
+        </.table_cell>
+        <.table_cell>
+          <div class="flex items-center gap-2">
+            <.button
+              type="button"
+              variant="ghost"
+              size="icon"
+              phx-click="edit_glossary_entry"
+              phx-value-id={glossary_entry.id}
+              phx-target={@myself}
+              title="Edit glossary entry"
+            >
+              <.icon name="edit" size="sm" label="Edit glossary entry" />
+            </.button>
+            <.button
+              type="button"
+              variant="ghost"
+              size="icon"
+              phx-click="delete_glossary_entry"
+              phx-value-id={glossary_entry.id}
+              phx-target={@myself}
+              data-confirm="Delete this glossary entry?"
+              title="Delete glossary entry"
+            >
+              <.icon name="delete" size="sm" class="text-destructive" label="Delete glossary entry" />
+            </.button>
+          </div>
+        </.table_cell>
+      </.table_row>
+    </.table_body>
+  </.table>
+</.table_container>

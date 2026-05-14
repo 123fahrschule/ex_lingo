@@ -26,11 +26,11 @@ defmodule ExLingo.Translations.Locale.Finders.GetLocale do
 
   defp find_in_cache(cache_key) do
     case Cache.get(cache_key) do
-      nil ->
-        {:error, :locale, :not_cached}
-
-      cached_locale ->
+      {:ok, %Locale{} = cached_locale} ->
         {:ok, cached_locale}
+
+      _ ->
+        {:error, :locale, :not_cached}
     end
   end
 

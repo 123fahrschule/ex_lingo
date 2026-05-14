@@ -12,13 +12,13 @@ defmodule ExLingo.Translations.Locale.Services.CreateLocaleFromIsoCode do
   def call(iso_code, nil) do
     %Locale{}
     |> Locale.changeset(mapped_attrs(iso_code))
-    |> Repo.get_repo().insert()
+    |> Repo.get_repo().insert(Repo.opts())
   end
 
   def call(iso_code, plurals_header) do
     %Locale{}
     |> Locale.changeset(mapped_attrs(iso_code, plurals_header))
-    |> Repo.get_repo().insert()
+    |> Repo.get_repo().insert(Repo.opts())
   end
 
   defp mapped_attrs(iso_code) do

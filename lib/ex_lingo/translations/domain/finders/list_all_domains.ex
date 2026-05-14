@@ -8,11 +8,9 @@ defmodule ExLingo.Translations.Domains.Finders.ListAllDomains do
     binding: :domain
 
   def find(params \\ []) do
-    repo = ExLingo.Repo.get_repo()
-
     base()
     |> filter_query(params[:filter])
     |> preload_resources(params[:preloads] || [])
-    |> repo.all()
+    |> ExLingo.Repo.get_repo().all(ExLingo.Repo.opts())
   end
 end

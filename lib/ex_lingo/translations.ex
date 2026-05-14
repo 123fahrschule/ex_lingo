@@ -7,6 +7,7 @@ defmodule ExLingo.Translations do
     ApplicationSources,
     Contexts,
     Domains,
+    GlossaryEntries,
     Locales,
     Messages,
     PluralTranslations,
@@ -34,6 +35,15 @@ defmodule ExLingo.Translations do
   defdelegate list_all_domains(params \\ []), to: Domains
   defdelegate get_domain(params \\ []), to: Domains
   defdelegate create_domain(attrs, opts \\ []), to: Domains
+
+  # GLOSSARY ENTRIES
+  defdelegate list_glossary_entries(params \\ []), to: GlossaryEntries
+  defdelegate list_all_glossary_entries(params \\ []), to: GlossaryEntries
+  defdelegate get_glossary_entry(params), to: GlossaryEntries
+  defdelegate create_glossary_entry(attrs, opts \\ []), to: GlossaryEntries
+  defdelegate update_glossary_entry(glossary_entry, attrs, opts \\ []), to: GlossaryEntries
+  defdelegate delete_glossary_entry(glossary_entry, opts \\ []), to: GlossaryEntries
+  defdelegate change_glossary_entry(glossary_entry, params \\ %{}), to: GlossaryEntries
 
   # MESSAGES
   defdelegate list_messages(params \\ []), to: Messages

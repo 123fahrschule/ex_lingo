@@ -23,17 +23,17 @@ defmodule ExLingo.Translations.Messages do
   end
 
   def get_messages_count do
-    Repo.get_repo().aggregate(Message, :count)
+    Repo.get_repo().aggregate(Message, :count, Repo.opts())
   end
 
   def create_message(attrs, opts \\ []) do
-    %Message{} |> Message.changeset(attrs) |> Repo.get_repo().insert(opts)
+    %Message{} |> Message.changeset(attrs) |> Repo.get_repo().insert(Repo.opts(opts))
   end
 
-  def update_message(message, attrs) do
+  def update_message(message, attrs, opts \\ []) do
     message
     |> Message.changeset(attrs)
-    |> Repo.get_repo().update()
+    |> Repo.get_repo().update(Repo.opts(opts))
   end
 
   @doc """
@@ -69,19 +69,19 @@ defmodule ExLingo.Translations.Messages do
         from(st in SingularTranslation,
           where: st.message_id == ^message_id
         )
-        |> Repo.get_repo().delete_all()
+        |> Repo.get_repo().delete_all(Repo.opts())
 
       # Delete ALL plural translations for this message (all locales)
       {plural_count, _} =
         from(pt in PluralTranslation,
           where: pt.message_id == ^message_id
         )
-        |> Repo.get_repo().delete_all()
+        |> Repo.get_repo().delete_all(Repo.opts())
 
       # Delete the message itself
       {message_count, _} =
         from(m in Message, where: m.id == ^message_id)
-        |> Repo.get_repo().delete_all()
+        |> Repo.get_repo().delete_all(Repo.opts())
 
       %{
         translations_deleted: singular_count + plural_count,
@@ -144,30 +144,30 @@ defmodule ExLingo.Translations.Messages do
       # Perform merge in transaction
       Repo.get_repo().transaction(fn ->
         # Delete all translations from target message
-        Repo.get_repo().delete_all(
-          from st in SingularTranslation,
-            where: st.message_id == ^to_message.id
+        from(st in SingularTranslation,
+          where: st.message_id == ^to_message.id
         )
+        |> Repo.get_repo().delete_all(Repo.opts())
 
-        Repo.get_repo().delete_all(
-          from pt in PluralTranslation,
-            where: pt.message_id == ^to_message.id
+        from(pt in PluralTranslation,
+          where: pt.message_id == ^to_message.id
         )
+        |> Repo.get_repo().delete_all(Repo.opts())
 
         # Move all singular translations from source to target
         from(st in SingularTranslation,
           where: st.message_id == ^from_message.id
         )
-        |> Repo.get_repo().update_all(set: [message_id: to_message.id])
+        |> Repo.get_repo().update_all([set: [message_id: to_message.id]], Repo.opts())
 
         # Move all plural translations from source to target
         from(pt in PluralTranslation,
           where: pt.message_id == ^from_message.id
         )
-        |> Repo.get_repo().update_all(set: [message_id: to_message.id])
+        |> Repo.get_repo().update_all([set: [message_id: to_message.id]], Repo.opts())
 
         # Delete the source message
-        Repo.get_repo().delete(from_message)
+        Repo.get_repo().delete(from_message, Repo.opts())
 
         # Invalidate cache
         ExLingo.Cache.delete_all()

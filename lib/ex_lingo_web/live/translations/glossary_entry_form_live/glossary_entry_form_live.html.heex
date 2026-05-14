@@ -1,0 +1,133 @@
+<div class="space-y-6">
+  <.breadcrumb>
+    <.breadcrumb_list>
+      <.breadcrumb_item>
+        <.breadcrumb_link href={dashboard_path(@socket, "/glossary")}>Glossary</.breadcrumb_link>
+      </.breadcrumb_item>
+      <.breadcrumb_separator />
+      <.breadcrumb_item>
+        <.breadcrumb_page>
+          <%= if Map.has_key?(assigns, :glossary_entry), do: "Edit", else: "New" %>
+        </.breadcrumb_page>
+      </.breadcrumb_item>
+    </.breadcrumb_list>
+  </.breadcrumb>
+
+  <.page_header
+    title={if Map.has_key?(assigns, :glossary_entry), do: "Update glossary entry", else: "Create glossary entry"}
+    class="px-0 pt-0"
+  />
+
+  <.card class="max-w-3xl">
+    <.card_header>
+      <.card_title>Glossary Entry</.card_title>
+      <.card_description>
+        Define approved terminology for one language direction.
+      </.card_description>
+    </.card_header>
+    <.card_content>
+      <.form for={@form} phx-change="validate" phx-submit="submit" class="space-y-6">
+        <div class="grid gap-4 md:grid-cols-2">
+          <.form_item>
+            <.form_label field={@form[:source_locale]}>Source locale</.form_label>
+            <.form_control>
+              <.input field={@form[:source_locale]} type="text" placeholder="en" />
+            </.form_control>
+            <.form_message field={@form[:source_locale]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@form[:target_locale]}>Target locale</.form_label>
+            <.form_control>
+              <.input field={@form[:target_locale]} type="text" placeholder="de" />
+            </.form_control>
+            <.form_message field={@form[:target_locale]} translate={false} />
+          </.form_item>
+        </div>
+
+        <.form_item>
+          <.form_label field={@form[:source_term]}>Source term</.form_label>
+          <.form_control>
+            <.input field={@form[:source_term]} type="text" />
+          </.form_control>
+          <.form_message field={@form[:source_term]} translate={false} />
+        </.form_item>
+
+        <.form_item>
+          <.form_label field={@form[:target_term]}>Target term</.form_label>
+          <.form_control>
+            <.input field={@form[:target_term]} type="text" />
+          </.form_control>
+          <.form_message field={@form[:target_term]} translate={false} />
+        </.form_item>
+
+        <.form_item>
+          <.form_label field={@form[:usage_guidance]}>Usage guidance</.form_label>
+          <.form_control>
+            <.textarea field={@form[:usage_guidance]} rows="4" />
+          </.form_control>
+          <.form_message field={@form[:usage_guidance]} translate={false} />
+        </.form_item>
+
+        <div class="grid gap-4 md:grid-cols-3">
+          <.form_item>
+            <.form_label field={@form[:domain_id]}>Domain scope</.form_label>
+            <.form_control>
+              <select
+                id={@form[:domain_id].id}
+                name={@form[:domain_id].name}
+                class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-body-sm shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="">Global</option>
+                <option :for={domain <- @domains} value={domain.id} selected={to_string(domain.id) == to_string(@form[:domain_id].value)}>
+                  {domain.name}
+                </option>
+              </select>
+            </.form_control>
+            <.form_message field={@form[:domain_id]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@form[:context_id]}>Context scope</.form_label>
+            <.form_control>
+              <select
+                id={@form[:context_id].id}
+                name={@form[:context_id].name}
+                class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-body-sm shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="">Global</option>
+                <option :for={context <- @contexts} value={context.id} selected={to_string(context.id) == to_string(@form[:context_id].value)}>
+                  {context.name}
+                </option>
+              </select>
+            </.form_control>
+            <.form_message field={@form[:context_id]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@form[:application_source_id]}>Application scope</.form_label>
+            <.form_control>
+              <select
+                id={@form[:application_source_id].id}
+                name={@form[:application_source_id].name}
+                class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-body-sm shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="">Global</option>
+                <option :for={application_source <- @application_sources} value={application_source.id} selected={to_string(application_source.id) == to_string(@form[:application_source_id].value)}>
+                  {application_source.name}
+                </option>
+              </select>
+            </.form_control>
+            <.form_message field={@form[:application_source_id]} translate={false} />
+          </.form_item>
+        </div>
+
+        <div class="flex justify-end">
+          <.button type="submit" phx-disable-with="Saving...">
+            <.icon name="save" size="sm" decorative /> Save
+          </.button>
+        </div>
+      </.form>
+    </.card_content>
+  </.card>
+</div>

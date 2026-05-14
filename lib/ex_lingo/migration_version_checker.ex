@@ -10,8 +10,7 @@ defmodule ExLingo.MigrationVersionChecker do
   - Step-by-step instructions for updating
   - Commands to generate and run the required migrations
 
-  The checker supports both PostgreSQL and SQLite3 databases and automatically detects
-  which adapter is being used.
+  The checker supports PostgreSQL databases.
   """
 
   use GenServer
@@ -35,14 +34,15 @@ defmodule ExLingo.MigrationVersionChecker do
   end
 
   defp check_version do
-    migrator =
-      case ExLingo.Repo.get_adapter_name() do
-        :postgres -> ExLingo.Migrations.Postgresql
-        :sqlite -> ExLingo.Migrations.SQLite3
-      end
-
+    ExLingo.Repo.get_adapter_name()
+    migrator = ExLingo.Migrations.Postgresql
     latest_version = migrator.current_version()
-    migrated = migrator.migrated_version(%{repo: ExLingo.Repo.get_repo()})
+
+    migrated =
+      migrator.migrated_version(%{
+        repo: ExLingo.Repo.get_repo(),
+        prefix: ExLingo.Repo.configured_prefix() || "public"
+      })
 
     if migrated < latest_version do
       warning_message = """

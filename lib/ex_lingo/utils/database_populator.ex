@@ -21,7 +21,7 @@ defmodule ExLingo.Utils.DatabasePopulator do
     schema
     |> struct()
     |> change(entry |> keys_to_atoms())
-    |> repo.insert!(on_conflict: :replace_all, conflict_target: conflict_target)
+    |> repo.insert!(Repo.opts(on_conflict: :replace_all, conflict_target: conflict_target))
   end
 
   defp keys_to_atoms(map) do

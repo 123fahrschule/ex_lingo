@@ -23,7 +23,7 @@ defmodule ExLingo.Translations.PluralTranslations do
   def create_plural_translation(attrs, opts \\ []) do
     attrs
     |> then(&PluralTranslation.changeset(%PluralTranslation{}, &1))
-    |> Repo.get_repo().insert(opts)
+    |> Repo.get_repo().insert(Repo.opts(opts))
     |> case do
       {:ok, plural_translation} ->
         cache_key =
@@ -45,7 +45,7 @@ defmodule ExLingo.Translations.PluralTranslations do
 
   def update_plural_translation(translation, attrs, opts \\ []) do
     PluralTranslation.changeset(translation, attrs)
-    |> Repo.get_repo().update(opts)
+    |> Repo.get_repo().update(Repo.opts(opts))
     |> case do
       {:ok, translation} ->
         cache_key =

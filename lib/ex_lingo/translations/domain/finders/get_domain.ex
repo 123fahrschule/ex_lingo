@@ -26,11 +26,11 @@ defmodule ExLingo.Translations.Domains.Finders.GetDomain do
 
   defp find_in_cache(cache_key) do
     case Cache.get(cache_key) do
-      nil ->
-        {:error, :domain, :not_cached}
-
-      cached_domain ->
+      {:ok, %Domain{} = cached_domain} ->
         {:ok, cached_domain}
+
+      _ ->
+        {:error, :domain, :not_cached}
     end
   end
 
