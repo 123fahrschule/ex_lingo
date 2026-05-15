@@ -10,6 +10,7 @@ defmodule ExLingo.Translations do
     GlossaryEntries,
     Locales,
     Messages,
+    PossibleDuplicateTranslations,
     PluralTranslations,
     SingularTranslations
   }
@@ -79,4 +80,17 @@ defmodule ExLingo.Translations do
 
   defdelegate update_singular_translation(translation, attrs, opts \\ []),
     to: SingularTranslations
+
+  # POSSIBLE DUPLICATES
+  defdelegate list_possible_duplicate_translations(params \\ []),
+    to: PossibleDuplicateTranslations,
+    as: :list
+
+  defdelegate possible_duplicate_translation_summaries(params \\ []),
+    to: PossibleDuplicateTranslations,
+    as: :summaries_by_message
+
+  defdelegate possible_duplicate_translations_for_message(params),
+    to: PossibleDuplicateTranslations,
+    as: :candidates_for_message
 end

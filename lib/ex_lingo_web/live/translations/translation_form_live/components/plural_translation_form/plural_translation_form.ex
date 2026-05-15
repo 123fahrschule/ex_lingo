@@ -10,6 +10,9 @@ defmodule ExLingoWeb.Translations.PluralTranslationForm do
   alias ExLingoWeb.Components.Shared.Tabs
   import ExLingoWeb.Translations.MessageMetadata, only: [message_metadata: 1]
 
+  import ExLingoWeb.Translations.PossibleDuplicateComponents,
+    only: [possible_duplicate_details: 1]
+
   def update(assigns, socket) do
     valid_plugins = valid_plugins()
 
@@ -40,6 +43,10 @@ defmodule ExLingoWeb.Translations.PluralTranslationForm do
       socket
       |> assign(:mode, Map.get(assigns, :mode, :page))
       |> assign(:current_url, Map.get(assigns, :current_url))
+      |> assign(
+        :possible_duplicate_candidates,
+        Map.get(assigns, :possible_duplicate_candidates, [])
+      )
       |> assign(:tabs, tabs)
       |> assign(:translation, translation)
       |> assign(:form, form)

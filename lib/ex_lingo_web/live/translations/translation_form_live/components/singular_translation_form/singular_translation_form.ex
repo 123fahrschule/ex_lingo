@@ -8,10 +8,17 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
   alias ExLingo.Translations
   import ExLingoWeb.Translations.MessageMetadata, only: [message_metadata: 1]
 
+  import ExLingoWeb.Translations.PossibleDuplicateComponents,
+    only: [possible_duplicate_details: 1]
+
   def update(assigns, socket) do
     socket =
       socket
       |> assign(:mode, Map.get(assigns, :mode, :page))
+      |> assign(
+        :possible_duplicate_candidates,
+        Map.get(assigns, :possible_duplicate_candidates, [])
+      )
       |> assign(:form, %{
         "original_text" => assigns[:translation].original_text,
         "translated_text" => assigns[:translation].translated_text

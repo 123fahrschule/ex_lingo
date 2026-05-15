@@ -1,0 +1,54 @@
+<.page_header title={t("Possible duplicates")} class="px-0 pt-0">
+  <p class="text-body-sm text-muted-foreground">
+    {t("Review repeated translations that may be shared in application code.")}
+  </p>
+</.page_header>
+
+<div class="space-y-4">
+  <.card>
+    <.card_content class="pt-6">
+      <.form for={@filters} as={:filters} phx-change="filter" class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto]">
+        <.form_item>
+          <.form_label for="possible_duplicates_locale_id">{t("Target locale")}</.form_label>
+          <select
+            id="possible_duplicates_locale_id"
+            name="locale_id"
+            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-body-sm shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          >
+            <option :if={@locales == []} value="">{t("None")}</option>
+            <option
+              :for={locale <- @locales}
+              value={locale.id}
+              selected={to_string(locale.id) == to_string(@filters["locale_id"])}
+            >
+              {locale.native_name || locale.name || locale.iso639_code}
+            </option>
+          </select>
+        </.form_item>
+
+        <div class="flex items-end text-body-sm text-muted-foreground">
+          {t("%{count} possible duplicate groups", count: length(@candidates))}
+        </div>
+      </.form>
+    </.card_content>
+  </.card>
+
+  <.empty_state
+    :if={@locales == []}
+    icon="translate"
+    title={t("No locales found.")}
+    description={t("Create a locale before reviewing possible duplicates.")}
+  />
+
+  <.empty_state
+    :if={@locales != [] and @candidates == []}
+    icon="difference"
+    title={t("No possible duplicates found.")}
+    description={t("No repeated translation patterns were found for the selected locale.")}
+  />
+
+  <.possible_duplicate_details
+    :if={@candidates != []}
+    candidates={@candidates}
+  />
+</div>

@@ -19,6 +19,7 @@ defmodule ExLingoWeb.Translations.TranslationFormLive do
         locale={@locale}
         filters={@filters}
         mode={:page}
+        possible_duplicate_candidates={@possible_duplicate_candidates}
       />
     """
   end
@@ -41,18 +42,26 @@ defmodule ExLingoWeb.Translations.TranslationFormLive do
         filters={@filters}
         mode={:page}
         current_url={dashboard_path(@socket, "/locales/#{@locale.id}/translations/#{@message.id}")}
+        possible_duplicate_candidates={@possible_duplicate_candidates}
       />
     """
   end
 
   def mount(%{"message_id" => message_id, "locale_id" => locale_id} = params, _session, socket) do
     socket =
-      with {:ok, %{locale: locale, message: message, translations: translations}} <-
+      with {:ok,
+            %{
+              locale: locale,
+              message: message,
+              translations: translations,
+              possible_duplicate_candidates: possible_duplicate_candidates
+            }} <-
              TranslationEditorLoader.load(locale_id, message_id) do
         socket
         |> assign(:locale, locale)
         |> assign(:message, message)
         |> assign(:translations, translations)
+        |> assign(:possible_duplicate_candidates, possible_duplicate_candidates)
       else
         _ -> redirect(socket, to: dashboard_path(socket, "/locales/#{locale_id}/translations"))
       end

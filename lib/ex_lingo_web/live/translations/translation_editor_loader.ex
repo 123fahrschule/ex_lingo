@@ -10,7 +10,13 @@ defmodule ExLingoWeb.Translations.TranslationEditorLoader do
     with {:ok, locale} <- get_locale(locale_id),
          {:ok, message} <- get_message(message_id),
          {:ok, translations} <- get_translations(message, locale) do
-      {:ok, %{locale: locale, message: message, translations: translations}}
+      {:ok,
+       %{
+         locale: locale,
+         message: message,
+         translations: translations,
+         possible_duplicate_candidates: possible_duplicate_candidates(locale, message)
+       }}
     end
   end
 
@@ -93,5 +99,12 @@ defmodule ExLingoWeb.Translations.TranslationEditorLoader do
       _invalid ->
         {:error, :id, :invalid}
     end
+  end
+
+  defp possible_duplicate_candidates(locale, message) do
+    Translations.possible_duplicate_translations_for_message(
+      locale_id: locale.id,
+      message_id: message.id
+    )
   end
 end

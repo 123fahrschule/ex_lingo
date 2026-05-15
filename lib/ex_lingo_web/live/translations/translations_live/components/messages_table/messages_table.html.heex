@@ -49,6 +49,14 @@
               >
                 {t("Merge")}
               </.badge>
+              <.badge
+                :if={possible_duplicate?(message, assigns[:possible_duplicate_summaries] || %{})}
+                variant="secondary"
+                class="border-info-300 bg-info-100 text-info-500"
+                title={possible_duplicate_title(message, assigns[:possible_duplicate_summaries] || %{})}
+              >
+                {t("Duplicate?")}
+              </.badge>
             </div>
             <%= if Map.has_key?(@fuzzy_matches, message.id) do %>
               <% fuzzy_match = Map.get(@fuzzy_matches, message.id) %>

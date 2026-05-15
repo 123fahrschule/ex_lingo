@@ -70,6 +70,11 @@
                     <.icon name="book" decorative /> <span>{t("Glossary")}</span>
                   </.sidebar_menu_button>
                 </.sidebar_menu_item>
+                <.sidebar_menu_item>
+                  <.sidebar_menu_button href={dashboard_path(@conn, "/possible_duplicates")}>
+                    <.icon name="difference" decorative /> <span>{t("Possible duplicates")}</span>
+                  </.sidebar_menu_button>
+                </.sidebar_menu_item>
               </.sidebar_menu>
             </.sidebar_group_content>
           </.sidebar_group>

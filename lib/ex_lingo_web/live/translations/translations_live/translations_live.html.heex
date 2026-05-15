@@ -19,7 +19,7 @@
   data-context-prefixes={Jason.encode!(@list_context_prefixes || [])}
 >
   <.live_component module={FiltersBar} filters={@filters} not_translated_default={@not_translated_default} stale_default={@stale_default} application_sources_empty?={@application_sources_empty?} locale_id={@locale.id} id="filters-bar" />
-  <.live_component module={MessagesTable} messages={@messages} filters={@filters} sort={@sort} locale={@locale} application_sources_empty?={@application_sources_empty?} stale_message_ids={@stale_message_ids} fuzzy_matches={@fuzzy_matches} highlighted_message_id={@highlighted_message_id} id="messages-table" />
+  <.live_component module={MessagesTable} messages={@messages} filters={@filters} sort={@sort} locale={@locale} application_sources_empty?={@application_sources_empty?} stale_message_ids={@stale_message_ids} fuzzy_matches={@fuzzy_matches} possible_duplicate_summaries={@possible_duplicate_summaries} highlighted_message_id={@highlighted_message_id} id="messages-table" />
   <Pagination.render metadata={@messages_metadata} on_page_change="page_changed" />
 </div>
 
@@ -42,6 +42,7 @@
         filters={@filters}
         mode={:sheet}
         return_to={:parent}
+        possible_duplicate_candidates={@editing_possible_duplicate_candidates}
       />
       <.live_component
         :if={@editing_message.message_type == :plural}
@@ -56,6 +57,7 @@
         filters={@filters}
         mode={:sheet}
         return_to={:parent}
+        possible_duplicate_candidates={@editing_possible_duplicate_candidates}
       />
     </div>
   </.sheet_content>

@@ -52,6 +52,10 @@ defmodule ExLingoWeb.Router do
                 live "/:id", GlossaryEntryFormLive, :index, route_opts
               end
 
+              scope "/possible_duplicates", Translations do
+                live "/", PossibleDuplicatesLive, :index, route_opts
+              end
+
               scope "/locales", Translations do
                 live "/", LocalesLive, :index, route_opts
 

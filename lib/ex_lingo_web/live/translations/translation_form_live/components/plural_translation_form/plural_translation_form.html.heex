@@ -38,6 +38,11 @@
   <%= if @mode == :sheet do %>
     <div class="space-y-4">
       <.message_metadata message={@message} translation={@translation} />
+      <.possible_duplicate_details
+        candidates={@possible_duplicate_candidates}
+        current_message_id={@message.id}
+        compact={true}
+      />
 
       <div class="text-body-xs text-muted-foreground">
         {t("Quantity examples: %{examples}", examples: plural_examples(@locale, @current_tab_index))}
@@ -92,6 +97,11 @@
       </.card_header>
       <.card_content class="space-y-4">
         <.message_metadata message={@message} translation={@translation} />
+        <.possible_duplicate_details
+          candidates={@possible_duplicate_candidates}
+          current_message_id={@message.id}
+          compact={true}
+        />
 
         <.form
           for={@form}

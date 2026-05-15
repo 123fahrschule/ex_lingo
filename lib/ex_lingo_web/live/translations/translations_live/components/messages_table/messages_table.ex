@@ -77,6 +77,29 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
       to_string(message.id) == to_string(highlighted_message_id)
   end
 
+  def possible_duplicate?(message, summaries) when is_map(summaries) do
+    Map.has_key?(summaries, message.id)
+  end
+
+  def possible_duplicate?(_message, _summaries), do: false
+
+  def possible_duplicate_title(message, summaries) when is_map(summaries) do
+    case Map.get(summaries, message.id) do
+      %{count: count, highest_confidence: confidence} ->
+        "#{t("Possible duplicate")}: #{count} · #{confidence_label(confidence)}"
+
+      _summary ->
+        t("Possible duplicate")
+    end
+  end
+
+  def possible_duplicate_title(_message, _summaries), do: t("Possible duplicate")
+
+  defp confidence_label(:high), do: t("High confidence")
+  defp confidence_label(:medium), do: t("Medium confidence")
+  defp confidence_label(:low), do: t("Low confidence")
+  defp confidence_label(_confidence), do: t("Possible duplicate")
+
   defp plural_form_translated?(translation, source) do
     case get_in(translation, [Access.key!(source)]) do
       nil ->

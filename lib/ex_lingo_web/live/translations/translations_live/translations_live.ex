@@ -288,6 +288,19 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
     socket
     |> assign(:messages, messages)
     |> assign(:messages_metadata, messages_metadata)
+    |> assign(
+      :possible_duplicate_summaries,
+      possible_duplicate_summaries(socket.assigns.locale.id, messages)
+    )
+  end
+
+  defp possible_duplicate_summaries(locale_id, messages) do
+    message_ids = Enum.map(messages, & &1.id)
+
+    Translations.possible_duplicate_translation_summaries(
+      locale_id: locale_id,
+      message_ids: message_ids
+    )
   end
 
   defp format_filters(filters) do
@@ -344,6 +357,7 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
     |> assign(:editing_message, nil)
     |> assign(:editing_message_id, nil)
     |> assign(:editing_translations, nil)
+    |> assign(:editing_possible_duplicate_candidates, [])
     |> assign(:editing_tab, "1")
     |> assign(:editing_current_tab_index, 0)
     |> assign(:editing_current_url, nil)
@@ -354,11 +368,17 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
     {tab, current_tab_index} = normalize_tab(Map.get(params, "tab", "1"))
 
     case TranslationEditorLoader.load(socket.assigns.locale.id, message_id) do
-      {:ok, %{message: message, translations: translations}} ->
+      {:ok,
+       %{
+         message: message,
+         translations: translations,
+         possible_duplicate_candidates: possible_duplicate_candidates
+       }} ->
         socket
         |> assign(:editing_message, message)
         |> assign(:editing_message_id, message.id)
         |> assign(:editing_translations, translations)
+        |> assign(:editing_possible_duplicate_candidates, possible_duplicate_candidates)
         |> assign(:editing_tab, tab)
         |> assign(:editing_current_tab_index, current_tab_index)
         |> assign(
@@ -381,6 +401,7 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
     |> assign(:editing_message, nil)
     |> assign(:editing_message_id, nil)
     |> assign(:editing_translations, nil)
+    |> assign(:editing_possible_duplicate_candidates, [])
     |> assign(:editing_tab, "1")
     |> assign(:editing_current_tab_index, 0)
     |> assign(:editing_current_url, nil)
