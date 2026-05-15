@@ -27,8 +27,14 @@ defmodule ExLingo.Repo do
   end
 
   defp repo_default_prefix do
-    get_repo()
-    |> apply(:default_options, [:all])
-    |> Keyword.get(:prefix)
+    repo = get_repo()
+
+    if function_exported?(repo, :default_options, 1) do
+      repo
+      |> apply(:default_options, [:all])
+      |> Keyword.get(:prefix)
+    end
+  rescue
+    UndefinedFunctionError -> nil
   end
 end

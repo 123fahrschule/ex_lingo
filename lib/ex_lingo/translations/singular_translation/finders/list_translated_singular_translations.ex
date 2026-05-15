@@ -17,7 +17,7 @@ defmodule ExLingo.Translations.SingularTranslations.Finders.ListTranslatedSingul
 
   defp translated_query(query) do
     from(st in query,
-      where: not is_nil(st.translated_text) and st.translated_text != ""
+      where: not is_nil(st.translated_text) and fragment("btrim(?) <> ''", st.translated_text)
     )
   end
 end

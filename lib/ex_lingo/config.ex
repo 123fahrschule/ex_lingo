@@ -38,7 +38,7 @@ defmodule ExLingo.Config do
   def new(opts) when is_list(opts) do
     opts = normalize(opts)
 
-    Validator.validate!(opts, &validate/1)
+    Validator.validate!(opts, &validate_opt(opts, &1))
 
     struct!(__MODULE__, opts)
   end
@@ -155,8 +155,9 @@ defmodule ExLingo.Config do
   defp normalize_plugins(plugins) when is_list(plugins) do
     plugins
     |> Enum.map(&if is_atom(&1), do: {&1, []}, else: &1)
+    # Reverse before deduplication so the last-specified plugin wins.
     |> Enum.reverse()
-    |> Enum.uniq()
+    |> Enum.uniq_by(&elem(&1, 0))
   end
 
   defp normalize_plugins(plugins), do: plugins || []

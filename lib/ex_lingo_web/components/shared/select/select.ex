@@ -29,14 +29,20 @@ defmodule ExLingoWeb.Components.Shared.Select do
   end
 
   def handle_event("update", %{"selectedIdx" => idx, "id" => id}, socket) do
-    selected_option = Enum.at(socket.assigns.options, idx)
+    options = socket.assigns.options
 
-    {
-      :noreply,
-      socket
-      |> push_event("close-selected", %{id: id, value: selected_option.value})
-      |> assign(:selected_option, selected_option)
-    }
+    with {idx, ""} <- Integer.parse(to_string(idx)),
+         true <- idx >= 0 and idx < length(options),
+         selected_option when not is_nil(selected_option) <- Enum.at(options, idx) do
+      {
+        :noreply,
+        socket
+        |> push_event("close-selected", %{id: id, value: selected_option.value})
+        |> assign(:selected_option, selected_option)
+      }
+    else
+      _invalid -> {:noreply, socket}
+    end
   end
 
   defp parse_select_value(nil), do: nil

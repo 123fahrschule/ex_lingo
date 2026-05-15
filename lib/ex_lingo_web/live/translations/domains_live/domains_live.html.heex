@@ -1,5 +1,50 @@
-<.page_header title="Domains" class="px-0 pt-0" />
-<div>
-  <.live_component module={DomainsTable} id="domains-table" domains={@domains} />
+<.page_header title={t("Domains")} class="px-0 pt-0" />
+<div
+  id="ex-lingo-domains-list"
+  phx-hook="ExLingoListContext"
+  data-storage-key={@list_context_storage_key}
+  data-list-context={Jason.encode!(@list_context_payload || %{})}
+  data-context-prefixes={Jason.encode!(@list_context_prefixes || [])}
+>
+  <.live_component module={DomainsTable} id="domains-table" domains={@domains} sort={@sort} />
   <Pagination.render metadata={@domains_metadata} on_page_change="page_changed" />
 </div>
+
+<.sheet :if={@editing_domain} id="domain-editor-sheet" open={true} on-close="close_domain_editor">
+  <.sheet_content side="right" size="lg" class="w-full overflow-hidden">
+    <.sheet_header class="pr-8">
+      <.sheet_title class="text-h3">{@editing_domain.name}</.sheet_title>
+      <.sheet_description>
+        {t("Adjust the display color and optional description for this gettext domain.")}
+      </.sheet_description>
+    </.sheet_header>
+
+    <div class="mt-4 flex-1 overflow-y-auto pr-1">
+      <.form for={@domain_form} phx-change="validate_domain" phx-submit="submit_domain" class="space-y-5">
+        <.form_item>
+          <.form_label>{t("Name")}</.form_label>
+          <.input type="text" value={@editing_domain.name} disabled />
+          <.form_description>
+            {t("The name comes from gettext and is used to scope imported messages.")}
+          </.form_description>
+        </.form_item>
+
+        <.form_item>
+          <.form_label field={@domain_form[:description]}>{t("Description")}</.form_label>
+          <.form_control>
+            <.textarea field={@domain_form[:description]} rows="3" />
+          </.form_control>
+          <.form_message field={@domain_form[:description]} translate={false} />
+        </.form_item>
+
+        <.color_field field={@domain_form[:color]} />
+
+        <div class="flex justify-end">
+          <.button type="submit" phx-disable-with={t("Saving...")}>
+            <.icon name="save" size="sm" decorative /> {t("Save")}
+          </.button>
+        </div>
+      </.form>
+    </div>
+  </.sheet_content>
+</.sheet>

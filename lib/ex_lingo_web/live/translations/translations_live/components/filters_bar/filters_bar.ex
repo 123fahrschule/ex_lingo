@@ -16,17 +16,17 @@ defmodule ExLingoWeb.Translations.Components.FiltersBar do
     %{entries: application_sources, metadata: _application_sources_metadata} =
       Translations.list_application_sources()
 
-    socket =
-      socket
-      |> assign(:contexts, contexts)
-      |> assign(:domains, domains)
-      |> assign(:application_sources, application_sources)
-      |> assign(:filters, %{
+    default_assigns = %{
+      contexts: contexts,
+      domains: domains,
+      application_sources: application_sources,
+      filters: %{
         domain: nil,
         context: nil,
         application_source: nil
-      })
+      }
+    }
 
-    {:ok, assign(socket, assigns)}
+    {:ok, assign(socket, Map.merge(default_assigns, assigns))}
   end
 end

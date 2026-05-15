@@ -15,7 +15,11 @@ defmodule ExLingo.Translations.Locale.Finders.GetLocaleTranslationProgress do
         0
 
       translations_count ->
-        Float.floor(translated_count(locale_id) / translations_count * 100)
+        translated_count(locale_id)
+        |> Kernel./(translations_count)
+        |> Kernel.*(100)
+        |> Float.floor()
+        |> trunc()
     end
   end
 

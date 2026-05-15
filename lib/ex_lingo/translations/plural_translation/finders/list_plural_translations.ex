@@ -8,10 +8,13 @@ defmodule ExLingo.Translations.PluralTranslations.Finders.ListPluralTranslations
     binding: :plural_translation
 
   def find(params \\ []) do
+    filters = params[:filter] || %{}
+    search = params[:search] || ""
+
     query =
       base()
-      |> filter_query(params[:filter])
-      |> search_query(params[:search])
+      |> filter_query(filters)
+      |> search_query(search)
       |> preload_resources(params[:preloads] || [])
 
     if params[:skip_pagination] do

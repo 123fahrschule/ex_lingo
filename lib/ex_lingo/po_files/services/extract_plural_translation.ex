@@ -9,11 +9,17 @@ defmodule ExLingo.PoFiles.Services.ExtractPluralTranslation do
   alias ExLingo.Translations.Locale.Services.CreateLocaleFromIsoCode
 
   def call(attrs) do
-    Repo.get_repo().transaction(fn ->
+    repo = Repo.get_repo()
+
+    repo.transaction(fn ->
       with attrs <- Map.put(attrs, :message_type, :plural),
            {:ok, message} <- ExtractMessage.call(attrs),
-           {:ok, locale} <- get_or_create_locale(attrs[:locale_name], attrs[:plurals_header]) do
-        create_or_update_plural_translations(attrs, message, locale)
+           {:ok, locale} <- get_or_create_locale(attrs[:locale_name], attrs[:plurals_header]),
+           {:ok, translations} <- create_or_update_plural_translations(attrs, message, locale) do
+        translations
+      else
+        {:error, reason} -> repo.rollback(reason)
+        error -> repo.rollback(error)
       end
     end)
   end
@@ -33,12 +39,14 @@ defmodule ExLingo.PoFiles.Services.ExtractPluralTranslation do
         {:ok, translation} ->
           attrs
           |> Map.put(:original_text, original_text)
+          |> seed_translated_text(original_text, translation.translated_text)
           |> then(&Translations.update_plural_translation(translation, &1))
 
         {:error, :plural_translation, :not_found} ->
           attrs
           |> Map.put(:nplural_index, index)
           |> Map.put(:original_text, original_text)
+          |> seed_translated_text(original_text, nil)
           |> Map.put(:message_id, message.id)
           |> Map.put(:locale_id, locale.id)
           |> Translations.create_plural_translation()
@@ -50,4 +58,15 @@ defmodule ExLingo.PoFiles.Services.ExtractPluralTranslation do
       false -> {:error, nil}
     end
   end
+
+  defp seed_translated_text(attrs, original_text, existing_translation) do
+    if blank?(existing_translation) and present?(original_text) do
+      Map.put(attrs, :translated_text, original_text)
+    else
+      attrs
+    end
+  end
+
+  defp present?(value), do: is_binary(value) and String.trim(value) != ""
+  defp blank?(value), do: is_nil(value) or (is_binary(value) and String.trim(value) == "")
 end

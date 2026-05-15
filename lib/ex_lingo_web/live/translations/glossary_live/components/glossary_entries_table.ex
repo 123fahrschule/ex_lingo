@@ -4,6 +4,7 @@ defmodule ExLingoWeb.Translations.GlossaryEntriesTable do
   """
 
   use ExLingoWeb, :live_component
+  require Logger
 
   alias ExLingo.Translations
 
@@ -18,21 +19,24 @@ defmodule ExLingoWeb.Translations.GlossaryEntriesTable do
   def handle_event("delete_glossary_entry", %{"id" => id}, socket) do
     with {:ok, glossary_entry} <- Translations.get_glossary_entry(filter: [id: id]),
          {:ok, _deleted} <- Translations.delete_glossary_entry(glossary_entry) do
-      {:noreply, push_navigate(socket, to: dashboard_path(socket, "/glossary"))}
+      send(self(), :refresh_glossary_entries)
+      {:noreply, socket}
     else
-      _ -> {:noreply, socket}
+      error ->
+        Logger.error("failed to delete glossary entry #{inspect(id)}: #{inspect(error)}")
+        {:noreply, put_flash(socket, :error, t("Failed to delete glossary entry."))}
     end
   end
 
   def scope_label(glossary_entry) do
     [
-      relation_label("Domain", glossary_entry.domain),
-      relation_label("Context", glossary_entry.context),
-      relation_label("Application", glossary_entry.application_source)
+      relation_label(t("Domain"), glossary_entry.domain),
+      relation_label(t("Context"), glossary_entry.context),
+      relation_label(t("Application"), glossary_entry.application_source)
     ]
     |> Enum.reject(&is_nil/1)
     |> case do
-      [] -> "Global"
+      [] -> t("Global")
       labels -> Enum.join(labels, " / ")
     end
   end

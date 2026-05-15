@@ -1,32 +1,41 @@
-<.table_container class="py-6">
-  <.table aria-label="Domains">
-    <.table_header>
-      <.table_row>
-        <.table_head>Name</.table_head>
-        <.table_head>Description</.table_head>
-        <.table_head>Color</.table_head>
-      </.table_row>
-    </.table_header>
-    <.table_body>
-      <.table_row
-        :for={domain <- @domains}
-        class="cursor-pointer"
-        phx-click="edit_domain"
-        phx-value-id={domain.id}
-        phx-target={@myself}
-      >
-        <.table_cell class="font-medium text-foreground">
-          {String.slice(domain.name, 0..30)}
-        </.table_cell>
-        <.table_cell class="text-muted-foreground">
-          {domain.description}
-        </.table_cell>
-        <.table_cell>
-          <.badge class="border-border text-primary-foreground" style={"background-color:#{domain.color};"}>
-            {domain.color}
-          </.badge>
-        </.table_cell>
-      </.table_row>
-    </.table_body>
-  </.table>
-</.table_container>
+<div>
+  <.table_container class="py-6">
+    <.table aria-label={t("Domains")}>
+      <.table_header>
+        <.table_row>
+          <.sortable_table_head field="name" sort={assigns[:sort] || %{}}>{t("Name")}</.sortable_table_head>
+          <.sortable_table_head field="description" sort={assigns[:sort] || %{}}>
+            {t("Description")}
+          </.sortable_table_head>
+          <.sortable_table_head field="color" sort={assigns[:sort] || %{}}>{t("Color")}</.sortable_table_head>
+        </.table_row>
+      </.table_header>
+      <.table_body>
+        <.table_row
+          :for={domain <- @domains}
+          class="cursor-pointer"
+          phx-click="edit_domain"
+          phx-value-id={domain.id}
+        >
+          <.table_cell class="font-medium text-foreground">
+            {truncate_name(domain.name)}
+          </.table_cell>
+          <.table_cell class="text-muted-foreground">
+            <%= if present?(domain.description) do %>
+              {domain.description}
+            <% end %>
+          </.table_cell>
+          <.table_cell>
+            <.badge
+              :if={present?(domain.color)}
+              class="border-border text-primary-foreground"
+              style={"background-color:#{domain.color};"}
+            >
+              {domain.color}
+            </.badge>
+          </.table_cell>
+        </.table_row>
+      </.table_body>
+    </.table>
+  </.table_container>
+</div>

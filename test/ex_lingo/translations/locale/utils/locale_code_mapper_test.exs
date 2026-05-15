@@ -292,8 +292,8 @@ defmodule ExLingo.Translations.Locale.Utils.LocaleCodeMapperTest do
   end
 
   describe "memory and performance characteristics" do
-    test "functions don't accumulate memory across calls" do
-      # Test that repeated calls don't cause memory issues
+    test "handles repeated calls without crashing" do
+      # This asserts repeated mapper calls complete without exceptions.
       codes = ["en", "es", "invalid", "xyz", nil, ""]
 
       Enum.each(1..100, fn _ ->
@@ -306,14 +306,10 @@ defmodule ExLingo.Translations.Locale.Utils.LocaleCodeMapperTest do
         end)
       end)
 
-      # If we got here without issues, memory handling is acceptable
       assert true
     end
 
     test "handles concurrent access correctly" do
-      # Test that multiple processes can call the functions simultaneously
-      parent = self()
-
       tasks =
         Enum.map(1..10, fn i ->
           Task.async(fn ->
@@ -327,24 +323,14 @@ defmodule ExLingo.Translations.Locale.Utils.LocaleCodeMapperTest do
               LocaleCodeMapper.get_colors(code)
             }
 
-            send(parent, {:result, i, result})
+            {i, result}
           end)
         end)
 
-      # Wait for all tasks to complete
-      Enum.each(tasks, &Task.await/1)
+      results = Enum.map(tasks, &Task.await/1)
 
-      # Verify we received all results
-      results =
-        Enum.map(1..10, fn i ->
-          receive do
-            {:result, ^i, result} -> result
-          after
-            1000 -> :timeout
-          end
-        end)
-
-      refute Enum.member?(results, :timeout)
+      assert length(results) == 10
+      assert Enum.all?(results, fn {i, result} -> is_integer(i) and tuple_size(result) == 5 end)
     end
   end
 
@@ -354,7 +340,10 @@ defmodule ExLingo.Translations.Locale.Utils.LocaleCodeMapperTest do
       fun.()
       assert true
     rescue
-      _ -> flunk("Expected no exception to be raised")
+      exception ->
+        flunk(
+          "Expected no exception to be raised, got #{inspect(exception.__struct__)}: #{Exception.message(exception)}"
+        )
     end
   end
 end

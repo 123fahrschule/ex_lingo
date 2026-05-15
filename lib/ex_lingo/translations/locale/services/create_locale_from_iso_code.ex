@@ -11,7 +11,7 @@ defmodule ExLingo.Translations.Locale.Services.CreateLocaleFromIsoCode do
 
   def call(iso_code, nil) do
     %Locale{}
-    |> Locale.changeset(mapped_attrs(iso_code))
+    |> Locale.changeset(mapped_attrs(iso_code, nil))
     |> Repo.get_repo().insert(Repo.opts())
   end
 
@@ -21,8 +21,8 @@ defmodule ExLingo.Translations.Locale.Services.CreateLocaleFromIsoCode do
     |> Repo.get_repo().insert(Repo.opts())
   end
 
-  defp mapped_attrs(iso_code) do
-    %{
+  defp mapped_attrs(iso_code, plurals_header) do
+    attrs = %{
       "iso639_code" => iso_code,
       "name" => LocaleCodeMapper.get_name(iso_code),
       "native_name" => LocaleCodeMapper.get_native_name(iso_code),
@@ -30,17 +30,7 @@ defmodule ExLingo.Translations.Locale.Services.CreateLocaleFromIsoCode do
       "wiki_url" => LocaleCodeMapper.get_wiki_url(iso_code),
       "colors" => LocaleCodeMapper.get_colors(iso_code)
     }
-  end
 
-  defp mapped_attrs(iso_code, plurals_header) do
-    %{
-      "iso639_code" => iso_code,
-      "name" => LocaleCodeMapper.get_name(iso_code),
-      "native_name" => LocaleCodeMapper.get_native_name(iso_code),
-      "family" => LocaleCodeMapper.get_family(iso_code),
-      "wiki_url" => LocaleCodeMapper.get_wiki_url(iso_code),
-      "colors" => LocaleCodeMapper.get_colors(iso_code),
-      "plurals_header" => plurals_header
-    }
+    if is_nil(plurals_header), do: attrs, else: Map.put(attrs, "plurals_header", plurals_header)
   end
 end

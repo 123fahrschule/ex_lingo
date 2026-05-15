@@ -15,11 +15,7 @@ defmodule ExLingo.Backend.GettextFallback do
 
         require Logger
 
-        @flag_file Path.join([
-                     Mix.Project.build_path(),
-                     "ex_lingo_recompile",
-                     ".fallback_recompiled"
-                   ])
+        @flag_file ExLingo.Utils.GettextRecompiler.flag_file(".fallback_recompiled")
 
         # When `mix gettext extract` create empty stub so that the  ExLingo.Backend can compile.
         if Gettext.Extractor.extracting?() do

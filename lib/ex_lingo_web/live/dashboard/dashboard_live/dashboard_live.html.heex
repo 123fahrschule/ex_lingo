@@ -1,5 +1,5 @@
 <div class="space-y-6">
-  <.page_header title="Dashboard" class="px-0 pt-0" />
+  <.page_header title={t("Dashboard")} class="px-0 pt-0" />
 
   <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.85fr)]">
     <div class="space-y-6">
@@ -7,47 +7,47 @@
         <.card>
           <.card_content class="flex items-center justify-between gap-4 pt-6">
             <div>
-              <p class="text-sm font-medium text-muted-foreground">Languages</p>
+              <p class="text-sm font-medium text-muted-foreground">{t("Languages")}</p>
               <p class="text-3xl font-semibold">{length(@languages)}</p>
             </div>
-            <.icon name="translate" size="lg" class="text-muted-foreground" decorative />
+            <.icon name="translate" size="md" class="text-muted-foreground" decorative />
           </.card_content>
         </.card>
 
         <.card>
           <.card_content class="flex items-center justify-between gap-4 pt-6">
             <div>
-              <p class="text-sm font-medium text-muted-foreground">Messages</p>
+              <p class="text-sm font-medium text-muted-foreground">{t("Messages")}</p>
               <p class="text-3xl font-semibold">{@messages_count}</p>
             </div>
-            <.icon name="article" size="lg" class="text-muted-foreground" decorative />
+            <.icon name="article" size="md" class="text-muted-foreground" decorative />
           </.card_content>
         </.card>
 
         <.card>
           <.card_content class="flex items-center justify-between gap-4 pt-6">
             <div>
-              <p class="text-sm font-medium text-muted-foreground">Contexts</p>
+              <p class="text-sm font-medium text-muted-foreground">{t("Contexts")}</p>
               <p class="text-3xl font-semibold">{length(@contexts)}</p>
             </div>
-            <.icon name="segment" size="lg" class="text-muted-foreground" decorative />
+            <.icon name="segment" size="md" class="text-muted-foreground" decorative />
           </.card_content>
         </.card>
 
         <.card>
           <.card_content class="flex items-center justify-between gap-4 pt-6">
             <div>
-              <p class="text-sm font-medium text-muted-foreground">Domains</p>
+              <p class="text-sm font-medium text-muted-foreground">{t("Domains")}</p>
               <p class="text-3xl font-semibold">{length(@domains)}</p>
             </div>
-            <.icon name="category" size="lg" class="text-muted-foreground" decorative />
+            <.icon name="category" size="md" class="text-muted-foreground" decorative />
           </.card_content>
         </.card>
 
         <.card>
           <.card_content class="flex items-center justify-between gap-4 pt-6">
             <div>
-              <p class="text-sm font-medium text-muted-foreground">Stale & Mergeable</p>
+              <p class="text-sm font-medium text-muted-foreground">{t("Stale & Mergeable")}</p>
               <p class="text-3xl font-semibold">{@mergeable_messages_count}</p>
             </div>
             <.button
@@ -56,10 +56,23 @@
               variant="outline"
               size="icon"
               phx-click="restore-mergeable"
-              data-confirm={"Merge all stale and mergeable messages?\n\nThis will move translations from stale messages to their best matching messages, overwrite target translations where applicable, and delete stale message IDs from all locales.\n\nThis action is irreversible."}
-              title="Merge all mergeable messages"
+              data-confirm={
+                Enum.join(
+                  [
+                    t("Merge all stale and mergeable messages?"),
+                    "",
+                    t(
+                      "This will move translations from stale messages to their best matching messages, overwrite target translations where applicable, and delete stale message IDs from all locales."
+                    ),
+                    "",
+                    t("This action is irreversible.")
+                  ],
+                  "\n"
+                )
+              }
+              title={t("Merge all mergeable messages")}
             >
-              <.icon name="merge_type" label="Merge all mergeable messages" />
+              <.icon name="merge_type" label={t("Merge all mergeable messages")} />
             </.button>
           </.card_content>
         </.card>
@@ -67,7 +80,7 @@
         <.card>
           <.card_content class="flex items-center justify-between gap-4 pt-6">
             <div>
-              <p class="text-sm font-medium text-muted-foreground">All Stale</p>
+              <p class="text-sm font-medium text-muted-foreground">{t("All Stale")}</p>
               <p class="text-3xl font-semibold">{@stale_messages_count}</p>
             </div>
             <.button
@@ -76,10 +89,23 @@
               variant="destructive"
               size="icon"
               phx-click="delete-stale"
-              data-confirm={"Delete all stale messages?\n\nThis will permanently delete all stale messages and their translations across all locales.\n\nThis action is irreversible."}
-              title="Delete all stale messages"
+              data-confirm={
+                Enum.join(
+                  [
+                    t("Delete all stale messages?"),
+                    "",
+                    t(
+                      "This will permanently delete all stale messages and their translations across all locales."
+                    ),
+                    "",
+                    t("This action is irreversible.")
+                  ],
+                  "\n"
+                )
+              }
+              title={t("Delete all stale messages")}
             >
-              <.icon name="delete" label="Delete all stale messages" />
+              <.icon name="delete" label={t("Delete all stale messages")} />
             </.button>
           </.card_content>
         </.card>
@@ -87,7 +113,7 @@
 
       <.card :if={length(ExLingo.config().plugins) > 0}>
         <.card_header>
-          <.card_title>Plugins</.card_title>
+          <.card_title>{t("Plugins")}</.card_title>
         </.card_header>
         <.card_content>
           <div class="grid gap-4 md:grid-cols-2">
@@ -105,13 +131,13 @@
 
       <.card>
         <.card_header>
-          <.card_title>Cache</.card_title>
-          <.card_description>Runtime translation cache entries.</.card_description>
+          <.card_title>{t("Cache")}</.card_title>
+          <.card_description>{t("Runtime translation cache entries.")}</.card_description>
         </.card_header>
         <.card_content>
           <div class="flex items-center justify-between rounded-md border border-border p-4">
             <div>
-              <p class="text-sm font-medium text-muted-foreground">Items</p>
+              <p class="text-sm font-medium text-muted-foreground">{t("Items")}</p>
               <p class="text-3xl font-semibold">{@cache_count}</p>
             </div>
             <.button
@@ -119,9 +145,9 @@
               variant="destructive"
               size="icon"
               phx-click="clear-cache"
-              data-confirm="Are you sure you want to clear the translation cache?"
+              data-confirm={t("Are you sure you want to clear the translation cache?")}
             >
-              <.icon name="delete" label="Clear translation cache" />
+              <.icon name="delete" label={t("Clear translation cache")} />
             </.button>
           </div>
         </.card_content>
@@ -130,18 +156,23 @@
 
     <.card>
       <.card_header>
-        <.card_title>Translation Progress</.card_title>
-        <.card_description>Completion status by locale.</.card_description>
+        <.card_title>{t("Translation Progress")}</.card_title>
+        <.card_description>{t("Completion status by locale.")}</.card_description>
       </.card_header>
       <.card_content>
         <ul class="space-y-4">
-          <li :for={language <- @languages} class="rounded-md border border-border p-4">
+          <li :for={language <- @languages}>
             <% progress = round(translation_progress(language) || 0) %>
-            <div class="mb-3 flex items-center justify-between gap-4">
-              <div class="min-w-0 truncate font-medium">{language.native_name}</div>
-              <div class="text-sm font-semibold text-muted-foreground">{progress}%</div>
-            </div>
-            <.progress value={progress} />
+            <.link
+              navigate={dashboard_path(@socket, "/locales/#{language.id}/translations")}
+              class="block rounded-md border border-border p-4 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            >
+              <div class="mb-3 flex items-center justify-between gap-4">
+                <div class="min-w-0 truncate font-medium">{language.native_name}</div>
+                <div class="text-sm font-semibold text-muted-foreground">{progress}%</div>
+              </div>
+              <.progress value={progress} />
+            </.link>
           </li>
         </ul>
       </.card_content>

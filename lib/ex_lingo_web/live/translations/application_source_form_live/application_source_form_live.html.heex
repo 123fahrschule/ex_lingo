@@ -3,13 +3,13 @@
     <.breadcrumb_list>
       <.breadcrumb_item>
         <.breadcrumb_link href={dashboard_path(@socket, "/application_sources")}>
-          Application Sources
+          {t("Application Sources")}
         </.breadcrumb_link>
       </.breadcrumb_item>
       <.breadcrumb_separator />
       <.breadcrumb_item>
         <.breadcrumb_page>
-          <%= if Map.has_key?(assigns, :application_source), do: "Edit", else: "New" %>
+          <%= if @editing, do: t("Edit"), else: t("New") %>
         </.breadcrumb_page>
       </.breadcrumb_item>
     </.breadcrumb_list>
@@ -17,24 +17,24 @@
 
   <.page_header
     title={
-      if Map.has_key?(assigns, :application_source),
-        do: "Update application source",
-        else: "Create application source"
+      if @editing,
+        do: t("Update application source"),
+        else: t("Create application source")
     }
     class="px-0 pt-0"
   />
 
   <.card class="max-w-3xl">
     <.card_header>
-      <.card_title>Application Source</.card_title>
+      <.card_title>{t("Application Source")}</.card_title>
       <.card_description>
-        Define the source label and color used in translation lists.
+        {t("Define the source label and color used in translation lists.")}
       </.card_description>
     </.card_header>
     <.card_content>
       <.form for={@form} phx-change="validate" phx-submit="submit" class="space-y-6">
         <.form_item>
-          <.form_label field={@form[:name]}>Name</.form_label>
+          <.form_label field={@form[:name]}>{t("Name")}</.form_label>
           <.form_control>
             <.input field={@form[:name]} type="text" />
           </.form_control>
@@ -42,30 +42,18 @@
         </.form_item>
 
         <.form_item>
-          <.form_label field={@form[:description]}>Description</.form_label>
+          <.form_label field={@form[:description]}>{t("Description")}</.form_label>
           <.form_control>
             <.textarea field={@form[:description]} rows="4" />
           </.form_control>
           <.form_message field={@form[:description]} translate={false} />
         </.form_item>
 
-        <.form_item>
-          <.form_label field={@form[:color]}>Color</.form_label>
-          <.form_control>
-            <input
-              type="color"
-              name={@form[:color].name}
-              id={@form[:color].id}
-              value={@form[:color].value}
-              class="h-9 w-full rounded-md border border-input bg-background p-1 shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            />
-          </.form_control>
-          <.form_message field={@form[:color]} translate={false} />
-        </.form_item>
+        <.color_field field={@form[:color]} />
 
         <div class="flex justify-end">
-          <.button type="submit" phx-disable-with="Saving...">
-            <.icon name="save" size="sm" decorative /> Save
+          <.button type="submit" phx-disable-with={t("Saving...")}>
+            <.icon name="save" size="sm" decorative /> {t("Save")}
           </.button>
         </div>
       </.form>

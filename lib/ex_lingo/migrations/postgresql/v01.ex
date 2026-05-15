@@ -40,9 +40,10 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
   end
 
   defp up_locales(opts) do
-    prefix = opts.prefix
+    prefix = prefix(opts)
 
-    create_if_not_exists table(@ex_lingo_locales, prefix: prefix) do
+    create_if_not_exists table(@ex_lingo_locales, prefix: prefix, primary_key: false) do
+      add(:id, :bigserial, primary_key: true)
       add(:iso639_code, :string)
       add(:name, :string)
       add(:native_name, :string)
@@ -57,9 +58,10 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
   end
 
   defp up_domains(opts) do
-    prefix = opts.prefix
+    prefix = prefix(opts)
 
-    create_if_not_exists table(@ex_lingo_domains, prefix: prefix) do
+    create_if_not_exists table(@ex_lingo_domains, prefix: prefix, primary_key: false) do
+      add(:id, :bigserial, primary_key: true)
       add(:name, :string)
       add(:description, :text)
       add(:color, :string, null: false, default: Colors.default_color())
@@ -70,9 +72,10 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
   end
 
   defp up_contexts(opts) do
-    prefix = opts.prefix
+    prefix = prefix(opts)
 
-    create_if_not_exists table(@ex_lingo_contexts, prefix: prefix) do
+    create_if_not_exists table(@ex_lingo_contexts, prefix: prefix, primary_key: false) do
+      add(:id, :bigserial, primary_key: true)
       add(:name, :string)
       add(:description, :text)
       add(:color, :string, null: false, default: Colors.default_color())
@@ -83,7 +86,8 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
   end
 
   defp up_messages(opts) do
-    prefix = Map.get(opts, :prefix, @default_prefix)
+    prefix = prefix(opts)
+    quoted_prefix = quoted_prefix(opts)
 
     create_if_not_exists_message_type_query = "
       DO $$ BEGIN
@@ -96,16 +100,17 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
     drop_message_type_query = "DROP TYPE gettext_message_type"
     execute(create_if_not_exists_message_type_query, drop_message_type_query)
 
-    create_if_not_exists table(@ex_lingo_messages, prefix: prefix) do
+    create_if_not_exists table(@ex_lingo_messages, prefix: prefix, primary_key: false) do
+      add(:id, :bigserial, primary_key: true)
       add(:msgid, :text)
       add(:message_type, :gettext_message_type, null: false)
-      add(:domain_id, references(@ex_lingo_domains, prefix: prefix), null: true)
-      add(:context_id, references(@ex_lingo_contexts, prefix: prefix), null: true)
+      add(:domain_id, references(@ex_lingo_domains, prefix: prefix, type: :bigint), null: true)
+      add(:context_id, references(@ex_lingo_contexts, prefix: prefix, type: :bigint), null: true)
       timestamps()
     end
 
     execute """
-      ALTER TABLE #{prefix}.#{@ex_lingo_messages}
+      ALTER TABLE #{quoted_prefix}.#{@ex_lingo_messages}
         ADD COLUMN IF NOT EXISTS searchable tsvector
         GENERATED ALWAYS AS (
           setweight(to_tsvector('english', coalesce(msgid, '')), 'A')
@@ -113,7 +118,7 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
     """
 
     execute """
-      CREATE INDEX IF NOT EXISTS #{@ex_lingo_messages}_searchable_idx ON #{prefix}.#{@ex_lingo_messages} USING gin(searchable);
+      CREATE INDEX IF NOT EXISTS #{@ex_lingo_messages}_searchable_idx ON #{quoted_prefix}.#{@ex_lingo_messages} USING gin(searchable);
     """
 
     create_if_not_exists unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid],
@@ -122,13 +127,17 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
   end
 
   defp up_singular_translations(opts) do
-    prefix = opts.prefix
+    prefix = prefix(opts)
 
-    create_if_not_exists table(@ex_lingo_singular_translations, prefix: prefix) do
+    create_if_not_exists table(@ex_lingo_singular_translations,
+                           prefix: prefix,
+                           primary_key: false
+                         ) do
+      add(:id, :bigserial, primary_key: true)
       add(:original_text, :text)
       add(:translated_text, :text, null: true)
-      add(:locale_id, references(@ex_lingo_locales, prefix: prefix))
-      add(:message_id, references(@ex_lingo_messages, prefix: prefix))
+      add(:locale_id, references(@ex_lingo_locales, prefix: prefix, type: :bigint))
+      add(:message_id, references(@ex_lingo_messages, prefix: prefix, type: :bigint))
       timestamps()
     end
 
@@ -138,14 +147,15 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
   end
 
   defp up_plural_translations(opts) do
-    prefix = opts.prefix
+    prefix = prefix(opts)
 
-    create_if_not_exists table(@ex_lingo_plural_translations, prefix: prefix) do
+    create_if_not_exists table(@ex_lingo_plural_translations, prefix: prefix, primary_key: false) do
+      add(:id, :bigserial, primary_key: true)
       add(:nplural_index, :integer)
       add(:original_text, :text)
       add(:translated_text, :text, null: true)
-      add(:locale_id, references(@ex_lingo_locales, prefix: prefix))
-      add(:message_id, references(@ex_lingo_messages, prefix: prefix))
+      add(:locale_id, references(@ex_lingo_locales, prefix: prefix, type: :bigint))
+      add(:message_id, references(@ex_lingo_messages, prefix: prefix, type: :bigint))
       timestamps()
     end
 
@@ -155,30 +165,38 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
                              :locale_id,
                              :message_id,
                              :nplural_index
-                           ], prefix: prefix)
+                           ],
+                           prefix: prefix
+                         )
   end
 
   defp down_locales(opts) do
-    drop table(@ex_lingo_locales, prefix: opts.prefix)
+    drop table(@ex_lingo_locales, prefix: prefix(opts))
   end
 
   defp down_domains(opts) do
-    drop table(@ex_lingo_domains, prefix: opts.prefix)
+    drop table(@ex_lingo_domains, prefix: prefix(opts))
   end
 
   defp down_contexts(opts) do
-    drop table(@ex_lingo_contexts, prefix: opts.prefix)
+    drop table(@ex_lingo_contexts, prefix: prefix(opts))
   end
 
   defp down_messages(opts) do
-    drop table(@ex_lingo_messages, prefix: opts.prefix)
+    drop table(@ex_lingo_messages, prefix: prefix(opts))
   end
 
   defp down_singular_translations(opts) do
-    drop table(@ex_lingo_singular_translations, prefix: opts.prefix)
+    drop table(@ex_lingo_singular_translations, prefix: prefix(opts))
   end
 
   defp down_plural_translations(opts) do
-    drop table(@ex_lingo_plural_translations, prefix: opts.prefix)
+    drop table(@ex_lingo_plural_translations, prefix: prefix(opts))
+  end
+
+  defp prefix(opts), do: Map.get(opts, :prefix, @default_prefix)
+
+  defp quoted_prefix(opts) do
+    Map.get(opts, :quoted_prefix, ~s("#{String.replace(prefix(opts), ~s("), ~s(""))}"))
   end
 end

@@ -5,6 +5,7 @@ defmodule ExLingo.Translations.ApplicationSources do
 
   alias ExLingo.Translations.ApplicationSource
   alias ExLingo.Repo
+  import Ecto.Query, only: [from: 2]
 
   alias ExLingo.Translations.ApplicationSources.Finders.{
     GetApplicationSource,
@@ -36,9 +37,8 @@ defmodule ExLingo.Translations.ApplicationSources do
   end
 
   def application_sources_empty? do
-    %{entries: application_sources, metadata: _application_sources_metadata} =
-      list_application_sources(page: 1, per_page: 1)
+    query = from(application_source in ApplicationSource, select: 1, limit: 1)
 
-    Enum.empty?(application_sources)
+    not Repo.get_repo().exists?(query, Repo.opts())
   end
 end

@@ -1,11 +1,14 @@
-<.page_header title="Locales" class="px-0 pt-0" />
+<.page_header title={t("Locales")} class="px-0 pt-0" />
 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
   <%= for locale <- @locales do %>
     <.card class="relative transition-colors hover:bg-muted/50">
       <.link navigate={dashboard_path(@socket, "/locales/#{locale.id}/translations")} class="block">
         <.card_content class="flex items-center gap-4 p-5">
           <div class="relative size-12 shrink-0">
-            <div class="absolute inset-0 rounded-full border border-border" style={generate_locale_gradient(locale)} />
+            <div
+              class={["absolute inset-0 rounded-full border border-border", locale_gradient_class(locale)]}
+              style={locale_gradient_vars(locale)}
+            />
             <div class="absolute inset-1 flex items-center justify-center rounded-full bg-background text-body-xs font-bold uppercase text-foreground">
               {locale.iso639_code}
             </div>

@@ -13,11 +13,8 @@ defmodule ExLingo.PoFiles.MessagesExtractor do
     otp_name = ExLingo.config().otp_name
     allowed_locales = Application.get_env(:ex_lingo, :allowed_locales)
 
-    # Construct full base path including "gettext" subdirectory
-    base_path =
-      :code.priv_dir(otp_name)
-      |> to_string()
-      |> Path.join("gettext")
+    # The configured OTP application must be loaded so :code.priv_dir/1 can find priv/gettext.
+    base_path = priv_gettext_path!(otp_name)
 
     # Pass explicitly to POFileParser
     result =
@@ -36,42 +33,66 @@ defmodule ExLingo.PoFiles.MessagesExtractor do
 
     messages
     |> Stream.map(fn
-      %Expo.Message.Singular{msgctxt: nil, msgid: msgid, msgstr: texts} ->
+      %Expo.Message.Singular{
+        msgctxt: nil,
+        msgid: msgid,
+        msgstr: texts,
+        references: references
+      } ->
         ExtractSingularTranslation.call(%{
           msgid: Enum.join(msgid),
           context_name: @default_context,
           locale_name: locale,
           domain_name: domain,
-          original_text: Enum.join(texts)
+          original_text: Enum.join(texts),
+          source_references: source_references(references)
         })
 
-      %Expo.Message.Singular{msgctxt: [msgctxt], msgid: msgid, msgstr: texts} ->
+      %Expo.Message.Singular{
+        msgctxt: [msgctxt],
+        msgid: msgid,
+        msgstr: texts,
+        references: references
+      } ->
         ExtractSingularTranslation.call(%{
           msgid: Enum.join(msgid),
           context_name: msgctxt,
           locale_name: locale,
           domain_name: domain,
-          original_text: Enum.join(texts)
+          original_text: Enum.join(texts),
+          source_references: source_references(references)
         })
 
-      %Expo.Message.Plural{msgctxt: nil, msgid_plural: msgid, msgstr: plurals_map} ->
+      %Expo.Message.Plural{
+        msgctxt: nil,
+        msgid: msgid,
+        msgstr: plurals_map,
+        references: references
+      } ->
         ExtractPluralTranslation.call(%{
           msgid: Enum.join(msgid),
           context_name: @default_context,
           locale_name: locale,
           domain_name: domain,
           plurals_map: plurals_map,
-          plurals_header: plurals_header
+          plurals_header: plurals_header,
+          source_references: source_references(references)
         })
 
-      %Expo.Message.Plural{msgctxt: [msgctxt], msgid_plural: msgid, msgstr: plurals_map} ->
+      %Expo.Message.Plural{
+        msgctxt: [msgctxt],
+        msgid: msgid,
+        msgstr: plurals_map,
+        references: references
+      } ->
         ExtractPluralTranslation.call(%{
           msgid: Enum.join(msgid),
           context_name: msgctxt,
           locale_name: locale,
           domain_name: domain,
           plurals_map: plurals_map,
-          plurals_header: plurals_header
+          plurals_header: plurals_header,
+          source_references: source_references(references)
         })
     end)
     |> Stream.filter(&(!is_nil(&1)))
@@ -85,5 +106,40 @@ defmodule ExLingo.PoFiles.MessagesExtractor do
       :error ->
         Expo.Messages.get_header(messages, "Plural-Forms") |> List.first()
     end
+  end
+
+  defp source_references(references) when is_list(references) do
+    references
+    |> List.flatten()
+    |> Enum.flat_map(fn
+      {file, line} when is_binary(file) and is_integer(line) ->
+        [%{"file" => file, "line" => line}]
+
+      {file, line} when is_binary(file) ->
+        [%{"file" => file, "line" => line}]
+
+      _other ->
+        []
+    end)
+    |> Enum.uniq()
+  end
+
+  defp source_references(_references), do: []
+
+  defp priv_gettext_path!(otp_name) do
+    case :code.priv_dir(otp_name) do
+      {:error, reason} ->
+        raise RuntimeError,
+              "could not locate priv/gettext for #{inspect(otp_name)}: #{inspect(reason)}"
+
+      path ->
+        path
+        |> to_string()
+        |> Path.join("gettext")
+    end
+  rescue
+    exception in ArgumentError ->
+      raise RuntimeError,
+            "could not locate priv/gettext for #{inspect(otp_name)}: #{Exception.message(exception)}"
   end
 end

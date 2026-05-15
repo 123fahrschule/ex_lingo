@@ -7,7 +7,7 @@ defmodule ExLingo.Utils.ModuleFolder do
   Converts a module name to a safe folder name.
 
   ## Options
-  - `:lowercase` - Set to `true` to convert to lowercase (default: `false`)
+  - `:lowercase` - Set to `true` to convert to lowercase (default: `true`)
   - `:replace_with` - Character to replace invalid chars with (default: `"_"`)
 
   ## Examples
@@ -20,14 +20,17 @@ defmodule ExLingo.Utils.ModuleFolder do
       iex> ModuleFolder.safe_folder_name("Elixir.MyApp.Module", replace_with: "-")
       "MyApp-Module"
   """
-  def safe_folder_name(module) when is_atom(module) or is_binary(module) do
-    replacement = "_"
+  def safe_folder_name(module, opts \\ []) when is_atom(module) or is_binary(module) do
+    replacement = Keyword.get(opts, :replace_with, "_")
+    lowercase? = Keyword.get(opts, :lowercase, true)
 
-    module
-    |> module_to_string()
-    |> remove_elixir_prefix()
-    |> replace_invalid_chars(replacement)
-    |> String.downcase()
+    safe_name =
+      module
+      |> module_to_string()
+      |> remove_elixir_prefix()
+      |> replace_invalid_chars(replacement)
+
+    if lowercase?, do: String.downcase(safe_name), else: safe_name
   end
 
   defp module_to_string(module) when is_atom(module), do: Atom.to_string(module)

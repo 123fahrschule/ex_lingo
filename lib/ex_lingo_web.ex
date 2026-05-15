@@ -17,6 +17,8 @@ defmodule ExLingoWeb do
   and import those modules here.
   """
 
+  require Logger
+
   def static_paths do
     ~w(assets fonts images favicon.ico favicon.svg robots.txt)
   end
@@ -33,9 +35,15 @@ defmodule ExLingoWeb do
   def controller do
     phoenix_version =
       case Application.spec(:phoenix, :vsn) do
-        vsn when is_list(vsn) -> List.to_string(vsn)
-        # default to 1.8 if version can't be determined
-        _ -> "1.8"
+        vsn when is_list(vsn) ->
+          List.to_string(vsn)
+
+        _ ->
+          Logger.warning(
+            "Application.spec(:phoenix, :vsn) returned nil; defaulting ExLingo Phoenix integration to 1.8."
+          )
+
+          "1.8"
       end
 
     if String.starts_with?(phoenix_version, "1.7") do
@@ -131,6 +139,7 @@ defmodule ExLingoWeb do
       import Phoenix.View
 
       import ExLingo.Utils.ModuleUtils
+      import ExLingoWeb.I18n
 
       use Cognit
 
@@ -157,16 +166,15 @@ defmodule ExLingoWeb do
         do: dashboard_path(socket, path)
 
       def dashboard_path(%Phoenix.LiveView.Socket{} = socket, path) do
-        unverified_path(
-          socket,
-          ExLingoWeb.Router,
-          socket.router.__ex_lingo_dashboard_prefix__() <> "/" <> path
-        )
+        path = ExLingoWeb.I18n.append_locale(path, ExLingoWeb.I18n.locale_from_socket(socket))
+        socket.router.__ex_lingo_dashboard_prefix__() <> "/" <> path
       end
 
       def dashboard_path(%Plug.Conn{} = conn, "/" <> path), do: dashboard_path(conn, path)
 
       def dashboard_path(%Plug.Conn{} = conn, path) do
+        path = ExLingoWeb.I18n.append_locale(path, ExLingoWeb.I18n.locale_from_conn(conn))
+
         unverified_path(
           conn,
           ExLingoWeb.Router,

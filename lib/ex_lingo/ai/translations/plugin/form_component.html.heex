@@ -1,14 +1,14 @@
 <div class="space-y-4">
   <%= if Enum.empty?(@provider_options) do %>
     <div class="rounded-md border border-border bg-muted p-4 text-body-sm text-muted-foreground">
-      No AI translation provider is configured.
+      {t("No AI translation provider is configured.")}
     </div>
   <% else %>
     <% provider = selected_provider(assigns) %>
     <.form for={%{}} as={:ai_suggestion} phx-submit="request_suggestion" phx-target={@myself} class="space-y-4">
       <div class="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
         <.form_item>
-          <.form_label for={"#{@id}-provider"}>Provider</.form_label>
+          <.form_label for={"#{@id}-provider"}>{t("Provider")}</.form_label>
           <select
             id={"#{@id}-provider"}
             name="ai_suggestion[provider_id]"
@@ -21,7 +21,7 @@
         </.form_item>
 
         <.form_item>
-          <.form_label for={"#{@id}-model"}>Model</.form_label>
+          <.form_label for={"#{@id}-model"}>{t("Model")}</.form_label>
           <select
             id={"#{@id}-model"}
             name="ai_suggestion[model]"
@@ -38,13 +38,17 @@
         </.form_item>
 
         <div class="flex items-end">
-          <.button type="submit" phx-disable-with="Generating...">
-            <.icon name="auto_awesome" size="sm" decorative />
-            Suggest
+          <.button type="submit" disabled={loading?(assigns)} phx-disable-with={t("Generating...")}>
+            <.icon name={if loading?(assigns), do: "hourglass_top", else: "auto_awesome"} size="sm" decorative />
+            <%= if loading?(assigns), do: t("Generating..."), else: t("Suggest") %>
           </.button>
         </div>
       </div>
     </.form>
+
+    <div :if={loading?(assigns)} class="rounded-md border border-border bg-muted p-4 text-body-sm text-muted-foreground">
+      {t("Generating suggestion...")}
+    </div>
 
     <div :if={@error} class="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-body-sm text-destructive">
       {@error}
@@ -52,17 +56,17 @@
 
     <div :if={@suggestion} class="space-y-4 rounded-md border border-border p-4">
       <div>
-        <p class="text-body-sm font-medium text-foreground">Suggestion</p>
+        <p class="text-body-sm font-medium text-foreground">{t("Suggestion")}</p>
         <p class="mt-2 whitespace-pre-wrap text-body-sm text-muted-foreground">{@suggestion}</p>
       </div>
 
       <div :if={!@adapting?} class="flex flex-wrap justify-end gap-2">
         <.button type="button" variant="outline" phx-click="adapt_suggestion" phx-target={@myself}>
-          Adapt
+          {t("Adapt")}
         </.button>
         <.button type="button" phx-click="accept_suggestion" phx-target={@myself}>
           <.icon name="check" size="sm" decorative />
-          Accept
+          {t("Accept")}
         </.button>
       </div>
 
@@ -75,7 +79,7 @@
         class="space-y-4"
       >
         <.form_item>
-          <.form_label for={"#{@id}-adapted-text"}>Adapted suggestion</.form_label>
+          <.form_label for={"#{@id}-adapted-text"}>{t("Adapted suggestion")}</.form_label>
           <.textarea
             id={"#{@id}-adapted-text"}
             name="ai_suggestion[adapted_text]"
@@ -84,9 +88,9 @@
           />
         </.form_item>
         <div class="flex justify-end">
-          <.button type="submit" phx-disable-with="Saving...">
+          <.button type="submit" phx-disable-with={t("Saving...")}>
             <.icon name="save" size="sm" decorative />
-            Save
+            {t("Save")}
           </.button>
         </div>
       </.form>

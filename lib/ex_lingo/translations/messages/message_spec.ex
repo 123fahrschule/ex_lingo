@@ -18,6 +18,7 @@ defmodule ExLingo.Translations.MessageSpec do
           id: Types.field(Types.id()),
           msgid: Types.field(String.t()),
           message_type: :singular | :plural,
+          source_references: [map()],
           application_source: Types.field(ApplicationSource.t()),
           application_source_id: Types.field(Types.id()),
           domain: Types.field(Domain.t()),

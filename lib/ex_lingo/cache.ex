@@ -12,7 +12,7 @@ defmodule ExLingo.Cache do
     Enum.reduce(params, prefix, fn {key, value}, acc ->
       case value do
         val when is_binary(val) ->
-          acc <> "_" <> to_string(key) <> "_" <> URI.encode_query(val)
+          acc <> "_" <> to_string(key) <> "_" <> URI.encode(val)
 
         val when is_list(val) ->
           # this old way is just broken for preloads lists

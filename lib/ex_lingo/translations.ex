@@ -29,16 +29,21 @@ defmodule ExLingo.Translations do
   defdelegate list_all_contexts(params \\ []), to: Contexts
   defdelegate get_context(params), to: Contexts
   defdelegate create_context(params, opts \\ []), to: Contexts
+  defdelegate update_context(context, attrs, opts \\ []), to: Contexts
+  defdelegate change_context(context, params \\ %{}), to: Contexts
 
   # DOMAINS
   defdelegate list_domains(params \\ []), to: Domains
   defdelegate list_all_domains(params \\ []), to: Domains
   defdelegate get_domain(params \\ []), to: Domains
   defdelegate create_domain(attrs, opts \\ []), to: Domains
+  defdelegate update_domain(domain, attrs, opts \\ []), to: Domains
+  defdelegate change_domain(domain, params \\ %{}), to: Domains
 
   # GLOSSARY ENTRIES
   defdelegate list_glossary_entries(params \\ []), to: GlossaryEntries
   defdelegate list_all_glossary_entries(params \\ []), to: GlossaryEntries
+  defdelegate list_matching_glossary_entries(params \\ []), to: GlossaryEntries
   defdelegate get_glossary_entry(params), to: GlossaryEntries
   defdelegate create_glossary_entry(attrs, opts \\ []), to: GlossaryEntries
   defdelegate update_glossary_entry(glossary_entry, attrs, opts \\ []), to: GlossaryEntries
@@ -51,6 +56,7 @@ defmodule ExLingo.Translations do
   defdelegate get_message(params \\ []), to: Messages
   defdelegate get_messages_count(), to: Messages
   defdelegate create_message(attrs, opts \\ []), to: Messages
+  defdelegate update_message(message, attrs, opts \\ []), to: Messages
   defdelegate delete_message(message_id), to: Messages
   defdelegate delete_messages(message_ids), to: Messages
   defdelegate merge_messages(from_message_id, to_message_id), to: Messages

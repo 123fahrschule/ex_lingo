@@ -2,8 +2,19 @@ defmodule ExLingoWeb.APIAuthPlug do
   @moduledoc false
 
   import Plug.Conn
+  require Logger
 
   @ex_lingo_secret_token "EX_LINGO_SECRET_TOKEN"
+
+  def warn_if_secret_missing(%{disable_api_authorization: false}) do
+    if is_nil(System.get_env(@ex_lingo_secret_token)) do
+      Logger.warning(
+        "[ExLingo] API authorization is enabled, but #{@ex_lingo_secret_token} is not set."
+      )
+    end
+  end
+
+  def warn_if_secret_missing(_config), do: :ok
 
   def init(_opts), do: %{}
 
@@ -30,14 +41,15 @@ defmodule ExLingoWeb.APIAuthPlug do
   end
 
   defp secret_token_matching?(token) do
-    secret_token_env =
-      @ex_lingo_secret_token
-      |> System.get_env()
+    secret_token_env = System.get_env(@ex_lingo_secret_token)
 
-    if is_nil(secret_token_env) do
-      false
+    with true <- is_binary(secret_token_env),
+         true <- is_binary(token),
+         expected <- sha256(secret_token_env),
+         true <- byte_size(expected) == byte_size(token) do
+      Plug.Crypto.secure_compare(expected, token)
     else
-      sha256(secret_token_env) == token
+      _ -> false
     end
   end
 

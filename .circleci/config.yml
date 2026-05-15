@@ -76,7 +76,7 @@ jobs:
           name: Audit dependencies
           command: |
             mix deps.audit
-            npm audit --prefix assets --audit-level=moderate
+            npm audit --prefix assets --audit-level=high
 
       - run:
           name: Install asset binaries

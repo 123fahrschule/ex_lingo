@@ -5,7 +5,7 @@ defmodule ExLingo.Translations.ApplicationSources.Finders.GetApplicationSource d
 
   use ExLingo.Query,
     module: ExLingo.Translations.ApplicationSource,
-    binding: :domain
+    binding: :application_source
 
   alias ExLingo.Cache
   alias ExLingo.Translations.ApplicationSource

@@ -157,10 +157,10 @@ defmodule ExLingo.PoFiles.POFileParser do
       %Expo.Message.Singular{msgid: msgid, msgctxt: [ctx]} ->
         {Enum.join(msgid), domain, ctx}
 
-      %Expo.Message.Plural{msgid_plural: msgid, msgctxt: nil} ->
+      %Expo.Message.Plural{msgid: msgid, msgctxt: nil} ->
         {Enum.join(msgid), domain, @default_context}
 
-      %Expo.Message.Plural{msgid_plural: msgid, msgctxt: [ctx]} ->
+      %Expo.Message.Plural{msgid: msgid, msgctxt: [ctx]} ->
         {Enum.join(msgid), domain, ctx}
     end
   end

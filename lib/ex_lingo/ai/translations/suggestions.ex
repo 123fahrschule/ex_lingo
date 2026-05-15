@@ -129,12 +129,19 @@ defmodule ExLingo.AI.Translations.Suggestions do
   defp plural_examples(_locale, %SingularTranslation{}), do: nil
   defp plural_examples(_locale, nil), do: nil
 
-  defp plural_examples(locale, %PluralTranslation{nplural_index: index}) do
-    forms_struct = Expo.PluralForms.parse!(locale.plurals_header)
+  defp plural_examples(%{plurals_header: plurals_header}, %PluralTranslation{nplural_index: index})
+       when is_binary(plurals_header) do
+    case Expo.PluralForms.parse(plurals_header) do
+      {:ok, forms_struct} ->
+        0..100
+        |> Enum.group_by(&Expo.PluralForms.index(forms_struct, &1), & &1)
+        |> Map.get(index, [])
+        |> Enum.join(", ")
 
-    0..100
-    |> Enum.group_by(&Expo.PluralForms.index(forms_struct, &1), & &1)
-    |> Map.get(index, [])
-    |> Enum.join(", ")
+      _error ->
+        ""
+    end
   end
+
+  defp plural_examples(_locale, %PluralTranslation{}), do: ""
 end

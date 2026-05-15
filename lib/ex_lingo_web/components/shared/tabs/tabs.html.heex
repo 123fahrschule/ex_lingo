@@ -7,7 +7,7 @@
             value={to_string(tab.index)}
             phx-click="tab_clicked"
             phx-target={@myself}
-            phx-value-index={tab.index}
+            phx-value-index={to_string(tab.index)}
             class="min-w-32"
           >
             {tab.label}

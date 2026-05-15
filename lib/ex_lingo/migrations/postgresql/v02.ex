@@ -18,12 +18,12 @@ defmodule ExLingo.Migrations.Postgresql.V02 do
   end
 
   def up_fuzzy_search(opts) do
-    prefix = Map.get(opts, :prefix, @default_prefix)
+    quoted_prefix = quoted_prefix(opts)
 
     [@ex_lingo_plural_translations, @ex_lingo_singular_translations]
     |> Enum.each(fn table_name ->
       execute """
-        ALTER TABLE #{prefix}.#{table_name}
+        ALTER TABLE #{quoted_prefix}.#{table_name}
           ADD COLUMN IF NOT EXISTS searchable tsvector
           GENERATED ALWAYS AS (
             setweight(to_tsvector('simple', coalesce(translated_text, '')), 'A')
@@ -31,14 +31,31 @@ defmodule ExLingo.Migrations.Postgresql.V02 do
       """
 
       execute """
-        CREATE INDEX IF NOT EXISTS #{table_name}_searchable_idx ON #{prefix}.#{table_name} USING gin(searchable);
+        CREATE INDEX IF NOT EXISTS #{table_name}_searchable_idx ON #{quoted_prefix}.#{table_name} USING gin(searchable);
       """
     end)
 
     execute("CREATE EXTENSION IF NOT EXISTS unaccent;")
   end
 
-  def down_fuzzy_search(_opts) do
+  def down_fuzzy_search(opts) do
+    quoted_prefix = quoted_prefix(opts)
+
+    [@ex_lingo_plural_translations, @ex_lingo_singular_translations]
+    |> Enum.each(fn table_name ->
+      execute "DROP INDEX IF EXISTS #{quoted_prefix}.#{table_name}_searchable_idx;"
+
+      execute """
+        ALTER TABLE #{quoted_prefix}.#{table_name}
+          DROP COLUMN IF EXISTS searchable;
+      """
+    end)
+
     execute("DROP EXTENSION IF EXISTS unaccent;")
+  end
+
+  defp quoted_prefix(opts) do
+    prefix = Map.get(opts, :prefix, @default_prefix)
+    Map.get(opts, :quoted_prefix, ~s("#{String.replace(prefix, ~s("), ~s(""))}"))
   end
 end

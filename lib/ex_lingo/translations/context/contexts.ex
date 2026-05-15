@@ -24,4 +24,14 @@ defmodule ExLingo.Translations.Contexts do
     |> Context.changeset(attrs)
     |> Repo.get_repo().insert(Repo.opts(opts))
   end
+
+  def update_context(%Context{} = context, attrs, opts \\ []) do
+    context
+    |> Context.changeset(attrs)
+    |> Repo.get_repo().update(Repo.opts(opts))
+  end
+
+  def change_context(%Context{} = context, params \\ %{}) do
+    Context.changeset(context, params)
+  end
 end

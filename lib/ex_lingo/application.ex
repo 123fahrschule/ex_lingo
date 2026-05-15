@@ -9,7 +9,8 @@ defmodule ExLingo.Application do
   def start(_type, _args) do
     children = [
       ExLingo.Registry,
-      ExLingo.Cache
+      ExLingo.Cache,
+      {Finch, name: ExLingo.Finch}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

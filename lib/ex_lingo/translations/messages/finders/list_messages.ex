@@ -11,6 +11,7 @@ defmodule ExLingo.Translations.Messages.Finders.ListMessages do
   alias ExLingo.Translations.SingularTranslations.Finders.ListSingularTranslations
 
   @available_filters ~w(domain_id context_id application_source_id)
+  @sortable_fields ~w(msgid message_type)
 
   def find(params \\ []) do
     filters = params[:filter] || %{}
@@ -21,9 +22,27 @@ defmodule ExLingo.Translations.Messages.Finders.ListMessages do
     |> not_translated_query(filters)
     |> stale_query(filters)
     |> search_subquery(filters, params[:search])
+    |> sort_query(params[:sort])
     |> distinct(true)
     |> preload_resources(params[:preloads] || [])
     |> paginate(params[:page], params[:per_page])
+  end
+
+  defp sort_query(query, %{"field" => field, "direction" => direction})
+       when field in @sortable_fields and direction in ["asc", "desc"] do
+    sort_field = String.to_existing_atom(field)
+    sort_direction = String.to_existing_atom(direction)
+
+    query
+    |> exclude(:order_by)
+    |> order_by([message: message], [
+      {^sort_direction, field(message, ^sort_field)},
+      asc: message.id
+    ])
+  end
+
+  defp sort_query(query, _sort) do
+    order_by(query, [message: message], asc: message.msgid, asc: message.id)
   end
 
   defp not_translated_query(query, %{"locale_id" => locale_id, "not_translated" => "true"}) do

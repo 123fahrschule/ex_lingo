@@ -1,7 +1,7 @@
 <.breadcrumb>
   <.breadcrumb_list>
     <.breadcrumb_item>
-      <.breadcrumb_link href={dashboard_path(@socket, "/locales")}>Locales</.breadcrumb_link>
+      <.breadcrumb_link href={dashboard_path(@socket, "/locales")}>{t("Locales")}</.breadcrumb_link>
     </.breadcrumb_item>
     <.breadcrumb_separator />
     <.breadcrumb_item>
@@ -10,8 +10,53 @@
   </.breadcrumb_list>
 </.breadcrumb>
 <.page_header title={@locale.native_name} class="px-0" />
-<div class="space-y-4">
+<div
+  id={"ex-lingo-translations-list-#{@locale.id}"}
+  class="space-y-4"
+  phx-hook="ExLingoListContext"
+  data-storage-key={@list_context_storage_key}
+  data-list-context={Jason.encode!(@list_context_payload || %{})}
+  data-context-prefixes={Jason.encode!(@list_context_prefixes || [])}
+>
   <.live_component module={FiltersBar} filters={@filters} not_translated_default={@not_translated_default} stale_default={@stale_default} application_sources_empty?={@application_sources_empty?} locale_id={@locale.id} id="filters-bar" />
-  <.live_component module={MessagesTable} messages={@messages} filters={@filters} locale={@locale} application_sources_empty?={@application_sources_empty?} stale_message_ids={@stale_message_ids} fuzzy_matches={@fuzzy_matches} id="messages-table" />
+  <.live_component module={MessagesTable} messages={@messages} filters={@filters} sort={@sort} locale={@locale} application_sources_empty?={@application_sources_empty?} stale_message_ids={@stale_message_ids} fuzzy_matches={@fuzzy_matches} highlighted_message_id={@highlighted_message_id} id="messages-table" />
   <Pagination.render metadata={@messages_metadata} on_page_change="page_changed" />
 </div>
+
+<.sheet :if={@editing_message} id="translation-editor-sheet" open={true} on-close="close_translation">
+  <.sheet_content side="right" size="lg" class="w-full overflow-hidden">
+    <.sheet_header class="pr-8">
+      <.sheet_title class="text-h3">
+        {t("Translate to %{locale}", locale: @locale.native_name)}
+      </.sheet_title>
+    </.sheet_header>
+
+    <div class="mt-3 flex-1 overflow-y-auto pr-1">
+      <.live_component
+        :if={@editing_message.message_type == :singular}
+        module={SingularTranslationForm}
+        id={"inline-singular-translation-form-#{@editing_message.id}"}
+        translation={@editing_translations}
+        message={@editing_message}
+        locale={@locale}
+        filters={@filters}
+        mode={:sheet}
+        return_to={:parent}
+      />
+      <.live_component
+        :if={@editing_message.message_type == :plural}
+        module={PluralTranslationForm}
+        id={"inline-plural-translation-form-#{@editing_message.id}"}
+        translations={@editing_translations}
+        message={@editing_message}
+        locale={@locale}
+        current_tab={@editing_tab}
+        current_tab_index={@editing_current_tab_index}
+        current_url={@editing_current_url}
+        filters={@filters}
+        mode={:sheet}
+        return_to={:parent}
+      />
+    </div>
+  </.sheet_content>
+</.sheet>

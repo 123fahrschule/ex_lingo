@@ -1,32 +1,41 @@
-<.table_container class="py-6">
-  <.table aria-label="Contexts">
-    <.table_header>
-      <.table_row>
-        <.table_head>Name</.table_head>
-        <.table_head>Description</.table_head>
-        <.table_head>Color</.table_head>
-      </.table_row>
-    </.table_header>
-    <.table_body>
-      <.table_row
-        :for={context <- @contexts}
-        class="cursor-pointer"
-        phx-click="edit_context"
-        phx-value-id={context.id}
-        phx-target={@myself}
-      >
-        <.table_cell class="font-medium text-foreground">
-          {String.slice(context.name, 0..30)}
-        </.table_cell>
-        <.table_cell class="text-muted-foreground">
-          {context.description}
-        </.table_cell>
-        <.table_cell>
-          <.badge class="border-border text-primary-foreground" style={"background-color:#{context.color};"}>
-            {context.color}
-          </.badge>
-        </.table_cell>
-      </.table_row>
-    </.table_body>
-  </.table>
-</.table_container>
+<div>
+  <.table_container class="py-6">
+    <.table aria-label={t("Contexts")}>
+      <.table_header>
+        <.table_row>
+          <.sortable_table_head field="name" sort={assigns[:sort] || %{}}>{t("Name")}</.sortable_table_head>
+          <.sortable_table_head field="description" sort={assigns[:sort] || %{}}>
+            {t("Description")}
+          </.sortable_table_head>
+          <.sortable_table_head field="color" sort={assigns[:sort] || %{}}>{t("Color")}</.sortable_table_head>
+        </.table_row>
+      </.table_header>
+      <.table_body>
+        <.table_row
+          :for={context <- @contexts}
+          class="cursor-pointer"
+          phx-click="edit_context"
+          phx-value-id={context.id}
+        >
+          <.table_cell class="font-medium text-foreground">
+            {truncate_name(context.name)}
+          </.table_cell>
+          <.table_cell class="text-muted-foreground">
+            <%= if present?(context.description) do %>
+              {context.description}
+            <% end %>
+          </.table_cell>
+          <.table_cell>
+            <.badge
+              :if={present?(context.color)}
+              class="border-border text-primary-foreground"
+              style={"background-color:#{context.color};"}
+            >
+              {context.color}
+            </.badge>
+          </.table_cell>
+        </.table_row>
+      </.table_body>
+    </.table>
+  </.table_container>
+</div>

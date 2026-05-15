@@ -28,5 +28,7 @@ defmodule ExLingo.Migrations.Postgresql.V04 do
     """)
   end
 
+  # This is an intentionally one-way data migration. Reverting would require
+  # restoring the previous null context assignments from a backup.
   def down(_opts), do: nil
 end

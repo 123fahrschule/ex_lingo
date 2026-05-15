@@ -23,6 +23,7 @@ defmodule ExLingo.AI.Translations.Plugin.FormComponent do
       |> assign_new(:suggestion, fn -> nil end)
       |> assign_new(:adapted_text, fn -> nil end)
       |> assign_new(:adapting?, fn -> false end)
+      |> assign_new(:loading?, fn -> false end)
       |> assign_new(:error, fn -> nil end)
 
     {:ok, socket}
@@ -32,43 +33,41 @@ defmodule ExLingo.AI.Translations.Plugin.FormComponent do
     provider_id = Map.get(params, "provider_id")
     model = Map.get(params, "model")
 
-    result =
-      Suggestions.suggest(
-        socket.assigns.message,
-        socket.assigns.locale,
-        socket.assigns.translation,
-        provider_id: provider_id,
-        source_locale: socket.assigns.source_locale,
-        model: model
-      )
+    message = socket.assigns.message
+    locale = socket.assigns.locale
+    translation = socket.assigns.translation
+    source_locale = socket.assigns.source_locale
 
     socket =
-      case result do
-        {:ok, suggestion} ->
-          socket
-          |> assign(:suggestion, suggestion)
-          |> assign(:adapted_text, suggestion)
-          |> assign(:adapting?, false)
-          |> assign(:error, nil)
-          |> assign(:selected_provider_id, provider_id)
-          |> assign(:selected_model, model)
-
-        {:error, reason} ->
-          socket
-          |> assign(:error, error_message(reason))
-          |> assign(:selected_provider_id, provider_id)
-          |> assign(:selected_model, model)
-      end
+      socket
+      |> assign(:loading?, true)
+      |> assign(:error, nil)
+      |> assign(:selected_provider_id, provider_id)
+      |> assign(:selected_model, model)
+      |> start_async(:ai_suggestion, fn ->
+        Suggestions.suggest(
+          message,
+          locale,
+          translation,
+          provider_id: provider_id,
+          source_locale: source_locale,
+          model: model
+        )
+      end)
 
     {:noreply, socket}
+  end
+
+  def handle_event("request_suggestion", _params, socket) do
+    {:noreply, assign(socket, :error, t("Invalid AI suggestion form data."))}
   end
 
   def handle_event("accept_suggestion", _params, %{assigns: %{suggestion: suggestion}} = socket)
       when is_binary(suggestion) do
     socket =
       case Suggestions.accept_suggestion(socket.assigns.translation, suggestion) do
-        {:ok, _translation} ->
-          push_navigate(socket, to: translation_path(socket))
+        {:ok, translation} ->
+          after_accept(socket, translation)
 
         {:error, reason} ->
           assign(socket, :error, error_message(reason))
@@ -88,8 +87,8 @@ defmodule ExLingo.AI.Translations.Plugin.FormComponent do
       ) do
     socket =
       case Suggestions.accept_suggestion(socket.assigns.translation, text) do
-        {:ok, _translation} ->
-          push_navigate(socket, to: translation_path(socket))
+        {:ok, translation} ->
+          after_accept(socket, translation)
 
         {:error, reason} ->
           assign(socket, :error, error_message(reason))
@@ -98,22 +97,65 @@ defmodule ExLingo.AI.Translations.Plugin.FormComponent do
     {:noreply, socket}
   end
 
+  def handle_async(:ai_suggestion, {:ok, {:ok, suggestion}}, socket) do
+    socket =
+      socket
+      |> assign(:suggestion, suggestion)
+      |> assign(:adapted_text, suggestion)
+      |> assign(:adapting?, false)
+      |> assign(:loading?, false)
+      |> assign(:error, nil)
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:ai_suggestion, {:ok, {:error, reason}}, socket) do
+    {:noreply,
+     socket
+     |> assign(:loading?, false)
+     |> assign(:error, error_message(reason))}
+  end
+
+  def handle_async(:ai_suggestion, {:exit, reason}, socket) do
+    {:noreply,
+     socket
+     |> assign(:loading?, false)
+     |> assign(:error, error_message(reason))}
+  end
+
   def selected_provider(assigns) do
     Enum.find(assigns.provider_options, &(&1.id == assigns.selected_provider_id)) ||
       List.first(assigns.provider_options)
   end
 
-  def error_message(:provider_not_configured), do: "No AI translation provider is configured."
+  def error_message(:provider_not_configured), do: t("No AI translation provider is configured.")
 
   def error_message({:invalid_provider, provider}),
-    do: "Invalid AI provider: #{inspect(provider)}."
+    do: t("Invalid AI provider: %{provider}.", provider: inspect(provider))
 
-  def error_message({:missing_api_key, _provider}), do: "The AI provider API key is missing."
+  def error_message({:missing_api_key, _provider}), do: t("The AI provider API key is missing.")
 
   def error_message({:invalid_model, model}),
-    do: "Model #{model} is not allowed for this provider."
+    do: t("Model %{model} is not allowed for this provider.", model: model)
 
-  def error_message(reason), do: "Could not generate a suggestion: #{inspect(reason)}"
+  def error_message(reason),
+    do: t("Could not generate a suggestion: %{reason}", reason: inspect(reason))
+
+  def loading?(assigns), do: Map.get(assigns, :loading?, false)
+
+  defp after_accept(%{assigns: %{return_to: :parent}} = socket, translation) do
+    send(self(), {:ai_suggestion_accepted, socket.assigns.message.id})
+
+    socket
+    |> assign(:translation, translation)
+    |> assign(:suggestion, nil)
+    |> assign(:adapted_text, nil)
+    |> assign(:adapting?, false)
+  end
+
+  defp after_accept(socket, _translation) do
+    push_navigate(socket, to: translation_path(socket))
+  end
 
   defp translation_path(socket) do
     message = socket.assigns.message
@@ -122,10 +164,12 @@ defmodule ExLingo.AI.Translations.Plugin.FormComponent do
 
     path = "/locales/#{locale.id}/translations/#{message.id}"
 
-    if Map.has_key?(translation, :nplural_index) do
-      dashboard_path(socket, path <> "?tab=#{translation.nplural_index + 1}")
-    else
-      dashboard_path(socket, path)
+    case translation do
+      %{nplural_index: index} when is_integer(index) ->
+        dashboard_path(socket, path <> "?tab=#{index + 1}")
+
+      _translation ->
+        dashboard_path(socket, path)
     end
   end
 end

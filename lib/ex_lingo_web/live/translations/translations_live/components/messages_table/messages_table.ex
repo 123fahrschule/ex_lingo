@@ -6,46 +6,27 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
   use ExLingoWeb, :live_component
 
   require Logger
+  import ExLingo.Utils.ParamParsers, only: [parse_id_filter: 1]
 
   alias ExLingo.Translations.{Message, SingularTranslation}
 
-  @available_params ~w(page search filter)
-  @params_in_filter ~w(domain_id context_id not_translated stale)
-
-  def update(socket, assigns) do
-    {:ok, assign(assigns, socket)}
+  def update(assigns, socket) do
+    {:ok, assign(socket, assigns)}
   end
 
   def message_stale?(message, stale_message_ids) do
     MapSet.member?(stale_message_ids, message.id)
   end
 
-  def handle_event("edit_message", %{"id" => id}, socket) do
-    params = get_filter_params_from_assigns(socket.assigns)
-    query = UriQuery.params(params)
-
-    {:noreply,
-     push_navigate(socket,
-       to:
-         dashboard_path(
-           socket,
-           "/locales/#{socket.assigns.locale.id}/translations/#{id}?" <>
-             URI.encode_query(query)
-         )
-     )}
-  end
-
   def handle_event("delete_stale", %{"message-id" => message_id}, socket) do
-    message_id = String.to_integer(message_id)
-
-    case ExLingo.Translations.delete_message(message_id) do
-      {:ok, _stats} ->
-        send(self(), :refresh_messages)
-        {:noreply, socket}
-
-      {:error, reason} ->
-        Logger.error("Failed to delete: #{inspect(reason)}")
-        {:noreply, socket}
+    with {:ok, message_id} <- parse_id_filter(message_id),
+         {:ok, _stats} <- ExLingo.Translations.delete_message(message_id) do
+      send(self(), :refresh_messages)
+      {:noreply, socket}
+    else
+      error ->
+        Logger.error("Failed to delete stale message: #{inspect(error)}")
+        {:noreply, put_flash(socket, :error, t("Failed to delete stale message."))}
     end
   end
 
@@ -54,17 +35,16 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
         %{"from-id" => from_id, "to-id" => to_id},
         socket
       ) do
-    from_message_id = String.to_integer(from_id)
-    to_message_id = String.to_integer(to_id)
-
-    case ExLingo.Translations.merge_messages(from_message_id, to_message_id) do
-      {:ok, _target_message} ->
-        notify_parent_refresh()
-        {:noreply, socket}
-
-      {:error, reason} ->
-        Logger.error("Failed to merge messages: #{inspect(reason)}")
-        {:noreply, socket}
+    with {:ok, from_message_id} <- parse_id_filter(from_id),
+         {:ok, to_message_id} <- parse_id_filter(to_id),
+         {:ok, _target_message} <-
+           ExLingo.Translations.merge_messages(from_message_id, to_message_id) do
+      notify_parent_refresh()
+      {:noreply, socket}
+    else
+      error ->
+        Logger.error("Failed to merge messages: #{inspect(error)}")
+        {:noreply, put_flash(socket, :error, t("Failed to merge messages."))}
     end
   end
 
@@ -88,9 +68,13 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
         false
 
       translations ->
-        translations
-        |> Enum.map(&plural_form_translated?(&1, source))
+        Enum.all?(translations, &plural_form_translated?(&1, source))
     end
+  end
+
+  def highlighted_message?(message, highlighted_message_id) do
+    not is_nil(highlighted_message_id) and
+      to_string(message.id) == to_string(highlighted_message_id)
   end
 
   defp plural_form_translated?(translation, source) do
@@ -179,21 +163,6 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
 
   defp truncate_translation(text) do
     if String.length(text) > 45, do: String.slice(text, 0..45) <> "... ", else: text
-  end
-
-  defp get_filter_params_from_assigns(%{filters: filters}) do
-    filter =
-      filters
-      |> Map.take(@params_in_filter)
-      |> Map.reject(fn {_, value} -> is_nil(value) or value == "" end)
-
-    params =
-      filters
-      |> Map.take(@available_params)
-      |> Map.put("filter", filter)
-      |> Map.reject(fn {_, value} -> is_nil(value) or value == "" end)
-
-    %{"filters" => params}
   end
 
   defp notify_parent_refresh do

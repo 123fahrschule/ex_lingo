@@ -4,8 +4,6 @@ defmodule ExLingoWeb.Api.ExLingoApiController do
   plug :put_layout, false
 
   def index(conn, _params) do
-    conn
-    |> put_status(200)
-    |> json(%{status: "OK"})
+    json(conn, %{status: "OK"})
   end
 end

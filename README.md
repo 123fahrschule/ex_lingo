@@ -183,7 +183,7 @@ mix ecto.gen.migration add_ex_lingo_translations_table
 Open the generated migration file and set up `up` and `down` functions.
 
 **Current Migration Versions:**
-- PostgreSQL: **v5** (adds translation glossary support)
+- PostgreSQL: **v6** (adds PO source references on messages)
 
 If you're upgrading from an earlier version of ExLingo, update your migration version to the latest.
 
@@ -194,7 +194,7 @@ defmodule MyApp.Repo.Migrations.AddExLingoTranslationsTable do
   use Ecto.Migration
 
   def up do
-    ExLingo.Migration.up(version: 5)
+    ExLingo.Migration.up(version: 6)
   end
 
   # We specify `version: 1` because we want to rollback all the way down including the first migration.
@@ -210,7 +210,7 @@ To use a dedicated PostgreSQL schema, pass the same prefix to the migration and 
 
 ```elixir
 # migration
-def up, do: ExLingo.Migration.up(version: 5, prefix: "ex_lingo")
+def up, do: ExLingo.Migration.up(version: 6, prefix: "ex_lingo")
 def down, do: ExLingo.Migration.down(version: 1, prefix: "ex_lingo")
 
 # config/config.exs
@@ -225,7 +225,7 @@ config :my_app, ExLingo,
 If your database user is not allowed to create schemas and the schema is managed externally, disable automatic schema creation explicitly:
 
 ```elixir
-def up, do: ExLingo.Migration.up(version: 5, prefix: "ex_lingo", create_schema: false)
+def up, do: ExLingo.Migration.up(version: 6, prefix: "ex_lingo", create_schema: false)
 ```
 
 After that run:
@@ -291,6 +291,10 @@ scope "/" do
 end
 ```
 
+The dashboard serves its own compiled CSS, JavaScript, favicon, and font assets
+from the mounted dashboard path. Host applications do not need to add ExLingo
+templates to their Tailwind `content` list; mounting the router macro is enough.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Features
@@ -300,6 +304,10 @@ end
 ![Messages](assets/images/readme/messages.png)
 
 ExLingo is based on the Phoenix Framework's default localization tool, GNU gettext. The process, which runs at application startup, analyzes .po files with messages and converts them to a format for convenient use with Ecto and ExLingo itself.
+
+When PO files contain existing `msgstr` translations, ExLingo seeds the editable
+database translation from that value on first import. Existing ExLingo edits are
+kept and are not overwritten by later PO-file scans.
 
 ### Storing messages in the database
 

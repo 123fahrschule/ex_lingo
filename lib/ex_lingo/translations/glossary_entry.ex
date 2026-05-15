@@ -11,6 +11,7 @@ defmodule ExLingo.Translations.GlossaryEntry do
   @required_fields ~w(source_locale target_locale source_term target_term)a
   @optional_fields ~w(usage_guidance domain_id context_id application_source_id)a
   @relations ~w(domain context application_source)a
+  @locale_format ~r/^[a-z]{2}(?:[_-][a-z]+)?$/
 
   @type t :: %__MODULE__{}
 
@@ -38,8 +39,14 @@ defmodule ExLingo.Translations.GlossaryEntry do
     |> validate_required(@required_fields)
     |> validate_length(:source_locale, min: 2, max: 16)
     |> validate_length(:target_locale, min: 2, max: 16)
-    |> validate_length(:source_term, min: 1)
-    |> validate_length(:target_term, min: 1)
+    |> validate_format(:source_locale, @locale_format,
+      message: "must be a locale code like en or en-us"
+    )
+    |> validate_format(:target_locale, @locale_format,
+      message: "must be a locale code like en or en-us"
+    )
+    |> validate_length(:source_term, min: 1, max: 255)
+    |> validate_length(:target_term, min: 1, max: 255)
     |> foreign_key_constraint(:domain_id)
     |> foreign_key_constraint(:context_id)
     |> foreign_key_constraint(:application_source_id)

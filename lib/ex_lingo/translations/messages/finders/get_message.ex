@@ -55,7 +55,7 @@ defmodule ExLingo.Translations.Messages.Finders.GetMessage do
          repo_opts,
          Ecto.Adapters.Postgres
        ) do
-    if public_prefix?(repo_opts) do
+    if public_prefix?(repo_opts) or not public_prefix_migrated?() do
       result
     else
       opts = Keyword.put(repo_opts, :prefix, "public")
@@ -69,5 +69,12 @@ defmodule ExLingo.Translations.Messages.Finders.GetMessage do
     config_prefix = Repo.configured_prefix() || :unset
     opts_prefix = Keyword.get(repo_opts, :prefix, :unset)
     config_prefix in [nil, "public"] or opts_prefix in [nil, "public"]
+  end
+
+  defp public_prefix_migrated? do
+    Postgresql.migrated_version(%{
+      repo: Repo.get_repo(),
+      prefix: "public"
+    }) > 0
   end
 end

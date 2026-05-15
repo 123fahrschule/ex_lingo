@@ -3,6 +3,7 @@ defmodule ExLingoWeb.Translations.ApplicationSourceFormLive do
 
   alias ExLingo.Translations
   alias ExLingo.Translations.ApplicationSource
+  import ExLingoWeb.Translations.Components.ColorField, only: [color_field: 1]
 
   def mount(%{"id" => application_source_id}, _session, socket) do
     socket =
@@ -16,6 +17,7 @@ defmodule ExLingoWeb.Translations.ApplicationSourceFormLive do
           socket
           |> assign(:form, to_form(form))
           |> assign(:application_source, application_source)
+          |> assign(:editing, true)
       end
 
     {:ok, socket}
@@ -23,14 +25,18 @@ defmodule ExLingoWeb.Translations.ApplicationSourceFormLive do
 
   def mount(_params, _session, socket) do
     form = Translations.change_application_source(%ApplicationSource{})
-    socket = assign(socket, :form, to_form(form))
+
+    socket =
+      socket
+      |> assign(:form, to_form(form))
+      |> assign(:editing, false)
 
     {:ok, socket}
   end
 
   def handle_event("validate", %{"application_source" => attrs}, socket) do
     {action, application_source} =
-      if Map.has_key?(socket.assigns, :application_source) do
+      if socket.assigns.editing do
         {:update, socket.assigns.application_source}
       else
         {:insert, %ApplicationSource{}}

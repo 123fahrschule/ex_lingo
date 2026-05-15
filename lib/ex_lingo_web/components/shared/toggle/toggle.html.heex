@@ -1,6 +1,6 @@
 <div id={"#{@id}-wrapper"} class="flex items-center gap-3">
-  <.switch id={@id} name={@field.name} checked={@default_value} />
-  <Cognit.Label.label for={"#{@id}-input"} class="text-body-sm">
+  <.switch id={@switch_id} name={@field.name} checked={@checked} />
+  <Cognit.Label.label for={"#{@switch_id}-input"} class="text-body-sm">
     {@label}
   </Cognit.Label.label>
 </div>

@@ -6,15 +6,19 @@ defmodule ExLingoWeb.Translations.PluralTranslationForm do
   use ExLingoWeb, :live_component
 
   alias ExLingo.Translations
+  alias ExLingo.Utils.ModuleUtils
   alias ExLingoWeb.Components.Shared.Tabs
+  import ExLingoWeb.Translations.MessageMetadata, only: [message_metadata: 1]
 
   def update(assigns, socket) do
+    valid_plugins = valid_plugins()
+
     tabs =
       Enum.map(
         assigns.translations,
         &%{
           index: &1.nplural_index + 1,
-          label: "Form #{&1.nplural_index + 1}"
+          label: t("Form %{number}", number: &1.nplural_index + 1)
         }
       )
 
@@ -34,47 +38,90 @@ defmodule ExLingoWeb.Translations.PluralTranslationForm do
 
     socket =
       socket
+      |> assign(:mode, Map.get(assigns, :mode, :page))
+      |> assign(:current_url, Map.get(assigns, :current_url))
       |> assign(:tabs, tabs)
       |> assign(:translation, translation)
       |> assign(:form, form)
+      |> assign(:valid_plugins, valid_plugins)
 
     {:ok, assign(socket, assigns)}
   end
 
   def handle_event("validate", attrs, socket) do
-    [translated] = attrs |> Map.drop(["_target"]) |> Map.values()
+    translated =
+      attrs
+      |> Map.drop(["_target"])
+      |> Enum.find_value("", fn
+        {"translated_text" <> _suffix, value} -> value
+        {_key, value} -> value
+      end)
 
     {:noreply, update(socket, :form, &Map.merge(&1, %{"translated_text" => translated}))}
   end
 
   def handle_event("submit", attrs, socket) do
     locale = socket.assigns.locale
-    ["translated_text." <> nplural_index] = Map.keys(attrs)
-    [translated] = Map.values(attrs)
 
-    translation =
-      Enum.find(
-        socket.assigns.translations,
-        &(&1.nplural_index == String.to_integer(nplural_index))
-      )
+    with {key, translated} <- translated_text_field(attrs),
+         "translated_text." <> nplural_index <- key,
+         {nplural_index, ""} <- Integer.parse(nplural_index),
+         translation when not is_nil(translation) <-
+           Enum.find(socket.assigns.translations, &(&1.nplural_index == nplural_index)),
+         {:ok, _translation} <-
+           Translations.update_plural_translation(translation, %{"translated_text" => translated}) do
+      after_success(socket, locale)
+    else
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, t("Could not update plural translation."))}
 
-    Translations.update_plural_translation(translation, %{
-      "translated_text" => translated
-    })
+      _invalid ->
+        {:noreply, put_flash(socket, :error, t("Invalid plural translation form data."))}
+    end
+  end
 
+  defp after_success(%{assigns: %{return_to: :parent}} = socket, _locale) do
+    send(self(), {:translation_saved, socket.assigns.message.id})
+    {:noreply, socket}
+  end
+
+  defp after_success(socket, locale) do
     {:noreply,
      push_navigate(socket,
        to:
-         dashboard_path(socket, "/locales/#{locale.id}/translations" <> get_query(socket.assigns))
+         dashboard_path(
+           socket,
+           "/locales/#{locale.id}/translations" <> get_query(socket.assigns)
+         )
      )}
   end
 
-  def plural_examples(locale, index) do
-    forms_struct = Expo.PluralForms.parse!(locale.plurals_header)
+  def plural_examples(%{plurals_header: plurals_header}, index) when is_binary(plurals_header) do
+    case Expo.PluralForms.parse(plurals_header) do
+      {:ok, forms_struct} ->
+        Enum.group_by(0..100, &Expo.PluralForms.index(forms_struct, &1), & &1)
+        |> Map.get(index, [])
+        |> Enum.join(", ")
 
-    Enum.group_by(0..100, &Expo.PluralForms.index(forms_struct, &1), & &1)
-    |> Map.fetch!(index)
-    |> Enum.join(", ")
+      _error ->
+        ""
+    end
+  end
+
+  def plural_examples(_locale, _index), do: ""
+
+  defp translated_text_field(attrs) do
+    Enum.find(attrs, fn
+      {key, _value} -> String.starts_with?(key, "translated_text.")
+    end)
+  end
+
+  defp valid_plugins do
+    ExLingo.config().plugins
+    |> Enum.map(fn {plugin_name, _opts} ->
+      {plugin_name, Module.concat(plugin_name, FormComponent)}
+    end)
+    |> Enum.filter(fn {_plugin_name, component} -> ModuleUtils.module_exists?(component) end)
   end
 
   defp get_query(%{filters: nil}), do: ""

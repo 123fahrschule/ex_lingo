@@ -106,6 +106,25 @@ defmodule ExLingo.AI.Translations.Plugin.FormComponentTest do
     assert html =~ "The AI provider API key is missing."
   end
 
+  test "renders loading state while suggestion is generating" do
+    html =
+      render_component(&FormComponent.render/1,
+        id: "ai-suggestion",
+        myself: nil,
+        provider_options: [provider_option()],
+        selected_provider_id: provider_option().id,
+        selected_model: "gpt-5.4-nano",
+        suggestion: nil,
+        adapted_text: nil,
+        adapting?: false,
+        loading?: true,
+        error: nil
+      )
+
+    assert html =~ "Generating suggestion"
+    assert html =~ "Generating..."
+  end
+
   defp provider_option do
     %{
       id: "Elixir.ExLingo.AI.Providers.OpenAI",

@@ -6,6 +6,8 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
   alias ExLingo.Translations
   alias ExLingo.Translations.GlossaryEntry
 
+  @scope_options_limit 100
+
   def mount(%{"id" => glossary_entry_id}, _session, socket) do
     socket =
       case get_glossary_entry(glossary_entry_id) do
@@ -79,9 +81,11 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
   end
 
   defp assign_scope_options(socket) do
-    %{entries: domains} = Translations.list_domains(per_page: 1_000)
-    %{entries: contexts} = Translations.list_contexts(per_page: 1_000)
-    %{entries: application_sources} = Translations.list_application_sources(per_page: 1_000)
+    %{entries: domains} = Translations.list_domains(per_page: @scope_options_limit)
+    %{entries: contexts} = Translations.list_contexts(per_page: @scope_options_limit)
+
+    %{entries: application_sources} =
+      Translations.list_application_sources(per_page: @scope_options_limit)
 
     socket
     |> assign(:domains, domains)

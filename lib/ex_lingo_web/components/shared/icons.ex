@@ -5,11 +5,42 @@ defmodule ExLingoWeb.Components.Icons do
 
   use Phoenix.Component
 
-  def replace do
+  def replace(assigns \\ %{}) do
+    class =
+      ["lucide lucide-replace-icon lucide-replace", assigns[:class]]
+      |> Enum.reject(&is_nil/1)
+      |> Enum.join(" ")
+
+    attrs = assigns_to_attributes(assigns, [:class])
+
+    assigns =
+      assigns
+      |> assign(:attrs, attrs)
+      |> assign(:class, class)
+
+    ~H"""
+    <svg
+      {@attrs}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class={@class}
+    >
+      <path d="M14 4a1 1 0 0 1 1-1" />
+      <path d="M15 10a1 1 0 0 1-1-1" />
+      <path d="M21 4a1 1 0 0 0-1-1" />
+      <path d="M21 9a1 1 0 0 1-1 1" />
+      <path d="m3 7 3 3 3-3" />
+      <path d="M6 10V5a2 2 0 0 1 2-2h2" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+    </svg>
     """
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-replace-icon lucide-replace"><path d="M14 4a1 1 0 0 1 1-1"/><path d="M15 10a1 1 0 0 1-1-1"/><path d="M21 4a1 1 0 0 0-1-1"/><path d="M21 9a1 1 0 0 1-1 1"/><path d="m3 7 3 3 3-3"/><path d="M6 10V5a2 2 0 0 1 2-2h2"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-    """
-    |> Phoenix.HTML.raw()
   end
 
   def arrow_left(assigns) do

@@ -468,7 +468,7 @@
     "639-1": "cy",
     "639-2": "cym",
     "639-2/B": "wel",
-    "colors": ["#FFFFFF", "##CA0529", "#01B23E"],
+    "colors": ["#FFFFFF", "#CA0529", "#01B23E"],
     "family": "Indo-European",
     "name": "Welsh",
     "nativeName": "Cymraeg",
@@ -914,7 +914,7 @@
   "aa": {
     "639-1": "aa",
     "639-2": "aar",
-    "colors": ["#088930", "#FCDD0B", "DA131A"],
+    "colors": ["#088930", "#FCDD0B", "#DA131A"],
     "family": "Afro-Asiatic",
     "name": "Afar",
     "nativeName": "Afaraf",

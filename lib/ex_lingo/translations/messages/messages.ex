@@ -60,53 +60,56 @@ defmodule ExLingo.Translations.Messages do
 
   """
   def delete_message(message_id) do
-    import Ecto.Query
-
-    # Delete all translations and message in a transaction
-    Repo.get_repo().transaction(fn ->
-      # Delete ALL singular translations for this message (all locales)
-      {singular_count, _} =
-        from(st in SingularTranslation,
-          where: st.message_id == ^message_id
-        )
-        |> Repo.get_repo().delete_all(Repo.opts())
-
-      # Delete ALL plural translations for this message (all locales)
-      {plural_count, _} =
-        from(pt in PluralTranslation,
-          where: pt.message_id == ^message_id
-        )
-        |> Repo.get_repo().delete_all(Repo.opts())
-
-      # Delete the message itself
-      {message_count, _} =
-        from(m in Message, where: m.id == ^message_id)
-        |> Repo.get_repo().delete_all(Repo.opts())
-
-      %{
-        translations_deleted: singular_count + plural_count,
-        message_deleted: message_count == 1
-      }
-    end)
+    Repo.get_repo()
+    |> then(& &1.transaction(fn -> delete_message_counts(message_id) end))
+    |> invalidate_message_cache_on_success()
   end
 
   def delete_messages(message_ids) when is_list(message_ids) do
-    {total_messages, total_translations} =
-      Enum.reduce(message_ids, {0, 0}, fn message_id, {msg_count, trans_count} ->
-        case delete_message(message_id) do
-          {:ok, stats} ->
-            {
-              msg_count + if(stats.message_deleted, do: 1, else: 0),
-              trans_count + stats.translations_deleted
-            }
+    Repo.get_repo()
+    |> then(fn repo ->
+      repo.transaction(fn ->
+        Enum.reduce(message_ids, %{messages_deleted: 0, translations_deleted: 0}, fn message_id,
+                                                                                     acc ->
+          stats = delete_message_counts(message_id)
 
-          {:error, _reason} ->
-            {msg_count, trans_count}
-        end
+          %{
+            messages_deleted: acc.messages_deleted + if(stats.message_deleted, do: 1, else: 0),
+            translations_deleted: acc.translations_deleted + stats.translations_deleted
+          }
+        end)
       end)
-
-    {:ok, %{messages_deleted: total_messages, translations_deleted: total_translations}}
+    end)
+    |> invalidate_message_cache_on_success()
   end
+
+  defp delete_message_counts(message_id) do
+    import Ecto.Query
+
+    {singular_count, _} =
+      from(st in SingularTranslation, where: st.message_id == ^message_id)
+      |> Repo.get_repo().delete_all(Repo.opts())
+
+    {plural_count, _} =
+      from(pt in PluralTranslation, where: pt.message_id == ^message_id)
+      |> Repo.get_repo().delete_all(Repo.opts())
+
+    {message_count, _} =
+      from(m in Message, where: m.id == ^message_id)
+      |> Repo.get_repo().delete_all(Repo.opts())
+
+    %{
+      translations_deleted: singular_count + plural_count,
+      message_deleted: message_count == 1
+    }
+  end
+
+  defp invalidate_message_cache_on_success({:ok, _stats} = result) do
+    ExLingo.Cache.delete_all()
+    result
+  end
+
+  defp invalidate_message_cache_on_success(result), do: result
 
   @doc """
   Merges two messages by moving all translations from one message to another.

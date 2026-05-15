@@ -1,25 +1,31 @@
-<.table_container>
-  <.table aria-label="Messages">
+<div>
+  <.table_container>
+    <.table aria-label={t("Messages")}>
     <.table_header>
       <.table_row>
-        <.table_head>Message ID</.table_head>
-        <.table_head>PO Translation</.table_head>
-        <.table_head>ExLingo Translation</.table_head>
-        <.table_head>Domain</.table_head>
-        <.table_head>Context</.table_head>
-        <.table_head :if={!@application_sources_empty?}>Application</.table_head>
-        <.table_head>Type</.table_head>
-        <.table_head>Actions</.table_head>
+        <.sortable_table_head field="msgid" sort={assigns[:sort] || %{}}>
+          {t("Message ID")}
+        </.sortable_table_head>
+        <.table_head>{t("PO Translation")}</.table_head>
+        <.table_head>{t("ExLingo Translation")}</.table_head>
+        <.table_head>{t("Domain")}</.table_head>
+        <.table_head :if={!@application_sources_empty?}>{t("Application")}</.table_head>
+        <.sortable_table_head field="message_type" sort={assigns[:sort] || %{}}>
+          {t("Type")}
+        </.sortable_table_head>
+        <.table_head>{t("Actions")}</.table_head>
       </.table_row>
     </.table_header>
     <.table_body>
       <.table_row
         :for={message <- @messages}
+        data-list-item-id={message.id}
         class={[
           !message_stale?(message, @stale_message_ids) && "cursor-pointer",
-          message_stale?(message, @stale_message_ids) && "bg-warning-50/80 hover:bg-warning-100/70"
+          message_stale?(message, @stale_message_ids) && "bg-warning-50/80 hover:bg-warning-100/70",
+          highlighted_message?(message, @highlighted_message_id) && "ex-lingo-list-highlight"
         ]}
-        {if !message_stale?(message, @stale_message_ids), do: [{"phx-click", "edit_message"}, {"phx-value-id", message.id}, {"phx-target", @myself}], else: []}
+        {if !message_stale?(message, @stale_message_ids), do: [{"phx-click", "edit_message"}, {"phx-value-id", message.id}], else: []}
       >
         <.table_cell>
           <div class="flex max-w-72 flex-col gap-2">
@@ -31,17 +37,17 @@
                 :if={message_stale?(message, @stale_message_ids)}
                 variant="secondary"
                 class="border-warning-300 bg-warning-100 text-warning-500"
-                title="This message exists in the database but is no longer present in any locale's PO files"
+                title={t("This message exists in the database but is no longer present in any locale's PO files")}
               >
-                Stale
+                {t("Stale")}
               </.badge>
               <.badge
                 :if={Map.has_key?(@fuzzy_matches, message.id)}
                 variant="secondary"
                 class="border-success-300 bg-success-100 text-success-500"
-                title="This message can be merged with a similar message that exists in PO files"
+                title={t("This message can be merged with a similar message that exists in PO files")}
               >
-                Merge
+                {t("Merge")}
               </.badge>
             </div>
             <%= if Map.has_key?(@fuzzy_matches, message.id) do %>
@@ -50,14 +56,17 @@
               <% score_pct = Float.round(fuzzy_match.similarity_score * 100, 1) %>
 
               <div class="text-body-xs text-muted-foreground">
-                <span class="font-semibold text-success-500">Probably:</span>
+                <span class="font-semibold text-success-500">{t("Probably:")}</span>
                 <.badge variant="secondary" class="ml-1 border-success-300 bg-success-100 text-success-500">
                   ({score_pct}%)
                 </.badge>
-                <span> changed from</span>
+                <span> {t("Changed from")}</span>
                 "<span class="italic">{String.slice(matched_msgid, 0..40)}</span>"
               </div>
             <% end %>
+            <div :if={message.context} class="truncate text-body-xs text-muted-foreground">
+              {t("Context")}: {message.context.name}
+            </div>
           </div>
         </.table_cell>
         <.table_cell>
@@ -82,16 +91,7 @@
             class="uppercase"
             style={unless is_nil(message.domain), do: "background-color:#{message.domain.color};"}
           >
-            {if is_nil(message.domain), do: "None", else: message.domain.name}
-          </.badge>
-        </.table_cell>
-        <.table_cell>
-          <.badge
-            variant={if is_nil(message.context), do: "outline", else: "default"}
-            class="uppercase"
-            style={unless is_nil(message.context), do: "background-color:#{message.context.color};"}
-          >
-            {if is_nil(message.context), do: "None", else: message.context.name}
+            {if is_nil(message.domain), do: t("None"), else: message.domain.name}
           </.badge>
         </.table_cell>
         <.table_cell :if={!@application_sources_empty?}>
@@ -100,7 +100,7 @@
             class="uppercase"
             style={unless is_nil(message.application_source), do: "background-color:#{message.application_source.color};"}
           >
-            {if is_nil(message.application_source), do: "None", else: message.application_source.name}
+            {if is_nil(message.application_source), do: t("None"), else: message.application_source.name}
           </.badge>
         </.table_cell>
         <.table_cell>
@@ -123,17 +123,24 @@
                   phx-value-from-id={message.id}
                   phx-value-to-id={matched_message_id}
                   phx-target={@myself}
-                  data-confirm={"⚠️ Merge Message
-
-This will:
-1. Move all translations from '#{message.msgid}' to '#{matched_msgid}'
-2. Overwrite existing translations in '#{matched_msgid}' (unless missing in source)
-3. Delete '#{message.msgid}' from all locales
-
-This action is irreversible. Are you sure?"}
-                  title={"Merge into: '#{matched_msgid}' (affects all locales)"}
+                  data-confirm={
+                    Enum.join(
+                      [
+                        "⚠️ #{t("Merge Message")}",
+                        "",
+                        t("This will:"),
+                        "1. " <> t("Move all translations from '%{from}' to '%{to}'", from: message.msgid, to: matched_msgid),
+                        "2. " <> t("Overwrite existing translations in '%{target}' (unless missing in source)", target: matched_msgid),
+                        "3. " <> t("Delete '%{message}' from all locales", message: message.msgid),
+                        "",
+                        t("This action is irreversible. Are you sure?")
+                      ],
+                      "\n"
+                    )
+                  }
+                  title={"#{t("Merge")}: '#{matched_msgid}'"}
                 >
-                  <.icon name="merge_type" size="sm" class="text-success-500" label="Merge message" />
+                  <.icon name="merge_type" size="sm" class="text-success-500" label={t("Merge message")} />
                 </.button>
               <% end %>
               <.button
@@ -144,19 +151,29 @@ This action is irreversible. Are you sure?"}
                 phx-click="delete_stale"
                 phx-value-message-id={message.id}
                 phx-target={@myself}
-                data-confirm={"⚠️ Delete Stale Message
-
-This will permanently delete this message and its translations across ALL locales.
-
-This action is irreversible. Are you sure?"}
-                title="Delete stale message (all locales)"
+                data-confirm={
+                  Enum.join(
+                    [
+                      "⚠️ #{t("Delete Stale Message")}",
+                      "",
+                      t(
+                        "This will permanently delete this message and its translations across ALL locales."
+                      ),
+                      "",
+                      t("This action is irreversible. Are you sure?")
+                    ],
+                    "\n"
+                  )
+                }
+                title={t("Delete stale message (all locales)")}
               >
-                <.icon name="delete" size="sm" class="text-destructive" label="Delete stale message" />
+                <.icon name="delete" size="sm" class="text-destructive" label={t("Delete stale message")} />
               </.button>
             </div>
           <% end %>
         </.table_cell>
       </.table_row>
     </.table_body>
-  </.table>
-</.table_container>
+    </.table>
+  </.table_container>
+</div>

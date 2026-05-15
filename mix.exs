@@ -23,7 +23,7 @@ defmodule ExLingo.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:uri_query, :logger, :inets, :ssl],
+      extra_applications: [:uri_query, :logger, :ssl],
       mod: {ExLingo.Application, []}
     ]
   end
@@ -45,6 +45,7 @@ defmodule ExLingo.MixProject do
       {:cognit, github: "123fahrschule/cognit", tag: "0.2.13"},
       {:tailwind, "~> 0.4.1", runtime: Mix.env() == :dev},
       {:jason, "~> 1.4"},
+      {:finch, "~> 0.21"},
       {:telemetry, "~> 1.4"},
       {:nebulex, "~> 3.0"},
       {:nebulex_distributed, "~> 3.2"},
@@ -59,7 +60,7 @@ defmodule ExLingo.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.40.2", only: :dev, runtime: false},
-      {:gettext, "~> 1.0"},
+      {:gettext, ">= 0.26.0 and < 2.0.0"},
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
       {:postgrex, "~> 0.22.2", only: :test}
     ]

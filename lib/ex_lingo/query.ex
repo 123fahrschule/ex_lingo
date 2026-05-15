@@ -14,6 +14,7 @@ defmodule ExLingo.Query do
     # credo:disable-for-next-line Credo.Check.Refactor.LongQuoteBlocks
     quote do
       import Ecto.Query
+      require Logger
 
       alias ExLingo.Migrations.Postgresql
       alias ExLingo.Repo
@@ -221,7 +222,11 @@ defmodule ExLingo.Query do
 
               get_query_operation(q, value, field_name)
             rescue
-              _e ->
+              exception in ArgumentError ->
+                Logger.debug(
+                  "Skipping invalid ExLingo query filter #{inspect(field_name)}: #{Exception.message(exception)}"
+                )
+
                 q
             end
         end)
@@ -230,10 +235,10 @@ defmodule ExLingo.Query do
       defp get_query_operation(query, value, field_name) do
         query
         |> maybe_inclusion(value, field_name)
-        |> maybe_greater_than(value, field_name)
         |> maybe_greater_or_equal_than(value, field_name)
-        |> maybe_lower_than(value, field_name)
+        |> maybe_greater_than(value, field_name)
         |> maybe_lower_or_equal_than(value, field_name)
+        |> maybe_lower_than(value, field_name)
         |> maybe_is_null(value, field_name)
         |> maybe_is_not_null(value, field_name)
         |> maybe_equality(value, field_name)
@@ -258,7 +263,8 @@ defmodule ExLingo.Query do
       end
 
       defp maybe_greater_than(q, value, field_name) do
-        if is_binary(value) && String.starts_with?(value, ">") do
+        if is_binary(value) && String.starts_with?(value, ">") &&
+             !String.starts_with?(value, ">=") do
           value = String.trim_leading(value, ">")
           from(s in q, where: field(s, ^field_name) > ^value)
         else
@@ -276,7 +282,8 @@ defmodule ExLingo.Query do
       end
 
       defp maybe_lower_than(q, value, field_name) do
-        if is_binary(value) && String.starts_with?(value, "<") do
+        if is_binary(value) && String.starts_with?(value, "<") &&
+             !String.starts_with?(value, "<=") do
           value = String.trim_leading(value, "<")
           from(s in q, where: field(s, ^field_name) < ^value)
         else
@@ -407,19 +414,21 @@ defmodule ExLingo.Query do
       end
 
       defp search_query_legacy(query, search_term) do
-        from(s in unquote(opts[:module]),
-          where:
-            fragment(
-              "searchable @@ websearch_to_tsquery(?)",
-              ^search_term
-            ),
-          order_by: {
-            :desc,
+        query
+        |> where(
+          [{unquote(opts[:binding]), resource}],
+          fragment(
+            "searchable @@ websearch_to_tsquery(?)",
+            ^search_term
+          )
+        )
+        |> order_by(
+          [{unquote(opts[:binding]), resource}],
+          desc:
             fragment(
               "ts_rank_cd(searchable, websearch_to_tsquery(?), 4)",
               ^search_term
             )
-          }
         )
       end
 
@@ -430,7 +439,7 @@ defmodule ExLingo.Query do
 
       @spec undeleted_query(Ecto.Query.t()) :: Ecto.Query.t()
       def undeleted_query(query \\ base()) do
-        from(q in unquote(opts[:module]),
+        from(q in query,
           where: is_nil(q.deleted_at),
           where: is_nil(q.deleted_by)
         )

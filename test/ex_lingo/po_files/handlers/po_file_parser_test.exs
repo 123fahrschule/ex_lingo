@@ -133,11 +133,6 @@ defmodule ExLingo.PoFiles.POFileParserTest do
 
       # Should have at least "default" domain
       assert "default" in all_domains
-
-      # Likely has "errors" domain too based on fixture structure
-      if "errors" in all_domains do
-        assert "errors" in all_domains
-      end
     end
 
     test "deduplicates messages across locales" do

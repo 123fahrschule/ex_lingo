@@ -22,6 +22,8 @@ defmodule ExLingo do
 
   @impl Supervisor
   def init(%Config{plugins: plugins} = conf) do
+    ExLingoWeb.APIAuthPlug.warn_if_secret_missing(conf)
+
     children = [
       {ExLingo.MigrationVersionChecker, []},
       {MessagesExtractorAgent, conf: conf, name: Registry.via(conf.name, MessagesExtractorAgent)}

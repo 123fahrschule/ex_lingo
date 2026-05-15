@@ -6,6 +6,7 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
   use Ecto.Migration
   alias ExLingo.Utils.Colors
 
+  @default_prefix "public"
   @ex_lingo_application_sources "ex_lingo_application_sources"
   @ex_lingo_messages "ex_lingo_messages"
 
@@ -26,9 +27,13 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
   end
 
   def up_application_sources(opts) do
-    prefix = opts.prefix
+    prefix = prefix(opts)
 
-    create_if_not_exists table(@ex_lingo_application_sources, prefix: prefix) do
+    create_if_not_exists table(@ex_lingo_application_sources,
+                           prefix: prefix,
+                           primary_key: false
+                         ) do
+      add(:id, :bigserial, primary_key: true)
       add(:name, :string)
       add(:description, :text)
       add(:color, :string, null: false, default: Colors.default_color())
@@ -39,10 +44,12 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
   end
 
   def up_ex_lingo_messages(opts) do
-    prefix = opts.prefix
+    prefix = prefix(opts)
 
     alter table(@ex_lingo_messages, prefix: prefix) do
-      add(:application_source_id, references(@ex_lingo_application_sources, prefix: prefix),
+      add(
+        :application_source_id,
+        references(@ex_lingo_application_sources, prefix: prefix, type: :bigint),
         null: true
       )
     end
@@ -63,11 +70,11 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
   end
 
   def down_application_sources(opts) do
-    drop table(@ex_lingo_application_sources, prefix: opts.prefix)
+    drop table(@ex_lingo_application_sources, prefix: prefix(opts))
   end
 
   def down_ex_lingo_messages(opts) do
-    prefix = opts.prefix
+    prefix = prefix(opts)
 
     drop unique_index(
            @ex_lingo_messages,
@@ -76,7 +83,9 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
              :context_id,
              :domain_id,
              :msgid
-           ], prefix: prefix)
+           ],
+           prefix: prefix
+         )
 
     create_if_not_exists unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid],
                            prefix: prefix
@@ -86,4 +95,6 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
       remove(:application_source_id)
     end
   end
+
+  defp prefix(opts), do: Map.get(opts, :prefix, @default_prefix)
 end

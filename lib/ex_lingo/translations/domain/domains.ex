@@ -25,4 +25,14 @@ defmodule ExLingo.Translations.Domains do
     |> Domain.changeset(attrs)
     |> Repo.get_repo().insert(Repo.opts(opts))
   end
+
+  def update_domain(%Domain{} = domain, attrs, opts \\ []) do
+    domain
+    |> Domain.changeset(attrs)
+    |> Repo.get_repo().update(Repo.opts(opts))
+  end
+
+  def change_domain(%Domain{} = domain, params \\ %{}) do
+    Domain.changeset(domain, params)
+  end
 end

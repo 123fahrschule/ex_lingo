@@ -1,6 +1,11 @@
 defmodule ExLingo.AI.Translations.Plugin do
   @moduledoc """
   Generic ExLingo AI translation suggestion UI plugin.
+
+  The process is intentionally registered by ExLingo's plugin supervisor. Today
+  most reads still come from ExLingo's config, but keeping a named process gives
+  this plugin a stable lifecycle hook for provider state, async suggestion work,
+  or runtime configuration refreshes without changing the plugin contract later.
   """
 
   use GenServer
@@ -48,11 +53,12 @@ defmodule ExLingo.AI.Translations.Plugin do
   end
 
   defp plugin_config do
+    module = __MODULE__
+
     ExLingo.config().plugins
-    |> Enum.find(&(elem(&1, 0) == __MODULE__))
-    |> case do
-      nil -> nil
-      {_module, opts} -> opts
-    end
+    |> Enum.find_value(fn
+      {^module, opts} -> opts
+      _plugin -> nil
+    end)
   end
 end

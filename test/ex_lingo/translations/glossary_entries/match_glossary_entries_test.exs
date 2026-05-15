@@ -116,4 +116,30 @@ defmodule ExLingo.Translations.GlossaryEntries.MatchGlossaryEntriesTest do
 
     assert Enum.map(result, & &1.id) == [scoped.id, global.id]
   end
+
+  test "matches global entries when optional message scopes are nil" do
+    {:ok, message} =
+      Translations.create_message(%{
+        msgid: "Download certificate",
+        message_type: :singular
+      })
+
+    {:ok, matching} =
+      Translations.create_glossary_entry(%{
+        source_locale: "en",
+        target_locale: "de",
+        source_term: "Certificate",
+        target_term: "Ausbildungsnachweis"
+      })
+
+    result =
+      MatchGlossaryEntries.call(%{
+        source_locale: "en",
+        target_locale: "de",
+        source_text: message.msgid,
+        message: message
+      })
+
+    assert Enum.map(result, & &1.id) == [matching.id]
+  end
 end

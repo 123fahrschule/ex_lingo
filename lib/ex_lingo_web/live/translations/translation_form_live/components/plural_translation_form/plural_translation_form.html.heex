@@ -1,8 +1,8 @@
-<div class="space-y-6">
-  <.breadcrumb>
+<div class={if @mode == :sheet, do: "space-y-4", else: "space-y-6"}>
+  <.breadcrumb :if={@mode == :page}>
     <.breadcrumb_list>
       <.breadcrumb_item>
-        <.breadcrumb_link href={dashboard_path(@socket, "/locales")}>Locales</.breadcrumb_link>
+        <.breadcrumb_link href={dashboard_path(@socket, "/locales")}>{t("Locales")}</.breadcrumb_link>
       </.breadcrumb_item>
       <.breadcrumb_separator />
       <.breadcrumb_item>
@@ -17,7 +17,11 @@
     </.breadcrumb_list>
   </.breadcrumb>
 
-  <.page_header title={"Translate to #{@locale.native_name}"} class="px-0 pt-0">
+  <.page_header
+    :if={@mode == :page}
+    title={t("Translate to %{locale}", locale: @locale.native_name)}
+    class="px-0 pt-0"
+  >
     <div class="min-w-0 flex-1 text-sm text-muted-foreground">
       <span class="truncate">{@message.msgid}</span>
     </div>
@@ -27,82 +31,122 @@
     module={Tabs}
     id="tabs"
     tabs={@tabs}
-    current_url={"#{dashboard_path(@socket)}/locales/#{@locale.id}/translations/#{@message.id}"}
+    current_url={@current_url || dashboard_path(@socket, "/locales/#{@locale.id}/translations/#{@message.id}")}
     current_tab={@current_tab}
   />
 
-  <.card>
-    <.card_header>
-      <.card_title>Plural Translation</.card_title>
-      <.card_description>
-        Quantity examples: {plural_examples(@locale, @current_tab_index)}
-      </.card_description>
-    </.card_header>
-    <.card_content>
+  <%= if @mode == :sheet do %>
+    <div class="space-y-4">
+      <.message_metadata message={@message} translation={@translation} />
+
+      <div class="text-body-xs text-muted-foreground">
+        {t("Quantity examples: %{examples}", examples: plural_examples(@locale, @current_tab_index))}
+      </div>
+
       <.form
         for={@form}
         phx-change="validate"
         phx-submit="submit"
         phx-target={@myself}
-        class="space-y-6"
+        class="space-y-4"
       >
         <.form_item>
-          <.form_label for="message_id">Message ID</.form_label>
-          <div
-            id="message_id"
-            class="rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
-          >
-            {@message.msgid}
-          </div>
-        </.form_item>
-
-        <.form_item>
-          <.form_label for="original_text">PO file text</.form_label>
+          <.form_label for="original_text">{t("PO file text")}</.form_label>
           <.textarea
             id="original_text"
             name="original_text"
             value={@form["original_text"]}
-            rows="5"
+            rows="2"
+            class="!min-h-16"
             disabled
           />
         </.form_item>
 
         <.form_item>
           <.form_label for={"translated_text.#{@current_tab_index}"}>
-            ExLingo translated text
+            {t("ExLingo translated text")}
           </.form_label>
           <.textarea
             id={"translated_text.#{@current_tab_index}"}
             name={"translated_text.#{@current_tab_index}"}
             value={@form["translated_text"]}
-            rows="5"
+            rows="4"
+            class="!min-h-24"
           />
         </.form_item>
 
         <div class="flex justify-end">
-          <.button type="submit" phx-disable-with="Saving...">
-            <.icon name="save" size="sm" decorative /> Save
+          <.button type="submit" phx-disable-with={t("Saving...")}>
+            <.icon name="save" size="sm" decorative /> {t("Save")}
           </.button>
         </div>
       </.form>
-    </.card_content>
-  </.card>
+    </div>
+  <% else %>
+    <.card>
+      <.card_header>
+        <.card_title>{t("Plural Translation")}</.card_title>
+        <.card_description>
+          {t("Quantity examples: %{examples}", examples: plural_examples(@locale, @current_tab_index))}
+        </.card_description>
+      </.card_header>
+      <.card_content class="space-y-4">
+        <.message_metadata message={@message} translation={@translation} />
 
-  <.card :if={length(ExLingo.config().plugins) > 0}>
+        <.form
+          for={@form}
+          phx-change="validate"
+          phx-submit="submit"
+          phx-target={@myself}
+          class="space-y-6"
+        >
+          <.form_item>
+            <.form_label for="original_text">{t("PO file text")}</.form_label>
+            <.textarea
+              id="original_text"
+              name="original_text"
+              value={@form["original_text"]}
+              rows="5"
+              disabled
+            />
+          </.form_item>
+
+          <.form_item>
+            <.form_label for={"translated_text.#{@current_tab_index}"}>
+              {t("ExLingo translated text")}
+            </.form_label>
+            <.textarea
+              id={"translated_text.#{@current_tab_index}"}
+              name={"translated_text.#{@current_tab_index}"}
+              value={@form["translated_text"]}
+              rows="5"
+            />
+          </.form_item>
+
+          <div class="flex justify-end">
+            <.button type="submit" phx-disable-with={t("Saving...")}>
+              <.icon name="save" size="sm" decorative /> {t("Save")}
+            </.button>
+          </div>
+        </.form>
+      </.card_content>
+    </.card>
+  <% end %>
+
+  <.card :if={length(@valid_plugins) > 0}>
     <.card_header>
-      <.card_title>Plugins</.card_title>
+      <.card_title>{t("Plugins")}</.card_title>
     </.card_header>
     <.card_content class="space-y-2">
-      <%= for {plugin_name, _} <- ExLingo.config().plugins do %>
-        <%= if plugin_name |> Module.concat(FormComponent) |> module_exists?() do %>
-          <.live_component
-            module={Module.concat(plugin_name, FormComponent)}
-            id={plugin_name}
-            message={@message}
-            locale={@locale}
-            translation={@translation}
-          />
-        <% end %>
+      <%= for {plugin_name, component} <- @valid_plugins do %>
+        <.live_component
+          module={component}
+          id={plugin_name}
+          message={@message}
+          locale={@locale}
+          translation={@translation}
+          return_to={assigns[:return_to]}
+        />
       <% end %>
     </.card_content>
   </.card>

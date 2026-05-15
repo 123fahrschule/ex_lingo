@@ -1,5 +1,6 @@
 defmodule ExLingoWeb.Dashboard.DashboardLive do
   use ExLingoWeb, :live_view
+  require Logger
 
   alias ExLingo.Cache
   alias ExLingo.PoFiles.MessagesExtractorAgent
@@ -23,7 +24,7 @@ defmodule ExLingoWeb.Dashboard.DashboardLive do
       |> assign(:languages, locales)
       |> assign(:contexts, contexts)
       |> assign(:domains, domains)
-      |> assign(:cache_count, Cache.count_all())
+      |> assign(:cache_count, cache_count())
 
     {:ok, socket}
   end
@@ -31,19 +32,27 @@ defmodule ExLingoWeb.Dashboard.DashboardLive do
   def handle_event("clear-cache", _, socket) do
     Cache.delete_all()
 
-    {:noreply, assign(socket, :cache_count, Cache.count_all())}
+    {:noreply, assign(socket, :cache_count, cache_count())}
   end
 
   def handle_event("delete-stale", _, socket) do
     %Result{stale_message_ids: stale_message_ids} =
       MessagesExtractorAgent.get_stale_detection_result()
 
-    Translations.delete_messages(MapSet.to_list(stale_message_ids))
+    case Translations.delete_messages(MapSet.to_list(stale_message_ids)) do
+      {:ok, _stats} ->
+        result = MessagesExtractorAgent.get_stale_detection_result(true)
 
-    stale_messages_count =
-      MessagesExtractorAgent.get_stale_detection_result(true).stale_count
+        {:noreply,
+         socket
+         |> assign(:stale_messages_count, result.stale_count)
+         |> assign(:mergeable_messages_count, result.mergeable_count)}
 
-    {:noreply, assign(socket, :stale_messages_count, stale_messages_count)}
+      {:error, reason} ->
+        Logger.error("failed to delete stale messages: #{inspect(reason)}")
+
+        {:noreply, put_flash(socket, :error, t("Failed to delete stale messages."))}
+    end
   end
 
   # Merge all the orphaned messages to selected target messages (that fuzzy mathed).
@@ -80,5 +89,13 @@ defmodule ExLingoWeb.Dashboard.DashboardLive do
       MessagesExtractorAgent.get_stale_detection_result()
 
     mergeable_count
+  end
+
+  defp cache_count do
+    case Cache.count_all() do
+      {:ok, count} when is_integer(count) -> count
+      count when is_integer(count) -> count
+      _other -> 0
+    end
   end
 end

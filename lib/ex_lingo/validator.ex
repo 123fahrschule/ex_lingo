@@ -20,7 +20,15 @@ defmodule ExLingo.Validator do
   end
 
   def validate!(opts, validator) do
-    with {:error, reason} <- validator.(opts), do: raise(ArgumentError, reason)
+    Enum.each(opts, fn opt ->
+      case validator.(opt) do
+        :ok -> :ok
+        {:error, reason} -> raise ArgumentError, reason
+        {:unknown, field, module} -> raise ArgumentError, elem(unknown_error(field, module), 1)
+      end
+    end)
+
+    :ok
   end
 
   defp unknown_error({name, _value}, known), do: unknown_error(name, known)

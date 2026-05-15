@@ -1,18 +1,25 @@
-<.page_header title="Glossary" class="px-0 pt-0">
+<.page_header title={t("Glossary")} class="px-0 pt-0">
   <:actions>
-    <.button as={&Phoenix.Component.link/1} navigate={dashboard_path(@socket, "/glossary/new")}>
+    <.button type="button" phx-click="new_glossary_entry">
       <.icon name="add" size="sm" decorative />
-      Create glossary entry
+      {t("Create glossary entry")}
     </.button>
   </:actions>
 </.page_header>
 
-<div class="space-y-4">
+<div
+  id="ex-lingo-glossary-list"
+  class="space-y-4"
+  phx-hook="ExLingoListContext"
+  data-storage-key={@list_context_storage_key}
+  data-list-context={Jason.encode!(@list_context_payload || %{})}
+  data-context-prefixes={Jason.encode!(@list_context_prefixes || [])}
+>
   <.card>
     <.card_content class="pt-6">
       <.form for={@filters} as={:filters} phx-change="filter" class="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
         <.form_item>
-          <.form_label for="filters_source_locale">Source locale</.form_label>
+          <.form_label for="filters_source_locale">{t("Source locale")}</.form_label>
           <.input
             id="filters_source_locale"
             name="source_locale"
@@ -23,7 +30,7 @@
         </.form_item>
 
         <.form_item>
-          <.form_label for="filters_target_locale">Target locale</.form_label>
+          <.form_label for="filters_target_locale">{t("Target locale")}</.form_label>
           <.input
             id="filters_target_locale"
             name="target_locale"
@@ -35,7 +42,7 @@
 
         <div class="flex items-end">
           <.button type="button" variant="outline" phx-click="clear_filters">
-            Clear
+            {t("Clear")}
           </.button>
         </div>
       </.form>
@@ -46,6 +53,139 @@
     module={GlossaryEntriesTable}
     id="glossary-entries-table"
     glossary_entries={@glossary_entries}
+    sort={@sort}
   />
   <Pagination.render metadata={@glossary_entries_metadata} on_page_change="page_changed" />
 </div>
+
+<.sheet
+  :if={@editing_glossary_entry}
+  id="glossary-entry-editor-sheet"
+  open={true}
+  on-close="close_glossary_entry_editor"
+>
+  <.sheet_content side="right" size="lg" class="w-full overflow-hidden">
+    <.sheet_header class="pr-8">
+      <.sheet_title class="text-h3">
+        <%= if @glossary_entry_editing?, do: t("Update glossary entry"), else: t("Create glossary entry") %>
+      </.sheet_title>
+      <.sheet_description>
+        {t("Define approved terminology for one language direction.")}
+      </.sheet_description>
+    </.sheet_header>
+
+    <div class="mt-4 flex-1 overflow-y-auto pr-1">
+      <.form
+        for={@glossary_entry_form}
+        phx-change="validate_glossary_entry"
+        phx-submit="submit_glossary_entry"
+        class="space-y-5"
+      >
+        <div class="grid gap-4 md:grid-cols-2">
+          <.form_item>
+            <.form_label field={@glossary_entry_form[:source_locale]}>{t("Source locale")}</.form_label>
+            <.form_control>
+              <.input field={@glossary_entry_form[:source_locale]} type="text" placeholder="en" />
+            </.form_control>
+            <.form_message field={@glossary_entry_form[:source_locale]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@glossary_entry_form[:target_locale]}>{t("Target locale")}</.form_label>
+            <.form_control>
+              <.input field={@glossary_entry_form[:target_locale]} type="text" placeholder="de" />
+            </.form_control>
+            <.form_message field={@glossary_entry_form[:target_locale]} translate={false} />
+          </.form_item>
+        </div>
+
+        <.form_item>
+          <.form_label field={@glossary_entry_form[:source_term]}>{t("Source term")}</.form_label>
+          <.form_control>
+            <.input field={@glossary_entry_form[:source_term]} type="text" />
+          </.form_control>
+          <.form_message field={@glossary_entry_form[:source_term]} translate={false} />
+        </.form_item>
+
+        <.form_item>
+          <.form_label field={@glossary_entry_form[:target_term]}>{t("Target term")}</.form_label>
+          <.form_control>
+            <.input field={@glossary_entry_form[:target_term]} type="text" />
+          </.form_control>
+          <.form_message field={@glossary_entry_form[:target_term]} translate={false} />
+        </.form_item>
+
+        <.form_item>
+          <.form_label field={@glossary_entry_form[:usage_guidance]}>{t("Usage guidance")}</.form_label>
+          <.form_control>
+            <.textarea field={@glossary_entry_form[:usage_guidance]} rows="3" />
+          </.form_control>
+          <.form_message field={@glossary_entry_form[:usage_guidance]} translate={false} />
+        </.form_item>
+
+        <% select_class = "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-body-sm shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" %>
+
+        <div class="grid gap-4 md:grid-cols-3">
+          <.form_item>
+            <.form_label field={@glossary_entry_form[:domain_id]}>{t("Domain scope")}</.form_label>
+            <.form_control>
+              <select
+                id={@glossary_entry_form[:domain_id].id}
+                name={@glossary_entry_form[:domain_id].name}
+                class={select_class}
+              >
+                <option value="">{t("Global")}</option>
+                <option :for={domain <- @domains} value={domain.id} selected={to_string(domain.id) == to_string(@glossary_entry_form[:domain_id].value)}>
+                  {domain.name}
+                </option>
+              </select>
+            </.form_control>
+            <.form_message field={@glossary_entry_form[:domain_id]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@glossary_entry_form[:context_id]}>{t("Context scope")}</.form_label>
+            <.form_control>
+              <select
+                id={@glossary_entry_form[:context_id].id}
+                name={@glossary_entry_form[:context_id].name}
+                class={select_class}
+              >
+                <option value="">{t("Global")}</option>
+                <option :for={context <- @contexts} value={context.id} selected={to_string(context.id) == to_string(@glossary_entry_form[:context_id].value)}>
+                  {context.name}
+                </option>
+              </select>
+            </.form_control>
+            <.form_message field={@glossary_entry_form[:context_id]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@glossary_entry_form[:application_source_id]}>
+              {t("Application scope")}
+            </.form_label>
+            <.form_control>
+              <select
+                id={@glossary_entry_form[:application_source_id].id}
+                name={@glossary_entry_form[:application_source_id].name}
+                class={select_class}
+              >
+                <option value="">{t("Global")}</option>
+                <option :for={application_source <- @application_sources} value={application_source.id} selected={to_string(application_source.id) == to_string(@glossary_entry_form[:application_source_id].value)}>
+                  {application_source.name}
+                </option>
+              </select>
+            </.form_control>
+            <.form_message field={@glossary_entry_form[:application_source_id]} translate={false} />
+          </.form_item>
+        </div>
+
+        <.sheet_footer class="pt-4">
+          <.button type="submit" phx-disable-with={t("Saving...")}>
+            <.icon name="save" size="sm" decorative /> {t("Save")}
+          </.button>
+        </.sheet_footer>
+      </.form>
+    </div>
+  </.sheet_content>
+</.sheet>

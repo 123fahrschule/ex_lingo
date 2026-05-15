@@ -34,7 +34,7 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
     {:ok, plural_message} =
       Translations.create_message(%{
         message_type: :plural,
-        msgid: "%{count} items",
+        msgid: "One item",
         context_id: context.id,
         domain_id: domain.id
       })
@@ -187,7 +187,7 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
       {:ok, message} =
         Translations.create_message(%{
           message_type: :plural,
-          msgid: "%{count} custom items with %{extra}",
+          msgid: "One custom item with %{extra}",
           context_id: nil,
           domain_id: domain.id
         })
@@ -226,7 +226,7 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
     end
   end
 
-  # Run after each test
+  # Final-suite cleanup; each individual test already clears the cache in setup.
   setup_all do
     on_exit(fn ->
       ExLingo.Cache.delete_all()

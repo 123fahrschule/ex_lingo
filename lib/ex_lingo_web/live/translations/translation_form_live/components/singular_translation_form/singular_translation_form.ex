@@ -6,10 +6,12 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
   use ExLingoWeb, :live_component
 
   alias ExLingo.Translations
+  import ExLingoWeb.Translations.MessageMetadata, only: [message_metadata: 1]
 
   def update(assigns, socket) do
     socket =
       socket
+      |> assign(:mode, Map.get(assigns, :mode, :page))
       |> assign(:form, %{
         "original_text" => assigns[:translation].original_text,
         "translated_text" => assigns[:translation].translated_text
@@ -26,12 +28,31 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
     locale = socket.assigns.locale
     translation = socket.assigns.translation
 
-    Translations.update_singular_translation(translation, %{"translated_text" => translated})
+    case Translations.update_singular_translation(translation, %{"translated_text" => translated}) do
+      {:ok, _translation} ->
+        after_success(socket, locale)
 
+      {:error, _changeset} ->
+        {:noreply,
+         socket
+         |> update(:form, &Map.merge(&1, %{"translated_text" => translated}))
+         |> put_flash(:error, t("Could not update translation."))}
+    end
+  end
+
+  defp after_success(%{assigns: %{return_to: :parent}} = socket, _locale) do
+    send(self(), {:translation_saved, socket.assigns.message.id})
+    {:noreply, socket}
+  end
+
+  defp after_success(socket, locale) do
     {:noreply,
      push_navigate(socket,
        to:
-         dashboard_path(socket, "/locales/#{locale.id}/translations" <> get_query(socket.assigns))
+         dashboard_path(
+           socket,
+           "/locales/#{locale.id}/translations" <> get_query(socket.assigns)
+         )
      )}
   end
 

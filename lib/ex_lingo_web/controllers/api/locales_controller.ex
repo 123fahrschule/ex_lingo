@@ -5,21 +5,17 @@ defmodule ExLingoWeb.Api.LocalesController do
   plug :put_layout, false
 
   alias ExLingo.Translations.Locale.Finders.ListLocales
-  alias ExLingo.Utils.DatabasePopulator
+  alias ExLingoWeb.Api.ControllerHelpers
 
   def index(conn, params) do
-    page = params |> Map.get("page", "1") |> String.to_integer()
-
-    conn
-    |> put_status(200)
-    |> json(ListLocales.find(page: page))
+    ControllerHelpers.with_page(conn, params, fn page ->
+      json(conn, ListLocales.find(page: page))
+    end)
   end
 
   def update(conn, %{"entries" => entries}) do
-    DatabasePopulator.call("locales", entries)
-
-    conn
-    |> put_status(200)
-    |> json(%{status: "OK"})
+    ControllerHelpers.populate(conn, "locales", entries)
   end
+
+  def update(conn, _params), do: ControllerHelpers.missing_entries(conn)
 end

@@ -1,18 +1,25 @@
-<.table_container>
-  <.table aria-label="Glossary entries">
+<div>
+  <.table_container>
+    <.table aria-label={t("Glossary entries")}>
     <.table_header>
       <.table_row>
-        <.table_head>Direction</.table_head>
-        <.table_head>Source term</.table_head>
-        <.table_head>Target term</.table_head>
-        <.table_head>Scope</.table_head>
-        <.table_head>Actions</.table_head>
+        <.sortable_table_head field="direction" sort={assigns[:sort] || %{}}>
+          {t("Direction")}
+        </.sortable_table_head>
+        <.sortable_table_head field="source_term" sort={assigns[:sort] || %{}}>
+          {t("Source term")}
+        </.sortable_table_head>
+        <.sortable_table_head field="target_term" sort={assigns[:sort] || %{}}>
+          {t("Target term")}
+        </.sortable_table_head>
+        <.table_head>{t("Scope")}</.table_head>
+        <.table_head>{t("Actions")}</.table_head>
       </.table_row>
     </.table_header>
     <.table_body>
       <.table_row :if={Enum.empty?(@glossary_entries)}>
         <.table_cell colspan="5" class="text-muted-foreground">
-          No glossary entries found.
+          {t("No glossary entries found.")}
         </.table_cell>
       </.table_row>
       <.table_row
@@ -20,7 +27,6 @@
         class="cursor-pointer"
         phx-click="edit_glossary_entry"
         phx-value-id={glossary_entry.id}
-        phx-target={@myself}
       >
         <.table_cell>
           <.badge variant="outline" class="uppercase">
@@ -44,10 +50,9 @@
               size="icon"
               phx-click="edit_glossary_entry"
               phx-value-id={glossary_entry.id}
-              phx-target={@myself}
-              title="Edit glossary entry"
+              title={t("Edit glossary entry")}
             >
-              <.icon name="edit" size="sm" label="Edit glossary entry" />
+              <.icon name="edit" size="sm" label={t("Edit glossary entry")} />
             </.button>
             <.button
               type="button"
@@ -56,14 +61,15 @@
               phx-click="delete_glossary_entry"
               phx-value-id={glossary_entry.id}
               phx-target={@myself}
-              data-confirm="Delete this glossary entry?"
-              title="Delete glossary entry"
+              data-confirm={t("Delete this glossary entry?")}
+              title={t("Delete glossary entry")}
             >
-              <.icon name="delete" size="sm" class="text-destructive" label="Delete glossary entry" />
+              <.icon name="delete" size="sm" class="text-destructive" label={t("Delete glossary entry")} />
             </.button>
           </div>
         </.table_cell>
       </.table_row>
     </.table_body>
-  </.table>
-</.table_container>
+    </.table>
+  </.table_container>
+</div>

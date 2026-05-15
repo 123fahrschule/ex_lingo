@@ -4,47 +4,41 @@ defmodule ExLingo.AI.Providers.OpenAI.Client do
   """
 
   def request(endpoint, api_key, payload, opts \\ []) do
-    with {:ok, body} <- Jason.encode(payload),
-         :ok <- ensure_http_started() do
+    with {:ok, body} <- Jason.encode(payload) do
       endpoint
       |> do_request(api_key, body, opts)
       |> decode_response()
     end
   end
 
-  defp ensure_http_started do
-    with {:ok, _} <- Application.ensure_all_started(:inets),
-         {:ok, _} <- Application.ensure_all_started(:ssl) do
-      :ok
-    else
-      {:error, reason} -> {:error, {:http_not_started, reason}}
-    end
-  end
-
   defp do_request(endpoint, api_key, body, opts) do
     timeout = Keyword.get(opts, :timeout, 30_000)
+    finch_name = Keyword.get(opts, :finch_name, ExLingo.Finch)
 
     headers = [
-      {~c"authorization", ~c"Bearer #{api_key}"},
-      {~c"content-type", ~c"application/json"}
+      {"authorization", "Bearer #{api_key}"},
+      {"content-type", "application/json"}
     ]
 
-    :httpc.request(
-      :post,
-      {String.to_charlist(endpoint), headers, ~c"application/json", String.to_charlist(body)},
-      [timeout: timeout],
-      body_format: :binary
-    )
+    Finch.build(:post, endpoint, headers, body)
+    |> Finch.request(finch_name, receive_timeout: timeout)
   end
 
-  defp decode_response({:ok, {{_http_version, status, _reason}, _headers, body}})
+  defp decode_response({:ok, %Finch.Response{status: status, body: body}})
        when status in 200..299 do
     Jason.decode(body)
   end
 
-  defp decode_response({:ok, {{_http_version, status, _reason}, _headers, body}}) do
-    {:error, {:openai_http_error, status, body}}
+  defp decode_response({:ok, %Finch.Response{status: status, body: body}}) do
+    {:error, {:openai_http_error, status, decode_error_body(body)}}
   end
 
   defp decode_response({:error, reason}), do: {:error, reason}
+
+  defp decode_error_body(body) do
+    case Jason.decode(body) do
+      {:ok, decoded} -> decoded
+      {:error, _reason} -> body
+    end
+  end
 end

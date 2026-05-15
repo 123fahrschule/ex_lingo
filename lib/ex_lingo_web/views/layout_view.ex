@@ -9,12 +9,18 @@ defmodule ExLingoWeb.LayoutView do
   def render(_, assigns), do: dashboard(assigns)
 
   def csp_nonce(conn, type) when type in [:script, :style, :img] do
-    csp_nonce_assign_key = conn.private.csp_nonce_assign_key[type]
-    conn.assigns[csp_nonce_assign_key]
+    private = Map.get(conn, :private) || %{}
+    assigns = Map.get(conn, :assigns) || %{}
+    csp_nonce_assign_key = get_in(private, [:csp_nonce_assign_key, type])
+
+    Map.get(assigns, csp_nonce_assign_key)
   end
 
   def live_socket_path(conn) do
-    [Enum.map(conn.script_name, &["/" | &1]) | conn.private.live_socket_path]
+    private = Map.get(conn, :private) || %{}
+    live_socket_path = Map.get(private, :live_socket_path) || []
+
+    [Enum.map(conn.script_name, &["/" | &1]) | live_socket_path]
   end
 
   def asset_path(conn, :favicon), do: dashboard_path(conn, "/favicon.ico")

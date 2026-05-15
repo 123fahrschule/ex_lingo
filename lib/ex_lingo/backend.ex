@@ -31,11 +31,7 @@ defmodule ExLingo.Backend do
     quote bind_quoted: [opts: opts] do
       require Logger
 
-      @flag_file Path.join([
-                   Mix.Project.build_path(),
-                   "ex_lingo_recompile",
-                   ".gettext_recompiled"
-                 ])
+      @flag_file ExLingo.Utils.GettextRecompiler.flag_file(".gettext_recompiled")
       @adapter Keyword.get(opts, :ex_lingo_adapter, ExLingo.Backend.Adapter.CachedDB)
       opts = Keyword.drop(opts, [:ex_lingo_adapter])
       # Generate fallback Gettext backend form PO files
@@ -61,7 +57,7 @@ defmodule ExLingo.Backend do
       end
 
       def handle_missing_translation(locale, domain, msgctxt, msgid, bindings) do
-        case ExLingo.Backend.Adapter.CachedDB.lgettext(
+        case @adapter.lgettext(
                locale,
                domain,
                msgctxt,
@@ -86,7 +82,7 @@ defmodule ExLingo.Backend do
             n,
             bindings
           ) do
-        case ExLingo.Backend.Adapter.CachedDB.lngettext(
+        case @adapter.lngettext(
                locale,
                domain,
                msgctxt,

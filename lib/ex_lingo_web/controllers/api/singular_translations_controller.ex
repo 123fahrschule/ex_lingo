@@ -5,21 +5,17 @@ defmodule ExLingoWeb.Api.SingularTranslationsController do
   plug :put_layout, false
 
   alias ExLingo.Translations.SingularTranslations.Finders.ListSingularTranslations
-  alias ExLingo.Utils.DatabasePopulator
+  alias ExLingoWeb.Api.ControllerHelpers
 
   def index(conn, params) do
-    page = params |> Map.get("page", "1") |> String.to_integer()
-
-    conn
-    |> put_status(200)
-    |> json(ListSingularTranslations.find(page: page))
+    ControllerHelpers.with_page(conn, params, fn page ->
+      json(conn, ListSingularTranslations.find(page: page))
+    end)
   end
 
   def update(conn, %{"entries" => entries}) do
-    DatabasePopulator.call("singular_translations", entries)
-
-    conn
-    |> put_status(200)
-    |> json(%{status: "OK"})
+    ControllerHelpers.populate(conn, "singular_translations", entries)
   end
+
+  def update(conn, _params), do: ControllerHelpers.missing_entries(conn)
 end

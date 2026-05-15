@@ -6,8 +6,9 @@ defmodule ExLingo.Utils.ModuleUtils do
   """
   @spec module_exists?(atom()) :: boolean()
   def module_exists?(module_name) do
-    module_name
-    |> Code.ensure_compiled()
-    |> (&match?({:module, _}, &1)).()
+    case Code.ensure_compiled(module_name) do
+      {:module, _module} -> true
+      _other -> false
+    end
   end
 end

@@ -14,21 +14,28 @@ All notable changes to this project will be documented in this file.
 - Add core glossary storage and dashboard management UI for approved translation terminology.
 - Add AI translation suggestions with a provider plugin contract and an OpenAI provider implementation.
 - Add PostgreSQL schema prefix configuration for ExLingo data, including automatic schema creation during ExLingo migrations.
+- Add imported PO source references to messages and display message ID, scope, and source positions in the translation form.
 
 ### Changed
 - Rework the dashboard, translation tables, filters, forms, tabs, pagination, and app shell to use Cognit components, typography, tokens, and icons.
+- Add a compact ExLingo dashboard density layer so Cognit spacing and typography fit embedded host applications.
 - Replace the custom ExLingo sidebar logo with the Cognit app-side-nav branding used by Absence.
 - Raise the minimum Elixir version to `~> 1.18` to match Cognit's runtime requirement.
+- Seed editable ExLingo translations from existing PO-file translations on import without overwriting existing database edits.
 - Update Hex dependencies to current compatible releases, including Phoenix, Phoenix LiveView, Ecto, Gettext, Nebulex, ExDoc, and Postgrex.
 - Update npm dependencies to resolve audit findings, including Alpine.js, Babel, Autoprefixer, PostCSS, Tailwind CSS 3.4.19, and transitive lockfile updates.
 - Update README badges and project links for the independent ExLingo repository and CircleCI workflow.
 - Document dedicated ExLingo repos, PostgreSQL schema prefix setup, and AI provider configuration in README/plugin docs.
 - Update license attribution for the independent ExLingo development line.
+- Relax the Gettext dependency constraint to support host applications on Gettext `0.26.x` and `1.x`.
 - Rebuild distributable JavaScript and CSS assets with the updated dependency set.
 
 ### Fixed
 - Update Nebulex cache configuration for the current adapter packages.
 - Replace `length/1` emptiness checks that caused Credo warnings in the new CI pipeline.
+- Keep ExLingo PostgreSQL migration primary keys independent from host application migration defaults.
+- Avoid falling back to the public schema for message lookups when the public ExLingo tables do not exist.
+- Serve dashboard font assets from ExLingo so Cognit typography and Material Symbols icons work in host applications.
 
 ### Removed
 - Remove the legacy ExLingo logo component and old logo image artifacts.

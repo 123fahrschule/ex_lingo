@@ -22,6 +22,7 @@ defmodule ExLingoWeb.Router do
           live_session session_name, session_opts do
             get "/css-:md5", ExLingoWeb.Assets, :css, as: :ex_lingo_dashboard_asset
             get "/js-:md5", ExLingoWeb.Assets, :js, as: :ex_lingo_dashboard_asset
+            get "/fonts/*path", ExLingoWeb.Assets, :font, as: :ex_lingo_dashboard_asset
             get "/favicon.ico", ExLingoWeb.Assets, :favicon, as: :ex_lingo_dashboard_asset
             get "/favicon.svg", ExLingoWeb.Assets, :favicon_svg, as: :ex_lingo_dashboard_asset
 
@@ -147,7 +148,11 @@ defmodule ExLingoWeb.Router do
         %{} = keys -> Map.take(keys, [:img, :style, :script])
       end
 
-    on_mount = Keyword.get(options, :on_mount)
+    on_mount =
+      options
+      |> Keyword.get(:on_mount)
+      |> List.wrap()
+      |> then(&[ExLingoWeb.I18n | &1])
 
     session_args = [
       csp_nonce_assign_key
@@ -172,11 +177,14 @@ defmodule ExLingoWeb.Router do
         conn,
         csp_nonce_assign_key
       ) do
+    nonce_keys = csp_nonce_assign_key || %{}
+
     %{
+      "ex_lingo_locale" => ExLingoWeb.I18n.locale_from_conn(conn),
       "csp_nonces" => %{
-        img: conn.assigns[csp_nonce_assign_key[:img]],
-        style: conn.assigns[csp_nonce_assign_key[:style]],
-        script: conn.assigns[csp_nonce_assign_key[:script]]
+        img: Map.get(conn.assigns, nonce_keys[:img]),
+        style: Map.get(conn.assigns, nonce_keys[:style]),
+        script: Map.get(conn.assigns, nonce_keys[:script])
       }
     }
   end

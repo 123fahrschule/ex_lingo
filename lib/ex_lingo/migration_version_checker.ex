@@ -14,6 +14,7 @@ defmodule ExLingo.MigrationVersionChecker do
   """
 
   use GenServer
+  require Logger
 
   @colors [
     warning: :yellow,
@@ -28,13 +29,22 @@ defmodule ExLingo.MigrationVersionChecker do
 
   @impl true
   def init(_) do
-    check_version()
+    safely_check_version()
 
     {:ok, %{}}
   end
 
+  defp safely_check_version do
+    check_version()
+  rescue
+    exception ->
+      Logger.error(Exception.format(:error, exception, __STACKTRACE__))
+  catch
+    kind, reason ->
+      Logger.error(Exception.format(kind, reason, __STACKTRACE__))
+  end
+
   defp check_version do
-    ExLingo.Repo.get_adapter_name()
     migrator = ExLingo.Migrations.Postgresql
     latest_version = migrator.current_version()
 

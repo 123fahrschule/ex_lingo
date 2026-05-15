@@ -6,7 +6,7 @@ defmodule ExLingo.Migrations.Postgresql do
   use Ecto.Migration
 
   @initial_version 1
-  @current_version 5
+  @current_version 6
   @default_prefix "public"
 
   @doc false
@@ -49,7 +49,7 @@ defmodule ExLingo.Migrations.Postgresql do
     opts = with_defaults(opts, @initial_version)
 
     repo = Map.get_lazy(opts, :repo, fn -> repo() end)
-    escaped_prefix = Map.fetch!(opts, :escaped_prefix)
+    prefix = Map.fetch!(opts, :prefix)
 
     query = """
     SELECT description
@@ -57,11 +57,11 @@ defmodule ExLingo.Migrations.Postgresql do
     LEFT JOIN pg_description ON pg_description.objoid = pg_class.oid
     LEFT JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace
     WHERE pg_class.relname = 'ex_lingo_messages'
-    AND pg_namespace.nspname = '#{escaped_prefix}'
+    AND pg_namespace.nspname = $1
     """
 
-    case repo.query(query, [], log: false) do
-      {:ok, %{rows: [[version]]}} when is_binary(version) -> String.to_integer(version)
+    case repo.query(query, [prefix], log: false) do
+      {:ok, %{rows: [[version]]}} when is_binary(version) -> parse_version(version)
       _ -> 0
     end
   end
@@ -83,8 +83,8 @@ defmodule ExLingo.Migrations.Postgresql do
 
   defp record_version(_opts, 0), do: :ok
 
-  defp record_version(%{prefix: prefix}, version) do
-    execute "COMMENT ON TABLE #{inspect(prefix)}.ex_lingo_messages IS '#{version}'"
+  defp record_version(%{quoted_prefix: quoted_prefix}, version) do
+    execute "COMMENT ON TABLE #{quoted_prefix}.#{quote_identifier("ex_lingo_messages")} IS '#{version}'"
   end
 
   defp create_schema(%{create_schema: true, quoted_prefix: quoted_prefix}) do
@@ -96,12 +96,34 @@ defmodule ExLingo.Migrations.Postgresql do
   defp with_defaults(opts, version) do
     opts = Enum.into(opts, %{})
     repo = Map.get(opts, :repo) || repo()
-    repo_prefix = repo.default_options(:all) |> Keyword.get(:prefix)
+    repo_prefix = repo_default_prefix(repo)
     opts = Map.merge(%{prefix: repo_prefix || @default_prefix, version: version}, opts)
+    prefix = Map.fetch!(opts, :prefix)
 
     opts
-    |> Map.put_new(:create_schema, opts.prefix != @default_prefix)
-    |> Map.put_new(:quoted_prefix, inspect(opts.prefix))
-    |> Map.put_new(:escaped_prefix, String.replace(opts.prefix, "'", "\\'"))
+    |> Map.put_new(:create_schema, prefix != @default_prefix)
+    |> Map.put_new(:quoted_prefix, quote_identifier(prefix))
+  end
+
+  defp repo_default_prefix(repo) do
+    if function_exported?(repo, :default_options, 1) do
+      repo.default_options(:all) |> Keyword.get(:prefix)
+    end
+  rescue
+    UndefinedFunctionError -> nil
+  end
+
+  defp quote_identifier(identifier) do
+    identifier
+    |> to_string()
+    |> String.replace(~s("), ~s(""))
+    |> then(&~s("#{&1}"))
+  end
+
+  defp parse_version(version) do
+    case Integer.parse(version) do
+      {version, ""} -> version
+      _invalid -> 0
+    end
   end
 end

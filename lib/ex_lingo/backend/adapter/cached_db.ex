@@ -35,6 +35,10 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
   """
   @impl true
   def lgettext(locale, domain, msgctxt, msgid, bindings) do
+    lgettext(locale, domain, msgctxt, msgid, bindings, nil)
+  end
+
+  def lgettext(locale, domain, msgctxt, msgid, bindings, application_source_id) do
     with {:ok, %Locale{id: locale_id}} <-
            Translations.get_locale(filter: [iso639_code: locale]),
          {:ok, %Domain{id: domain_id}} <-
@@ -46,7 +50,7 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
                msgid: msgid,
                context_id: context_id,
                domain_id: domain_id,
-               application_source_id: nil
+               application_source_id: application_source_id
              ]
            ),
          {:ok, %SingularTranslation{translated_text: text}} when not is_nil(text) <-
@@ -59,7 +63,8 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
          {:ok, interpolated} <- apply_bindings(text, bindings) do
       {:ok, interpolated}
     else
-      _ -> {:error, :not_found}
+      {:ok, %SingularTranslation{translated_text: nil}} -> {:error, :not_found}
+      error -> normalize_lookup_error(error)
     end
   end
 
@@ -80,7 +85,11 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
     * `{:error, :not_found}` - When translation is not found
   """
   @impl true
-  def lngettext(locale, domain, msgctxt, _msgid, msgid_plural, n, bindings) do
+  def lngettext(locale, domain, msgctxt, msgid, msgid_plural, n, bindings) do
+    lngettext(locale, domain, msgctxt, msgid, msgid_plural, n, bindings, nil)
+  end
+
+  def lngettext(locale, domain, msgctxt, msgid, _msgid_plural, n, bindings, application_source_id) do
     with {:ok, %Locale{id: locale_id, plurals_header: plurals_header}} <-
            Translations.get_locale(filter: [iso639_code: locale]),
          {:ok, %Domain{id: domain_id}} <-
@@ -89,10 +98,10 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
          {:ok, %Message{id: message_id}} <-
            Translations.get_message(
              filter: [
-               msgid: msgid_plural,
+               msgid: msgid,
                context_id: context_id,
                domain_id: domain_id,
-               application_source_id: nil
+               application_source_id: application_source_id
              ]
            ),
          {:ok, plurals_options} <- Expo.PluralForms.parse(plurals_header),
@@ -108,7 +117,8 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
          {:ok, interpolated} <- apply_bindings(text, Map.put(bindings, :count, n)) do
       {:ok, interpolated}
     else
-      _ -> {:error, :not_found}
+      {:ok, %PluralTranslation{translated_text: nil}} -> {:error, :not_found}
+      error -> normalize_lookup_error(error)
     end
   end
 
@@ -121,8 +131,21 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
     end
   end
 
+  defp normalize_lookup_error({:error, _resource, :not_found}), do: {:error, :not_found}
+  defp normalize_lookup_error({:error, :not_found}), do: {:error, :not_found}
+
+  defp normalize_lookup_error({:error, reason} = error) do
+    Logger.error("cached_db lookup failed: #{inspect(reason)}")
+    error
+  end
+
+  defp normalize_lookup_error(error) do
+    Logger.error("cached_db lookup returned unexpected result: #{inspect(error)}")
+    {:error, {:unexpected_lookup_result, error}}
+  end
+
   @spec apply_bindings(String.t(), Keyword.t() | map()) ::
-          {:ok, String.t()} | {:error, :not_found}
+          {:ok, String.t()} | {:error, term()}
   defp apply_bindings(text, bindings) when is_list(bindings) do
     apply_bindings(text, Map.new(bindings))
   end

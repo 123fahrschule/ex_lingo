@@ -1,12 +1,16 @@
 defmodule ExLingo.Utils.ParamParsers do
   @moduledoc false
 
-  def default_id_parser(id) do
+  def default_id_parser(id) when is_integer(id), do: {:ok, id}
+
+  def default_id_parser(id) when is_binary(id) do
     case Integer.parse(id) do
       {id, _} -> {:ok, id}
       _ -> :error
     end
   end
+
+  def default_id_parser(_id), do: :error
 
   def parse_page(page) do
     case Integer.parse(page) do

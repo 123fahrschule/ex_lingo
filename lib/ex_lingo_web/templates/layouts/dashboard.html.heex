@@ -1,17 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" phx-socket={live_socket_path(@conn)}>
+<html lang={current_ui_locale(@conn)} phx-socket={live_socket_path(@conn)}>
   <head>
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no, user-scalable=no"/>
     <meta name="csrf-token" content={Phoenix.Controller.get_csrf_token()} />
-    <title><%= assigns[:page_title] || "ExLingo Dashboard" %></title>
+    <title><%= assigns[:page_title] || t("ExLingo Dashboard") %></title>
     <link rel="icon" href={asset_path(@conn, :favicon)} sizes="any">
     <link rel="icon" href={asset_path(@conn, :favicon_svg)} type="image/svg+xml">
     <link rel="stylesheet" nonce={csp_nonce(@conn, :style)} href={asset_path(@conn, :css)}>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
     <script nonce={csp_nonce(@conn, :script)} src={asset_path(@conn, :js)} defer></script>
     <script>
       if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -31,7 +28,7 @@
       });
     </script>
   </head>
-  <body>
+  <body class="ex-lingo-dashboard">
     <.sidebar_provider>
       <.sidebar id="sidebar" collapsible="icon">
         <.sidebar_header>
@@ -40,70 +37,62 @@
         <.sidebar_separator />
         <.sidebar_content>
           <.sidebar_group>
-            <.sidebar_group_label>Workspace</.sidebar_group_label>
+            <.sidebar_group_label>{t("Workspace")}</.sidebar_group_label>
             <.sidebar_group_content>
               <.sidebar_menu>
                 <.sidebar_menu_item>
                   <.sidebar_menu_button href={dashboard_path(@conn, "/dashboard")}>
-                    <.icon name="dashboard" decorative /> <span>Dashboard</span>
+                    <.icon name="dashboard" decorative /> <span>{t("Dashboard")}</span>
                   </.sidebar_menu_button>
                 </.sidebar_menu_item>
                 <.sidebar_menu_item>
                   <.sidebar_menu_button href={dashboard_path(@conn, "/locales")}>
-                    <.icon name="translate" decorative /> <span>Locales</span>
+                    <.icon name="translate" decorative /> <span>{t("Locales")}</span>
                   </.sidebar_menu_button>
                 </.sidebar_menu_item>
                 <.sidebar_menu_item>
                   <.sidebar_menu_button href={dashboard_path(@conn, "/domains")}>
-                    <.icon name="folder_managed" decorative /> <span>Domains</span>
+                    <.icon name="folder_managed" decorative /> <span>{t("Domains")}</span>
                   </.sidebar_menu_button>
                 </.sidebar_menu_item>
                 <.sidebar_menu_item>
                   <.sidebar_menu_button href={dashboard_path(@conn, "/contexts")}>
-                    <.icon name="category" decorative /> <span>Contexts</span>
+                    <.icon name="category" decorative /> <span>{t("Contexts")}</span>
                   </.sidebar_menu_button>
                 </.sidebar_menu_item>
                 <.sidebar_menu_item>
                   <.sidebar_menu_button href={dashboard_path(@conn, "/application_sources")}>
-                    <.icon name="apps" decorative /> <span>Applications</span>
+                    <.icon name="apps" decorative /> <span>{t("Applications")}</span>
                   </.sidebar_menu_button>
                 </.sidebar_menu_item>
                 <.sidebar_menu_item>
                   <.sidebar_menu_button href={dashboard_path(@conn, "/glossary")}>
-                    <.icon name="book" decorative /> <span>Glossary</span>
+                    <.icon name="book" decorative /> <span>{t("Glossary")}</span>
                   </.sidebar_menu_button>
                 </.sidebar_menu_item>
               </.sidebar_menu>
             </.sidebar_group_content>
           </.sidebar_group>
         </.sidebar_content>
-        <.sidebar_footer>
-          <div class="px-2 text-body-xs text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden">
-            ExLingo
-          </div>
-        </.sidebar_footer>
       </.sidebar>
 
       <.sidebar_inset>
-        <.topbar>
-          <div class="mr-auto min-w-0">
-            <div class="truncate text-body-sm font-medium text-muted-foreground">
-              Translation management
-            </div>
-          </div>
+        <.topbar data-ex-lingo-topbar>
+          <div class="mr-auto" />
+          <.locale_select class="ml-2" />
           <.button
             type="button"
             variant="ghost"
             size="icon"
             phx-click={Phoenix.LiveView.JS.dispatch("toggle_dark_mode")}
-            aria-label="Toggle dark mode"
+            aria-label={t("Toggle dark mode")}
           >
             <.icon name="dark_mode" size="sm" decorative />
           </.button>
         </.topbar>
 
         <.page>
-          <.page_content>
+          <.page_content data-ex-lingo-page-content>
             <%= @inner_content %>
           </.page_content>
         </.page>

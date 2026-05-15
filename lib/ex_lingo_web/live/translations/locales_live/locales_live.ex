@@ -11,16 +11,24 @@ defmodule ExLingoWeb.Translations.LocalesLive do
      |> assign(:locales, locales)}
   end
 
-  def generate_locale_gradient(locale) do
-    case length(locale.colors) do
-      1 ->
-        "background: #{List.first(locale.colors)};"
-
-      2 ->
-        "background: #{List.first(locale.colors)}; background: linear-gradient(145deg, #{Enum.at(locale.colors, 0)} 45%, #{Enum.at(locale.colors, 1)} 50% 100%);"
-
-      3 ->
-        "background: #{List.first(locale.colors)}; background: linear-gradient(145deg, #{Enum.at(locale.colors, 0)} 0% 30%, #{Enum.at(locale.colors, 1)} 33% 66%, #{Enum.at(locale.colors, 2)} 66% 100%);"
+  def locale_gradient_class(locale) do
+    case locale_colors(locale) |> length() do
+      1 -> "locale-gradient locale-gradient--solid"
+      2 -> "locale-gradient locale-gradient--split"
+      _count -> "locale-gradient locale-gradient--tricolor"
     end
   end
+
+  def locale_gradient_vars(locale) do
+    [first, second, third] =
+      locale
+      |> locale_colors()
+      |> then(fn colors -> colors ++ List.duplicate(List.first(colors), 3) end)
+      |> Enum.take(3)
+
+    "--locale-color-1: #{first}; --locale-color-2: #{second}; --locale-color-3: #{third};"
+  end
+
+  defp locale_colors(%{colors: colors}) when is_list(colors) and colors != [], do: colors
+  defp locale_colors(_locale), do: ["#000000"]
 end
