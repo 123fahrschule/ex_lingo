@@ -50,6 +50,17 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponentsTest do
     assert html =~ "margin-bottom: 1.5rem;"
   end
 
+  test "renders padding and spacing inside related duplicate messages" do
+    html =
+      render_component(&PossibleDuplicateComponents.possible_duplicate_details/1,
+        candidates: [candidate()],
+        current_message_id: 1
+      )
+
+    assert html =~ "padding: 1rem;"
+    assert html =~ "margin-bottom: 1rem;"
+  end
+
   test "renders duplicate badge in messages table" do
     message = %Message{
       id: 1,

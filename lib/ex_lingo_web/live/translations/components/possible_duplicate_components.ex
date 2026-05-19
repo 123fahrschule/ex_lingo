@@ -107,17 +107,27 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponents do
             {t("Plural form")}: <span class="text-foreground">{candidate.nplural_index}</span>
           </div>
 
-          <details class="group">
+          <details
+            class="group rounded-md border border-border bg-muted/20"
+            style={if @compact, do: "padding: 0.75rem;", else: "padding: 1rem;"}
+          >
             <summary class="cursor-pointer text-body-sm font-medium text-foreground">
               {t("Related messages")} ({candidate.occurrence_count})
             </summary>
-            <div class="mt-3 space-y-2">
+            <div class="mt-3">
               <div
-                :for={occurrence <- candidate.occurrences}
+                :for={{occurrence, occurrence_index} <- Enum.with_index(candidate.occurrences)}
                 class={[
-                  "rounded-md border border-border p-3",
+                  "rounded-md border border-border bg-background",
                   @current_message_id == occurrence.message_id && "bg-info-50"
                 ]}
+                style={
+                  occurrence_card_style(
+                    occurrence_index,
+                    length(candidate.occurrences),
+                    @compact
+                  )
+                }
               >
                 <div class="flex flex-wrap items-center gap-2">
                   <.badge variant="outline">
@@ -286,6 +296,16 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponents do
 
   defp candidate_spacing_style(_index, _candidate_count, true), do: "margin-bottom: 0.75rem;"
   defp candidate_spacing_style(_index, _candidate_count, false), do: "margin-bottom: 1.5rem;"
+
+  defp occurrence_card_style(index, occurrence_count, compact) do
+    padding = if compact, do: "0.75rem", else: "1rem"
+    margin = if index >= occurrence_count - 1, do: "0", else: occurrence_card_margin(compact)
+
+    "padding: #{padding}; margin-bottom: #{margin};"
+  end
+
+  defp occurrence_card_margin(true), do: "0.75rem"
+  defp occurrence_card_margin(false), do: "1rem"
 
   defp source_reference_label(%{"file" => file, "line" => line}), do: reference_label(file, line)
   defp source_reference_label(%{file: file, line: line}), do: reference_label(file, line)
