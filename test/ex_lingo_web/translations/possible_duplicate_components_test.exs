@@ -127,7 +127,8 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponentsTest do
         locale: %Locale{id: 1, native_name: "Deutsch"},
         filters: %{},
         form: %{"original_text" => "Cancel", "translated_text" => "Abbrechen"},
-        possible_duplicate_candidates: [candidate()]
+        possible_duplicate_candidates: [candidate()],
+        length_status: :ok
       )
 
     assert html =~ "Possible duplicate"

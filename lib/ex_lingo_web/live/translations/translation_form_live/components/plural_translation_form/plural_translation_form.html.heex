@@ -76,7 +76,11 @@
             name={"translated_text.#{@current_tab_index}"}
             value={@form["translated_text"]}
             rows="4"
-            class="!min-h-24"
+            class={["!min-h-24", length_border_class(@length_status)]}
+          />
+          <.validation_hints
+            source={@form["original_text"]}
+            target={@form["translated_text"]}
           />
         </.form_item>
 
@@ -130,6 +134,11 @@
               name={"translated_text.#{@current_tab_index}"}
               value={@form["translated_text"]}
               rows="5"
+              class={length_border_class(@length_status)}
+            />
+            <.validation_hints
+              source={@form["original_text"]}
+              target={@form["translated_text"]}
             />
           </.form_item>
 

@@ -6,10 +6,14 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
   use ExLingoWeb, :live_component
 
   alias ExLingo.Translations
+  alias ExLingo.Translations.Validations
   import ExLingoWeb.Translations.MessageMetadata, only: [message_metadata: 1]
 
   import ExLingoWeb.Translations.PossibleDuplicateComponents,
     only: [possible_duplicate_details: 1]
+
+  import ExLingoWeb.Translations.TranslationValidationHints,
+    only: [validation_hints: 1, length_border_class: 1]
 
   def update(assigns, socket) do
     socket =
@@ -24,11 +28,16 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
         "translated_text" => assigns[:translation].translated_text
       })
 
-    {:ok, assign(socket, assigns)}
+    {:ok, socket |> assign(assigns) |> assign_length_status()}
   end
 
   def handle_event("validate", %{"translated_text" => translation}, socket) do
-    {:noreply, update(socket, :form, &Map.merge(&1, %{"translated_text" => translation}))}
+    socket =
+      socket
+      |> update(:form, &Map.merge(&1, %{"translated_text" => translation}))
+      |> assign_length_status()
+
+    {:noreply, socket}
   end
 
   def handle_event("submit", %{"translated_text" => translated}, socket) do
@@ -58,6 +67,12 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
       _error ->
         {:noreply, put_flash(socket, :error, t("Could not mark text as unclear."))}
     end
+  end
+
+  defp assign_length_status(socket) do
+    source = socket.assigns.form["original_text"] || ""
+    target = socket.assigns.form["translated_text"] || ""
+    assign(socket, :length_status, Validations.length_status(source, target))
   end
 
   defp after_success(%{assigns: %{return_to: :parent}} = socket, _locale) do

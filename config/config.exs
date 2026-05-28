@@ -6,6 +6,16 @@ config :ex_lingo, ExLingo.Cache,
     backend: :ets
   ]
 
+# Thresholds for translator quality warnings. Override per project — mobile UIs
+# typically use tighter ratios, web UIs more relaxed. Once a settings UI exists
+# (briefing 06), these values should be writable through it.
+config :ex_lingo, :validations,
+  length_warning_ratio: 1.3,
+  length_error_ratio: 1.8,
+  short_string_threshold: 10,
+  short_abs_warning: 5,
+  short_abs_error: 15
+
 config :phoenix, :json_library, Jason
 config :phoenix, :stacktrace_depth, 20
 
