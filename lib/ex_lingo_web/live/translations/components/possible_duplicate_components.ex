@@ -193,24 +193,24 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponents do
 
   def ai_cleanup_instruction(candidate) do
     """
-    Du arbeitest im Repository der Anwendung, in der diese UI-Texte verwendet werden. Bitte prüfe diese mögliche doppelte Übersetzung im Anwendungscode und bereinige sie nur, wenn die Semantik wirklich vollständig gleich ist.
+    You are working in the repository of the application where these UI texts are used. Please review this possible duplicate translation in the application code and only consolidate it if the semantics are truly identical.
 
-    Wichtig:
-    - Prüfe zuerst die unten genannten Quellpositionen im Anwendungscode. Wenn eine Quellposition fehlt, suche nach dem angegebenen Quelltext.
-    - Ziehe Keys nur zusammen, wenn Bedeutung, Nutzungskontext, Platzhalter, Pluralform, Grammatik und spätere Änderungswahrscheinlichkeit vollständig identisch sind.
-    - Gleiche Zielübersetzungen allein reichen nicht aus. Wenn ein Text je nach UI-Stelle fachlich anders verstanden werden kann, bleibt er getrennt.
-    - Wenn du zusammenziehst, ändere den Anwendungscode so, dass die betroffenen Stellen denselben fachlich passenden i18n-/gettext-Key verwenden. Entferne danach nicht mehr genutzte doppelte Keys/Einträge, sofern das Projekt dafür einen klaren Mechanismus hat.
-    - Halte den Patch klein, ändere keine unabhängigen Übersetzungen und führe passende Tests aus.
+    Important:
+    - First check the source positions listed below in the application code. If a source position is missing, search for the given source text.
+    - Only merge keys when meaning, usage context, placeholders, plural form, grammar and likelihood of future divergence are fully identical.
+    - Identical target translations alone are not enough. If a text could be understood differently depending on the UI location, keep them separate.
+    - When merging, update the application code so that the affected places use the same semantically appropriate i18n/gettext key. Then remove unused duplicate keys/entries if the project has a clear mechanism for that.
+    - Keep the patch small, do not change unrelated translations, and run the relevant tests.
 
-    Warum diese Stellen auffallen:
-    - Typ: #{translation_type_label(candidate)}
-    - Sicherheit: #{confidence_label(candidate.confidence)}
-    - Grund: #{reason_label(candidate.reason)}
-    - Aktuelle Übersetzung: #{quoted(candidate.target_text)}
-    #{plural_instruction_line(candidate)}- Quelltexte / Suchbegriffe:
+    Why these places stand out:
+    - Type: #{instruction_translation_type_label(candidate)}
+    - Confidence: #{instruction_confidence_label(candidate.confidence)}
+    - Reason: #{instruction_reason_label(candidate.reason)}
+    - Current translation: #{quoted(candidate.target_text)}
+    #{plural_instruction_line(candidate)}- Source texts / search terms:
     #{formatted_source_texts(candidate.source_texts)}
 
-    Zu prüfende Stellen:
+    Locations to review:
     #{formatted_app_occurrences(candidate.occurrences)}
     """
     |> String.trim()
@@ -236,7 +236,7 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponents do
   defp relation_name(_relation, fallback), do: fallback
 
   defp plural_instruction_line(%{translation_type: :plural, nplural_index: index}) do
-    "- Pluralform: #{index}\n"
+    "- Plural form: #{index}\n"
   end
 
   defp plural_instruction_line(_candidate), do: ""
@@ -252,21 +252,14 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponents do
     |> Enum.with_index(1)
     |> Enum.map_join("\n\n", fn {occurrence, index} ->
       """
-      #{index}. Quellpositionen: #{formatted_instruction_source_references(occurrence.source_references)}
-         Quelltext / Suchbegriff: #{quoted(occurrence.source_text)}
-         Aktuelle Übersetzung: #{quoted(occurrence.target_text)}
-         Typ: #{occurrence_type_label(occurrence)}
+      #{index}. Source positions: #{formatted_instruction_source_references(occurrence.source_references)}
+         Source text / search term: #{quoted(occurrence.source_text)}
+         Current translation: #{quoted(occurrence.target_text)}
+         Type: #{instruction_occurrence_type_label(occurrence)}
       """
       |> String.trim_trailing()
     end)
   end
-
-  defp occurrence_type_label(%{translation_type: :plural, nplural_index: index}) do
-    "#{t("Plural Translation")} #{index}"
-  end
-
-  defp occurrence_type_label(%{translation_type: :singular}), do: t("Singular Translation")
-  defp occurrence_type_label(_occurrence), do: t("Translation")
 
   defp formatted_source_references([]), do: t("None")
   defp formatted_source_references(nil), do: t("None")
@@ -279,13 +272,41 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponents do
   end
 
   defp formatted_instruction_source_references([]),
-    do: "nicht aufgezeichnet; suche nach dem Quelltext / Suchbegriff"
+    do: "not recorded; search by source text / search term"
 
   defp formatted_instruction_source_references(nil),
-    do: "nicht aufgezeichnet; suche nach dem Quelltext / Suchbegriff"
+    do: "not recorded; search by source text / search term"
 
   defp formatted_instruction_source_references(references),
     do: formatted_source_references(references)
+
+  defp instruction_translation_type_label(%{translation_type: :plural, nplural_index: index}),
+    do: "Plural translation #{index}"
+
+  defp instruction_translation_type_label(%{translation_type: :singular}),
+    do: "Singular translation"
+
+  defp instruction_translation_type_label(_candidate), do: "Translation"
+
+  defp instruction_occurrence_type_label(%{translation_type: :plural, nplural_index: index}),
+    do: "Plural translation #{index}"
+
+  defp instruction_occurrence_type_label(%{translation_type: :singular}),
+    do: "Singular translation"
+
+  defp instruction_occurrence_type_label(_occurrence), do: "Translation"
+
+  defp instruction_confidence_label(:high), do: "High confidence"
+  defp instruction_confidence_label(:medium), do: "Medium confidence"
+  defp instruction_confidence_label(:low), do: "Low confidence"
+  defp instruction_confidence_label(_confidence), do: "Possible duplicate"
+
+  defp instruction_reason_label(:same_source_same_target_different_scope),
+    do: "Same source and translation"
+
+  defp instruction_reason_label(:same_target_different_source), do: "Same translation"
+  defp instruction_reason_label(:near_source_variant_same_target), do: "Source variant"
+  defp instruction_reason_label(_reason), do: "Possible duplicate"
 
   defp quoted(text) when is_binary(text), do: inspect(text, printable_limit: :infinity)
   defp quoted(text), do: inspect(text)

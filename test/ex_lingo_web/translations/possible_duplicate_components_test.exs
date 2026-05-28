@@ -27,14 +27,14 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponentsTest do
   test "builds cautious AI cleanup instructions" do
     instruction = PossibleDuplicateComponents.ai_cleanup_instruction(candidate())
 
-    assert instruction =~ "Repository der Anwendung"
-    assert instruction =~ "Semantik wirklich vollständig gleich"
-    assert instruction =~ "Gleiche Zielübersetzungen allein reichen nicht aus"
+    assert instruction =~ "repository of the application"
+    assert instruction =~ "only consolidate it if the semantics are truly identical"
+    assert instruction =~ "Identical target translations alone are not enough"
     refute instruction =~ "ExLingo"
     refute instruction =~ "Message-ID"
     refute instruction =~ "Translation-ID"
     assert instruction =~ "lib/app/modal.ex:12"
-    assert instruction =~ "nicht aufgezeichnet; suche nach dem Quelltext"
+    assert instruction =~ "not recorded; search by source text"
     assert instruction =~ ~s("Abbrechen")
   end
 
