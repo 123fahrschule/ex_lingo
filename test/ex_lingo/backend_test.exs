@@ -59,11 +59,27 @@ defmodule ExLingo.BackendTest do
         translated_text: "DB: Ciao mondo"
       })
 
+    # 2b. Same msgid under the default context, used by the dynamic Gettext API
+    {:ok, default_hello} =
+      Translations.create_message(%{
+        message_type: :singular,
+        msgid: "Hello world",
+        context: "default",
+        domain_id: domain.id
+      })
+
+    {:ok, _default_hello_translation} =
+      Translations.create_singular_translation(%{
+        locale_id: locale.id,
+        message_id: default_hello.id,
+        translated_text: "DB: Ciao mondo"
+      })
+
     # 3. Plural message in DB
     {:ok, plural_message} =
       Translations.create_message(%{
         message_type: :plural,
-        msgid: "%{count} plural messages",
+        msgid: "DB plural message",
         context: "test",
         domain_id: domain.id
       })
@@ -89,7 +105,7 @@ defmodule ExLingo.BackendTest do
     {:ok, override_plural_message} =
       Translations.create_message(%{
         message_type: :plural,
-        msgid: "%{count} new emails",
+        msgid: "One new email",
         context: "default",
         domain_id: domain.id
       })

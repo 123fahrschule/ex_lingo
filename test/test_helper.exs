@@ -1,6 +1,7 @@
 Application.ensure_all_started(:ex_lingo)
 
 ExLingo.Test.Repo.start_link()
+ExLingo.Test.Endpoint.start_link()
 
 ExLingo.start_link(
   endpoint: ExLingo.Test.Endpoint,

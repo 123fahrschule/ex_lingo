@@ -11,7 +11,8 @@ defmodule ExLingoWeb.Translations.PossibleDuplicatesLive do
 
   def mount(params, _session, socket) do
     %{entries: locales} = Translations.list_locales(per_page: @locales_limit)
-    selected_locale = selected_locale(locales, params["locale_id"])
+    locale_id_param = if is_map(params), do: params["locale_id"]
+    selected_locale = selected_locale(locales, locale_id_param)
 
     socket =
       socket

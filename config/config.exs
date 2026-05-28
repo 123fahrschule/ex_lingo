@@ -67,4 +67,10 @@ if config_env() == :test do
     port: 5432,
     pool: Ecto.Adapters.SQL.Sandbox,
     pool_size: 10
+
+  config :ex_lingo, ExLingo.Test.Endpoint,
+    secret_key_base:
+      "test_secret_key_base_test_secret_key_base_test_secret_key_base_test_secret_key_base",
+    live_view: [signing_salt: "ex-lingo-test-salt"],
+    server: false
 end

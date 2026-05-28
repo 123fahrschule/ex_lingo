@@ -62,7 +62,8 @@ defmodule ExLingo.MixProject do
       {:ex_doc, "~> 0.40.2", only: :dev, runtime: false},
       {:gettext, ">= 0.26.0 and < 2.0.0"},
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
-      {:postgrex, "~> 0.22.2", only: :test}
+      {:postgrex, "~> 0.22.2", only: :test},
+      {:lazy_html, ">= 0.1.0", only: :test}
     ]
   end
 

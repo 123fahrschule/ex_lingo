@@ -109,32 +109,7 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
   end
 
   describe "lngettext/7" do
-    test "returns singular form for count = 1", %{
-      locale: locale,
-      domain: domain,
-      context: context
-    } do
-      # Create a specific message for singular test
-      {:ok, message} =
-        Translations.create_message(%{
-          message_type: :singular,
-          msgid: "One item",
-          context: context,
-          domain_id: domain.id
-        })
-
-      # Change the translation to expect interpolation
-      {:ok, _translation} =
-        Translations.create_singular_translation(%{
-          locale_id: locale.id,
-          message_id: message.id,
-          # Changed from "Un élément"
-          translated_text: "%{count} élément"
-        })
-
-      # Clear cache to ensure fresh state
-      ExLingo.Cache.delete_all()
-
+    test "returns singular form for count = 1" do
       result =
         CachedDB.lngettext(
           "fr",
@@ -146,7 +121,6 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
           %{}
         )
 
-      # Changed from "Un élément"
       assert result == {:ok, "1 élément"}
     end
 
