@@ -27,10 +27,18 @@
         <.card>
           <.card_content class="flex items-center justify-between gap-4 pt-6">
             <div>
-              <p class="text-sm font-medium text-muted-foreground">{t("Contexts")}</p>
-              <p class="text-3xl font-semibold">{length(@contexts)}</p>
+              <p class="text-sm font-medium text-muted-foreground">{t("Unclear texts")}</p>
+              <p class="text-3xl font-semibold">{@unclear_messages_count}</p>
             </div>
-            <.icon name="segment" size="md" class="text-muted-foreground" decorative />
+            <.button
+              as={&Phoenix.Component.link/1}
+              navigate={dashboard_path(@socket, "/unclear_texts")}
+              variant="outline"
+              size="icon"
+              title={t("Open unclear texts")}
+            >
+              <.icon name="help" label={t("Open unclear texts")} />
+            </.button>
           </.card_content>
         </.card>
 

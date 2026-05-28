@@ -46,34 +46,13 @@ defmodule ExLingo.PoFiles.Services.StaleDetectionTest do
           domain
       end
 
-    # Get or create contexts (default context exists from migration)
-    context_default =
-      case Translations.get_context(filter: [name: "default"]) do
-        {:ok, context} ->
-          context
-
-        {:error, :context, :not_found} ->
-          {:ok, context} = Translations.create_context(%{name: "default"})
-          context
-      end
-
-    context_test =
-      case Translations.get_context(filter: [name: "test"]) do
-        {:ok, context} ->
-          context
-
-        {:error, :context, :not_found} ->
-          {:ok, context} = Translations.create_context(%{name: "test"})
-          context
-      end
-
     # Create a message that EXISTS in PO files (not stale)
     {:ok, active_message} =
       Translations.create_message(%{
         msgid: "Hello world",
         message_type: :singular,
         domain_id: domain_default.id,
-        context_id: context_test.id
+        context: "test"
       })
 
     # Create a message that DOES NOT exist in PO files (stale)
@@ -82,7 +61,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetectionTest do
         msgid: "This message was removed from PO files",
         message_type: :singular,
         domain_id: domain_default.id,
-        context_id: context_default.id
+        context: "default"
       })
 
     # Create another stale message
@@ -91,7 +70,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetectionTest do
         msgid: "Another removed message",
         message_type: :singular,
         domain_id: domain_errors.id,
-        context_id: context_default.id
+        context: "default"
       })
 
     %{
@@ -99,8 +78,8 @@ defmodule ExLingo.PoFiles.Services.StaleDetectionTest do
       locale_it: locale_it,
       domain_default: domain_default,
       domain_errors: domain_errors,
-      context_default: context_default,
-      context_test: context_test,
+      context_default: "default",
+      context_test: "test",
       active_message: active_message,
       stale_message_1: stale_message_1,
       stale_message_2: stale_message_2
@@ -156,7 +135,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetectionTest do
           msgid: "Message with default domain",
           message_type: :singular,
           domain_id: domain_default.id,
-          context_id: context_default.id
+          context: context_default
         })
 
       {:ok, result} = StaleDetection.call(base_path: @test_base_path)
@@ -175,7 +154,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetectionTest do
           msgid: "Message with default context",
           message_type: :singular,
           domain_id: domain_default.id,
-          context_id: context_default.id
+          context: context_default
         })
 
       {:ok, result} = StaleDetection.call(base_path: @test_base_path)
@@ -212,7 +191,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetectionTest do
           # Typo - missing 'l'
           message_type: :singular,
           domain_id: domain_default.id,
-          context_id: context_test.id
+          context: context_test
         })
 
       {:ok, result} =
@@ -244,7 +223,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetectionTest do
           msgid: "Helo world similar",
           message_type: :singular,
           domain_id: domain_default.id,
-          context_id: context_test.id
+          context: context_test
         })
 
       {:ok, result} =
@@ -275,7 +254,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetectionTest do
           msgid: "XYZ",
           message_type: :singular,
           domain_id: domain_default.id,
-          context_id: context_default.id
+          context: context_default
         })
 
       {:ok, result} =
@@ -330,7 +309,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetectionTest do
           msgid: "Helo world",
           message_type: :singular,
           domain_id: domain_default.id,
-          context_id: context_test.id
+          context: context_test
         })
 
       {:ok, result} =

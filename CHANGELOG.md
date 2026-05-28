@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - Add AI translation suggestions with a provider plugin contract and an OpenAI provider implementation.
 - Add PostgreSQL schema prefix configuration for ExLingo data, including automatic schema creation during ExLingo migrations.
 - Add imported PO source references to messages and display message ID, scope, and source positions in the translation form.
+- Add an unclear-text review flow so translators can flag vague gettext contexts and developers can review the affected source positions.
 
 ### Changed
 - Rework the dashboard, translation tables, filters, forms, tabs, pagination, and app shell to use Cognit components, typography, tokens, and icons.
@@ -29,6 +30,7 @@ All notable changes to this project will be documented in this file.
 - Update license attribution for the independent ExLingo development line.
 - Relax the Gettext dependency constraint to support host applications on Gettext `0.26.x` and `1.x`.
 - Rebuild distributable JavaScript and CSS assets with the updated dependency set.
+- Treat gettext context as message metadata instead of a managed dashboard entity; context remains visible during translation and searchable with message text.
 
 ### Fixed
 - Update Nebulex cache configuration for the current adapter packages.
@@ -40,6 +42,7 @@ All notable changes to this project will be documented in this file.
 ### Removed
 - Remove the legacy ExLingo logo component and old logo image artifacts.
 - Remove historical non-PostgreSQL migration modules and adapter branches.
+- Remove managed context tables, context CRUD screens, context filters, and glossary context scoping.
 - Remove GitHub Actions, GitHub issue and pull request templates, Lefthook configuration, commitlint hook, Code of Conduct, and Contributing guide from the forked project.
 - Remove the obsolete `@tailwindcss/forms` npm dependency after switching to the Cognit Tailwind preset.
 

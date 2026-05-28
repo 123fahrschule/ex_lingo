@@ -82,14 +82,12 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
 
   defp assign_scope_options(socket) do
     %{entries: domains} = Translations.list_domains(per_page: @scope_options_limit)
-    %{entries: contexts} = Translations.list_contexts(per_page: @scope_options_limit)
 
     %{entries: application_sources} =
       Translations.list_application_sources(per_page: @scope_options_limit)
 
     socket
     |> assign(:domains, domains)
-    |> assign(:contexts, contexts)
     |> assign(:application_sources, application_sources)
   end
 
@@ -98,7 +96,7 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
       {:ok, id} ->
         Translations.get_glossary_entry(
           filter: [id: id],
-          preloads: [:domain, :context, :application_source]
+          preloads: [:domain, :application_source]
         )
 
       _ ->
@@ -111,7 +109,6 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
     |> normalize_locale("source_locale")
     |> normalize_locale("target_locale")
     |> normalize_optional_id("domain_id")
-    |> normalize_optional_id("context_id")
     |> normalize_optional_id("application_source_id")
   end
 

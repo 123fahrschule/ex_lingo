@@ -13,8 +13,8 @@ defmodule ExLingoWeb.Dashboard.DashboardLive do
     stale_messages_count = get_stale_messages_count()
     mergeable_messages_count = get_mergeable_messages_count()
     %{entries: domains, metadata: _domains_metadata} = Translations.list_domains()
-    %{entries: contexts, metadata: _contexts_metadata} = Translations.list_contexts()
     %{entries: locales, metadata: _locales_metadata} = Translations.list_locales()
+    unclear_messages = Translations.list_context_review_messages()
 
     socket =
       socket
@@ -22,8 +22,8 @@ defmodule ExLingoWeb.Dashboard.DashboardLive do
       |> assign(:stale_messages_count, stale_messages_count)
       |> assign(:mergeable_messages_count, mergeable_messages_count)
       |> assign(:languages, locales)
-      |> assign(:contexts, contexts)
       |> assign(:domains, domains)
+      |> assign(:unclear_messages_count, length(unclear_messages))
       |> assign(:cache_count, cache_count())
 
     {:ok, socket}

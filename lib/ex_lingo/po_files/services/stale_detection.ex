@@ -123,9 +123,9 @@ defmodule ExLingo.PoFiles.Services.StaleDetection do
 
   ## Database Operations
 
-  # Retrieves all messages from database with domain and context preloaded
+  # Retrieves all messages from database with their domain preloaded
   defp list_all_db_messages do
-    Translations.list_all_messages(preloads: [:domain, :context])
+    Translations.list_all_messages(preloads: [:domain])
   end
 
   ## PO File Processing
@@ -154,8 +154,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetection do
   defp message_to_key(%Message{} = message) do
     %Message{msgid: msgid, domain: domain, context: context} = message
     domain_name = domain && domain.name
-    context_name = context && context.name
-    {msgid, domain_name, context_name}
+    {msgid, domain_name, context}
   end
 
   # Extracts message IDs from stale messages into a MapSet
@@ -193,7 +192,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetection do
        when is_list(messages) and is_list(against_messages) do
     scoped_against_messages =
       Enum.group_by(against_messages, fn %Message{} = message ->
-        {message.domain, message.context}
+        {message.domain_id, message.context}
       end)
 
     messages
@@ -212,7 +211,7 @@ defmodule ExLingo.PoFiles.Services.StaleDetection do
   # Finds the best fuzzy match for a single message within its domain/context scope
   defp fuzzy_match_message(%Message{} = message, scoped_against_messages, threshold)
        when is_map(scoped_against_messages) do
-    against_messages = scoped_against_messages[{message.domain, message.context}] || []
+    against_messages = scoped_against_messages[{message.domain_id, message.context}] || []
 
     against_messages
     |> Enum.reduce_while(nil, &reduce_fuzzy_match(message, &1, &2, threshold))

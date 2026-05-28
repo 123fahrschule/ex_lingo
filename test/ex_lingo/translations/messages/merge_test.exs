@@ -33,22 +33,11 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           domain
       end
 
-    # Get or create context
-    context =
-      case Translations.get_context(filter: [name: "default"]) do
-        {:ok, context} ->
-          context
-
-        {:error, :context, :not_found} ->
-          {:ok, context} = Translations.create_context(%{name: "default"})
-          context
-      end
-
     %{
       locale_en: locale_en,
       locale_es: locale_es,
       domain: domain,
-      context: context
+      context: "default"
     }
   end
 
@@ -65,7 +54,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Hello world",
           message_type: :singular,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       # Target already has English translation
@@ -83,7 +72,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Hello wrold",
           message_type: :singular,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       # Stale has Spanish translation (no conflict - target doesn't have Spanish)
@@ -128,7 +117,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Hello world",
           message_type: :singular,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       # Target has English translation
@@ -146,7 +135,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Hello wrold",
           message_type: :singular,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       # Source also has English translation
@@ -186,7 +175,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid_plural: "Many items",
           message_type: :plural,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       # Target has English plural translations
@@ -207,7 +196,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid_plural: "Many itmes",
           message_type: :plural,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       # Stale has Spanish plural translations
@@ -256,7 +245,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Item",
           message_type: :singular,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       {:ok, stale_message} =
@@ -264,7 +253,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Itme",
           message_type: :singular,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       # Create translations for both
@@ -318,7 +307,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Target",
           message_type: :singular,
           domain_id: nil,
-          context_id: nil
+          context: "default"
         })
 
       assert {:error, :message, :not_found} =
@@ -331,7 +320,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Source",
           message_type: :singular,
           domain_id: nil,
-          context_id: nil
+          context: "default"
         })
 
       assert {:error, :message, :not_found} =
@@ -351,7 +340,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Hello",
           message_type: :singular,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       # Source message in "errors" domain
@@ -360,7 +349,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Helo",
           message_type: :singular,
           domain_id: other_domain.id,
-          context_id: context.id
+          context: context
         })
 
       # Merge should work even across domains
@@ -388,7 +377,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "Old",
           message_type: :singular,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       {:ok, target_message} =
@@ -396,7 +385,7 @@ defmodule ExLingo.Translations.Messages.MergeTest do
           msgid: "New",
           message_type: :singular,
           domain_id: domain.id,
-          context_id: context.id
+          context: context
         })
 
       {:ok, _translation} =

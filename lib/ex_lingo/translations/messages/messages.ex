@@ -36,6 +36,63 @@ defmodule ExLingo.Translations.Messages do
     |> Repo.get_repo().update(Repo.opts(opts))
   end
 
+  def mark_message_context_unclear(%Message{} = message, opts \\ []) do
+    update_message(
+      message,
+      %{
+        context_review_requested_at: DateTime.utc_now() |> DateTime.truncate(:second),
+        context_review_context: message.context
+      },
+      opts
+    )
+  end
+
+  def list_context_review_messages(params \\ []) do
+    import Ecto.Query
+
+    preloads = params[:preloads] || [:domain, :application_source]
+
+    Message
+    |> where([message], not is_nil(message.context_review_requested_at))
+    |> order_by([message], desc: message.context_review_requested_at, asc: message.msgid)
+    |> preload(^preloads)
+    |> Repo.get_repo().all(Repo.opts())
+  end
+
+  def clear_context_reviews_for_key(attrs, opts \\ []) do
+    import Ecto.Query
+
+    msgid = attrs[:msgid] || attrs["msgid"]
+    context = attrs[:context] || attrs["context"] || "default"
+    domain_id = attrs[:domain_id] || attrs["domain_id"]
+    application_source_id = attrs[:application_source_id] || attrs["application_source_id"]
+
+    Message
+    |> where(
+      [message],
+      message.msgid == ^msgid and message.context != ^context and
+        not is_nil(message.context_review_requested_at)
+    )
+    |> domain_query(domain_id)
+    |> application_source_query(application_source_id)
+    |> Repo.get_repo().update_all(
+      [set: [context_review_requested_at: nil, context_review_context: nil]],
+      Repo.opts(opts)
+    )
+  end
+
+  defp domain_query(query, nil) do
+    import Ecto.Query
+
+    where(query, [message], is_nil(message.domain_id))
+  end
+
+  defp domain_query(query, domain_id) do
+    import Ecto.Query
+
+    where(query, [message], message.domain_id == ^domain_id)
+  end
+
   @doc """
   Deletes a stale message and ALL its translations across ALL locales.
 
@@ -110,6 +167,18 @@ defmodule ExLingo.Translations.Messages do
   end
 
   defp invalidate_message_cache_on_success(result), do: result
+
+  defp application_source_query(query, nil) do
+    import Ecto.Query
+
+    where(query, [message], is_nil(message.application_source_id))
+  end
+
+  defp application_source_query(query, application_source_id) do
+    import Ecto.Query
+
+    where(query, [message], message.application_source_id == ^application_source_id)
+  end
 
   @doc """
   Merges two messages by moving all translations from one message to another.

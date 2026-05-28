@@ -5,7 +5,6 @@ defmodule ExLingo.Translations do
 
   alias ExLingo.Translations.{
     ApplicationSources,
-    Contexts,
     Domains,
     GlossaryEntries,
     Locales,
@@ -24,14 +23,6 @@ defmodule ExLingo.Translations do
 
   defdelegate update_application_source(application_source, attrs, opts \\ []),
     to: ApplicationSources
-
-  # CONTEXTS
-  defdelegate list_contexts(params \\ []), to: Contexts
-  defdelegate list_all_contexts(params \\ []), to: Contexts
-  defdelegate get_context(params), to: Contexts
-  defdelegate create_context(params, opts \\ []), to: Contexts
-  defdelegate update_context(context, attrs, opts \\ []), to: Contexts
-  defdelegate change_context(context, params \\ %{}), to: Contexts
 
   # DOMAINS
   defdelegate list_domains(params \\ []), to: Domains
@@ -58,6 +49,9 @@ defmodule ExLingo.Translations do
   defdelegate get_messages_count(), to: Messages
   defdelegate create_message(attrs, opts \\ []), to: Messages
   defdelegate update_message(message, attrs, opts \\ []), to: Messages
+  defdelegate mark_message_context_unclear(message, opts \\ []), to: Messages
+  defdelegate clear_context_reviews_for_key(attrs, opts \\ []), to: Messages
+  defdelegate list_context_review_messages(params \\ []), to: Messages
   defdelegate delete_message(message_id), to: Messages
   defdelegate delete_messages(message_ids), to: Messages
   defdelegate merge_messages(from_message_id, to_message_id), to: Messages

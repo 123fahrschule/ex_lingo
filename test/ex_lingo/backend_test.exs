@@ -24,7 +24,6 @@ defmodule ExLingo.BackendTest do
       })
 
     {:ok, domain} = Translations.create_domain(%{name: "default"})
-    {:ok, context} = Translations.create_context(%{name: "test"})
 
     # Create messages and translations for database-backed tests
 
@@ -33,7 +32,7 @@ defmodule ExLingo.BackendTest do
       Translations.create_message(%{
         message_type: :singular,
         msgid: "DB only message",
-        context_id: context.id,
+        context: "test",
         domain_id: domain.id
       })
 
@@ -49,7 +48,7 @@ defmodule ExLingo.BackendTest do
       Translations.create_message(%{
         message_type: :singular,
         msgid: "Hello world",
-        context_id: context.id,
+        context: "test",
         domain_id: domain.id
       })
 
@@ -65,7 +64,7 @@ defmodule ExLingo.BackendTest do
       Translations.create_message(%{
         message_type: :plural,
         msgid: "%{count} plural messages",
-        context_id: context.id,
+        context: "test",
         domain_id: domain.id
       })
 
@@ -91,7 +90,7 @@ defmodule ExLingo.BackendTest do
       Translations.create_message(%{
         message_type: :plural,
         msgid: "%{count} new emails",
-        context_id: nil,
+        context: "default",
         domain_id: domain.id
       })
 
@@ -225,7 +224,7 @@ defmodule ExLingo.BackendTest do
       Translations.create_message(%{
         message_type: :singular,
         msgid: "Welcome %{user} to %{app}",
-        context_id: nil,
+        context: "default",
         domain_id: domain.id
       })
 

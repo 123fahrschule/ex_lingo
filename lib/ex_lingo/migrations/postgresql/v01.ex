@@ -10,7 +10,6 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
   @default_prefix "public"
   @ex_lingo_locales "ex_lingo_locales"
   @ex_lingo_domains "ex_lingo_domains"
-  @ex_lingo_contexts "ex_lingo_contexts"
   @ex_lingo_messages "ex_lingo_messages"
   @ex_lingo_singular_translations "ex_lingo_singular_translations"
   @ex_lingo_plural_translations "ex_lingo_plural_translations"
@@ -18,7 +17,6 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
   def up(opts) do
     [
       &up_locales/1,
-      &up_contexts/1,
       &up_domains/1,
       &up_messages/1,
       &up_singular_translations/1,
@@ -33,7 +31,6 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
       &down_singular_translations/1,
       &down_messages/1,
       &down_domains/1,
-      &down_contexts/1,
       &down_locales/1
     ]
     |> Enum.each(&apply(&1, [opts]))
@@ -71,20 +68,6 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
     create_if_not_exists unique_index(@ex_lingo_domains, [:name], prefix: prefix)
   end
 
-  defp up_contexts(opts) do
-    prefix = prefix(opts)
-
-    create_if_not_exists table(@ex_lingo_contexts, prefix: prefix, primary_key: false) do
-      add(:id, :bigserial, primary_key: true)
-      add(:name, :string)
-      add(:description, :text)
-      add(:color, :string, null: false, default: Colors.default_color())
-      timestamps()
-    end
-
-    create_if_not_exists unique_index(@ex_lingo_contexts, [:name], prefix: prefix)
-  end
-
   defp up_messages(opts) do
     prefix = prefix(opts)
     quoted_prefix = quoted_prefix(opts)
@@ -103,9 +86,9 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
     create_if_not_exists table(@ex_lingo_messages, prefix: prefix, primary_key: false) do
       add(:id, :bigserial, primary_key: true)
       add(:msgid, :text)
+      add(:context, :text)
       add(:message_type, :gettext_message_type, null: false)
       add(:domain_id, references(@ex_lingo_domains, prefix: prefix, type: :bigint), null: true)
-      add(:context_id, references(@ex_lingo_contexts, prefix: prefix, type: :bigint), null: true)
       timestamps()
     end
 
@@ -113,7 +96,8 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
       ALTER TABLE #{quoted_prefix}.#{@ex_lingo_messages}
         ADD COLUMN IF NOT EXISTS searchable tsvector
         GENERATED ALWAYS AS (
-          setweight(to_tsvector('english', coalesce(msgid, '')), 'A')
+          setweight(to_tsvector('english', coalesce(msgid, '')), 'A') ||
+          setweight(to_tsvector('english', coalesce(context, '')), 'B')
         ) STORED;
     """
 
@@ -121,8 +105,9 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
       CREATE INDEX IF NOT EXISTS #{@ex_lingo_messages}_searchable_idx ON #{quoted_prefix}.#{@ex_lingo_messages} USING gin(searchable);
     """
 
-    create_if_not_exists unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid],
-                           prefix: prefix
+    create_if_not_exists unique_index(@ex_lingo_messages, [:domain_id, :context, :msgid],
+                           prefix: prefix,
+                           nulls_distinct: false
                          )
   end
 
@@ -176,10 +161,6 @@ defmodule ExLingo.Migrations.Postgresql.V01 do
 
   defp down_domains(opts) do
     drop table(@ex_lingo_domains, prefix: prefix(opts))
-  end
-
-  defp down_contexts(opts) do
-    drop table(@ex_lingo_contexts, prefix: prefix(opts))
   end
 
   defp down_messages(opts) do

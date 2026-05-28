@@ -35,17 +35,15 @@ defmodule ExLingoWeb.I18n do
     "Could not generate a suggestion: %{reason}" =>
       "Der Vorschlag konnte nicht erstellt werden: %{reason}",
     "Could not load application source." => "Die Anwendung konnte nicht geladen werden.",
-    "Could not load context." => "Der Kontext konnte nicht geladen werden.",
     "Could not load domain." => "Die Domain konnte nicht geladen werden.",
     "Could not load glossary entry." => "Der Glossareintrag konnte nicht geladen werden.",
     "Could not update plural translation." =>
       "Die Plural-Übersetzung konnte nicht aktualisiert werden.",
     "Could not update translation." => "Die Übersetzung konnte nicht aktualisiert werden.",
+    "Could not mark text as unclear." =>
+      "Der Text konnte nicht als unverständlich markiert werden.",
     "Could not load translation." => "Die Übersetzung konnte nicht geladen werden.",
     "Context" => "Kontext",
-    "Context scope" => "Kontext-Scope",
-    "Context settings" => "Kontext-Einstellungen",
-    "Contexts" => "Kontexte",
     "Copied!" => "Kopiert!",
     "Copy AI instructions" => "KI-Anweisung kopieren",
     "Create application source" => "Anwendung anlegen",
@@ -57,8 +55,6 @@ defmodule ExLingoWeb.I18n do
       "Definiere freigegebene Terminologie für eine Sprachrichtung.",
     "Define the source label and color used in translation lists." =>
       "Definiere Bezeichnung und Farbe der Quelle in Übersetzungslisten.",
-    "Adjust the display color and optional description for this gettext context." =>
-      "Passe die Anzeigefarbe und optionale Beschreibung für diesen gettext-Kontext an.",
     "Adjust the display color and optional description for this gettext domain." =>
       "Passe die Anzeigefarbe und optionale Beschreibung für diese gettext-Domain an.",
     "Delete" => "Löschen",
@@ -111,8 +107,12 @@ defmodule ExLingoWeb.I18n do
     "Message ID" => "Text-ID",
     "Message" => "Text",
     "Messages" => "Texte",
+    "Marked" => "Markiert",
+    "Marked unclear" => "Als unverständlich markiert",
     "Medium confidence" => "Mittlere Sicherheit",
     "Model" => "Modell",
+    "Mark this text as unclear for developers" =>
+      "Diesen Text für Entwickler als unverständlich markieren",
     "Model %{model} is not allowed for this provider." =>
       "Das Modell %{model} ist für diesen Anbieter nicht erlaubt.",
     "MsgID" => "MsgID",
@@ -122,6 +122,7 @@ defmodule ExLingoWeb.I18n do
     "Next page" => "Nächste Seite",
     "No glossary entries found." => "Keine Glossareinträge gefunden.",
     "No locales found." => "Keine Sprachen gefunden.",
+    "No unclear texts." => "Keine unverständlichen Texte.",
     "No possible duplicates found." => "Keine möglichen Duplikate gefunden.",
     "No source positions were recorded in the imported PO files." =>
       "In den importierten PO-Dateien wurden keine Quellpositionen gespeichert.",
@@ -131,6 +132,7 @@ defmodule ExLingoWeb.I18n do
       "Es ist kein KI-Übersetzungsanbieter konfiguriert.",
     "None" => "Keine",
     "Not translated" => "Nicht übersetzt",
+    "Open unclear texts" => "Unverständliche Texte öffnen",
     "Pagination" => "Seitennavigation",
     "Page %{number}" => "Seite %{number}",
     "Plural form" => "Pluralform",
@@ -168,6 +170,9 @@ defmodule ExLingoWeb.I18n do
     "Suggestion" => "Vorschlag",
     "Target locale" => "Zielsprache",
     "Target term" => "Zielbegriff",
+    "Text marked as unclear." => "Der Text wurde als unverständlich markiert.",
+    "Texts marked by translators because the gettext context is not clear enough." =>
+      "Texte, die Übersetzer markiert haben, weil der gettext-Kontext nicht verständlich genug ist.",
     "The AI provider API key is missing." => "Der API-Key des KI-Anbieters fehlt.",
     "The name comes from gettext and is used to scope imported messages." =>
       "Der Name kommt aus gettext und wird zum Scoping importierter Texte verwendet.",
@@ -199,10 +204,14 @@ defmodule ExLingoWeb.I18n do
     "Translation Progress" => "Übersetzungsfortschritt",
     "Translation" => "Übersetzung",
     "Type" => "Typ",
+    "Unclear text" => "Unverständlich",
+    "Unclear texts" => "Unverständliche Texte",
     "%{count} possible duplicate groups" => "%{count} mögliche Duplikatgruppen",
     "Update application source" => "Anwendung aktualisieren",
     "Update glossary entry" => "Glossareintrag aktualisieren",
     "Usage guidance" => "Hinweise zur Verwendung",
+    "When translators mark a text as unclear, it will appear here with source positions." =>
+      "Wenn Übersetzer einen Text als unverständlich markieren, erscheint er hier mit Quellpositionen.",
     "Used for badges and filters in translation tables." =>
       "Wird für Badges und Filter in Übersetzungstabellen verwendet.",
     "Workspace" => "Arbeitsbereich"

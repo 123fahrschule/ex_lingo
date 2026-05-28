@@ -6,7 +6,7 @@ defmodule ExLingo.PoFiles.Services.ExtractMessage do
   alias ExLingo.Repo
 
   alias ExLingo.Translations
-  alias ExLingo.Translations.{Context, Domain}
+  alias ExLingo.Translations.Domain
 
   @default_domain "default"
   @default_context "default"
@@ -16,8 +16,9 @@ defmodule ExLingo.PoFiles.Services.ExtractMessage do
 
     repo.transaction(fn ->
       with {:ok, domain} <- assign_domain(attrs[:domain_name]),
-           {:ok, context} <- assign_context(attrs[:context_name]),
-           {:ok, message} <- get_or_create_message(attrs, context, domain) do
+           message_attrs <- assign_message_scope(attrs, domain),
+           {_count, _rows} <- Translations.clear_context_reviews_for_key(message_attrs),
+           {:ok, message} <- get_or_create_message(message_attrs) do
         message
       else
         {:error, reason} -> repo.rollback(reason)
@@ -29,57 +30,36 @@ defmodule ExLingo.PoFiles.Services.ExtractMessage do
   def default_domain, do: @default_domain
   def default_context, do: @default_context
 
-  defp get_or_create_message(attrs, nil, nil) do
-    case Translations.get_message(filter: [msgid: attrs[:msgid]]) do
-      {:ok, message} -> update_message_source_references(message, attrs)
-      {:error, :message, :not_found} -> Translations.create_message(attrs)
-    end
-  end
-
-  defp get_or_create_message(attrs, %Context{id: context_id}, %Domain{id: domain_id}) do
-    case Translations.get_message(
-           filter: [msgid: attrs[:msgid], context_id: context_id, domain_id: domain_id]
-         ) do
+  defp get_or_create_message(attrs) do
+    case Translations.get_message(filter: message_filter(attrs)) do
       {:ok, message} ->
-        update_message_source_references(message, attrs)
+        update_existing_message(message, attrs)
 
       {:error, :message, :not_found} ->
-        attrs
-        |> Map.put(:context_id, context_id)
-        |> Map.put(:domain_id, domain_id)
-        |> Translations.create_message()
+        Translations.create_message(attrs)
     end
   end
 
-  defp get_or_create_message(attrs, %Context{id: context_id}, nil) do
-    case Translations.get_message(filter: [msgid: attrs[:msgid], context_id: context_id]) do
-      {:ok, message} ->
-        update_message_source_references(message, attrs)
-
-      {:error, :message, :not_found} ->
-        with {:ok, %Domain{id: domain_id}} <- assign_domain(@default_domain) do
-          attrs
-          |> Map.put(:context_id, context_id)
-          |> Map.put(:domain_id, domain_id)
-          |> Translations.create_message()
-        end
-    end
+  defp assign_message_scope(attrs, domain) do
+    attrs
+    |> Map.put(:context, normalize_context(attrs[:context_name]))
+    |> put_domain_id(domain)
   end
 
-  defp get_or_create_message(%{msgid: msgid} = attrs, nil, %Domain{id: domain_id}) do
-    case Translations.get_message(filter: [msgid: msgid, domain_id: domain_id]) do
-      {:ok, message} ->
-        update_message_source_references(message, attrs)
+  defp put_domain_id(attrs, %Domain{id: domain_id}), do: Map.put(attrs, :domain_id, domain_id)
+  defp put_domain_id(attrs, _domain), do: attrs
 
-      {:error, :message, :not_found} ->
-        with {:ok, %Context{id: context_id}} <- assign_context(@default_context) do
-          attrs
-          |> Map.put(:context_id, context_id)
-          |> Map.put(:domain_id, domain_id)
-          |> Translations.create_message()
-        end
-    end
+  defp message_filter(attrs) do
+    [
+      msgid: attrs[:msgid],
+      context: attrs[:context],
+      domain_id: nullable_filter(attrs[:domain_id]),
+      application_source_id: nullable_filter(attrs[:application_source_id])
+    ]
   end
+
+  defp nullable_filter(nil), do: :is_null
+  defp nullable_filter(value), do: value
 
   defp assign_domain(nil), do: {:ok, nil}
 
@@ -95,28 +75,28 @@ defmodule ExLingo.PoFiles.Services.ExtractMessage do
     end
   end
 
-  defp assign_context(nil), do: {:ok, nil}
+  defp normalize_context(nil), do: @default_context
 
-  defp assign_context(context_name) do
-    case Translations.get_context(filter: [name: context_name]) do
-      {:ok, context} ->
-        {:ok, context}
-
-      {:error, :context, :not_found} ->
-        Translations.create_context(%{
-          name: context_name
-        })
+  defp normalize_context(context_name) do
+    context_name
+    |> to_string()
+    |> String.trim()
+    |> case do
+      "" -> @default_context
+      context -> context
     end
   end
 
-  defp update_message_source_references(message, attrs) do
-    incoming_references = Map.get(attrs, :source_references, [])
+  defp update_existing_message(message, attrs) do
+    changes =
+      message
+      |> context_changes(attrs)
+      |> source_reference_changes(message, attrs)
 
-    with true <- incoming_references != [],
-         merged_references <-
-           merge_source_references(message.source_references, incoming_references),
-         false <- merged_references == (message.source_references || []) do
-      case Translations.update_message(message, %{source_references: merged_references}) do
+    if changes == %{} do
+      {:ok, message}
+    else
+      case Translations.update_message(message, changes) do
         {:ok, message} ->
           ExLingo.Cache.delete_all()
           {:ok, message}
@@ -124,8 +104,31 @@ defmodule ExLingo.PoFiles.Services.ExtractMessage do
         error ->
           error
       end
+    end
+  end
+
+  defp context_changes(message, attrs) do
+    if message.context == attrs[:context] do
+      %{}
     else
-      _no_update_needed -> {:ok, message}
+      %{
+        context: attrs[:context],
+        context_review_requested_at: nil,
+        context_review_context: nil
+      }
+    end
+  end
+
+  defp source_reference_changes(changes, message, attrs) do
+    incoming_references = Map.get(attrs, :source_references, [])
+
+    with true <- incoming_references != [],
+         merged_references <-
+           merge_source_references(message.source_references, incoming_references),
+         false <- merged_references == (message.source_references || []) do
+      Map.put(changes, :source_references, merged_references)
+    else
+      _no_update_needed -> changes
     end
   end
 

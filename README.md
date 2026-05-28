@@ -320,7 +320,7 @@ With Gettext version >= `0.26`, ExLingo uses a custom backend adapter system (`E
 
 ### Translation glossary
 
-ExLingo can store approved terminology in `ex_lingo_glossary_entries`. Each glossary entry defines a source locale, target locale, source term, target term, optional usage guidance, and optional scope by domain, context, or application source.
+ExLingo can store approved terminology in `ex_lingo_glossary_entries`. Each glossary entry defines a source locale, target locale, source term, target term, optional usage guidance, and optional scope by domain or application source.
 
 The glossary is core translation data. Provider plugins can use it, but the terminology is not tied to a specific AI provider.
 
@@ -348,7 +348,7 @@ You can take action one by one for every message (delete and/or merge) or you ca
 
 ![Translation progress](assets/images/readme/dashboard.png)
 
-ExLingo tracks the progress of your application's translation into other languages and reports it in the user's dashboard. In the dashboard you can filter your messages by domain or context, or use a search engine. It is also possible to display only the messages that need translation to better see how much work remains to be done.
+ExLingo tracks the progress of your application's translation into other languages and reports it in the user's dashboard. In the dashboard you can filter your messages by domain or use a search engine that also considers gettext context text. It is also possible to display only the messages that need translation to better see how much work remains to be done.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

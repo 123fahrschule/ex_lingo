@@ -8,15 +8,14 @@ defmodule ExLingo.Translations.Message do
 
   alias ExLingo.Translations.{
     ApplicationSource,
-    Context,
     Domain,
     PluralTranslation,
     SingularTranslation
   }
 
   @required_fields ~w(msgid message_type)a
-  @optional_fields ~w(domain_id context_id application_source_id source_references)a
-  @relations ~w(domain context singular_translations plural_translations)a
+  @optional_fields ~w(context domain_id application_source_id source_references context_review_requested_at context_review_context)a
+  @relations ~w(domain singular_translations plural_translations application_source)a
   @max_msgid_length 10_000
 
   @type t() :: ExLingo.Translations.MessageSpec.t()
@@ -25,11 +24,13 @@ defmodule ExLingo.Translations.Message do
 
   schema "ex_lingo_messages" do
     field :msgid, :string
+    field :context, :string
     field :message_type, Ecto.Enum, values: [:singular, :plural]
     field :source_references, {:array, :map}, default: []
+    field :context_review_requested_at, :utc_datetime
+    field :context_review_context, :string
 
     belongs_to :domain, Domain
-    belongs_to :context, Context
     belongs_to :application_source, ApplicationSource
 
     has_many :singular_translations, SingularTranslation

@@ -56,11 +56,6 @@
                   </.sidebar_menu_button>
                 </.sidebar_menu_item>
                 <.sidebar_menu_item>
-                  <.sidebar_menu_button href={dashboard_path(@conn, "/contexts")}>
-                    <.icon name="category" decorative /> <span>{t("Contexts")}</span>
-                  </.sidebar_menu_button>
-                </.sidebar_menu_item>
-                <.sidebar_menu_item>
                   <.sidebar_menu_button href={dashboard_path(@conn, "/application_sources")}>
                     <.icon name="apps" decorative /> <span>{t("Applications")}</span>
                   </.sidebar_menu_button>
@@ -73,6 +68,11 @@
                 <.sidebar_menu_item>
                   <.sidebar_menu_button href={dashboard_path(@conn, "/possible_duplicates")}>
                     <.icon name="difference" decorative /> <span>{t("Possible duplicates")}</span>
+                  </.sidebar_menu_button>
+                </.sidebar_menu_item>
+                <.sidebar_menu_item>
+                  <.sidebar_menu_button href={dashboard_path(@conn, "/unclear_texts")}>
+                    <.icon name="help" decorative /> <span>{t("Unclear texts")}</span>
                   </.sidebar_menu_button>
                 </.sidebar_menu_item>
               </.sidebar_menu>

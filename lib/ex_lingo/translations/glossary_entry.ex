@@ -6,11 +6,11 @@ defmodule ExLingo.Translations.GlossaryEntry do
   use ExLingo.Schema
   import Ecto.Changeset
 
-  alias ExLingo.Translations.{ApplicationSource, Context, Domain}
+  alias ExLingo.Translations.{ApplicationSource, Domain}
 
   @required_fields ~w(source_locale target_locale source_term target_term)a
-  @optional_fields ~w(usage_guidance domain_id context_id application_source_id)a
-  @relations ~w(domain context application_source)a
+  @optional_fields ~w(usage_guidance domain_id application_source_id)a
+  @relations ~w(domain application_source)a
   @locale_format ~r/^[a-z]{2}(?:[_-][a-z]+)?$/
 
   @type t :: %__MODULE__{}
@@ -25,7 +25,6 @@ defmodule ExLingo.Translations.GlossaryEntry do
     field :usage_guidance, :string
 
     belongs_to :domain, Domain
-    belongs_to :context, Context
     belongs_to :application_source, ApplicationSource
 
     timestamps()
@@ -48,7 +47,6 @@ defmodule ExLingo.Translations.GlossaryEntry do
     |> validate_length(:source_term, min: 1, max: 255)
     |> validate_length(:target_term, min: 1, max: 255)
     |> foreign_key_constraint(:domain_id)
-    |> foreign_key_constraint(:context_id)
     |> foreign_key_constraint(:application_source_id)
   end
 

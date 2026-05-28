@@ -147,7 +147,7 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslations do
   defp singular_occurrences(locale_id) do
     [
       filter: [locale_id: locale_id],
-      preloads: [message: [:domain, :context, :application_source]],
+      preloads: [message: [:domain, :application_source]],
       skip_pagination: true
     ]
     |> Translations.list_singular_translations()
@@ -157,7 +157,7 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslations do
   defp plural_occurrences(locale_id) do
     [
       filter: [locale_id: locale_id],
-      preloads: [message: [:domain, :context, :application_source]],
+      preloads: [message: [:domain, :application_source]],
       skip_pagination: true
     ]
     |> Translations.list_plural_translations()
@@ -381,7 +381,7 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslations do
   defp scope_key(occurrence) do
     {
       relation_id(occurrence.domain),
-      relation_id(occurrence.context),
+      occurrence.context,
       relation_id(occurrence.application_source)
     }
   end

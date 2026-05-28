@@ -7,7 +7,6 @@ defmodule ExLingo.Migrations.Postgresql.V05 do
 
   @ex_lingo_glossary_entries "ex_lingo_glossary_entries"
   @ex_lingo_domains "ex_lingo_domains"
-  @ex_lingo_contexts "ex_lingo_contexts"
   @ex_lingo_application_sources "ex_lingo_application_sources"
 
   def up(opts) do
@@ -23,7 +22,6 @@ defmodule ExLingo.Migrations.Postgresql.V05 do
       add(:target_term, :text, null: false)
       add(:usage_guidance, :text)
       add(:domain_id, references(@ex_lingo_domains, prefix: prefix, type: :bigint), null: true)
-      add(:context_id, references(@ex_lingo_contexts, prefix: prefix, type: :bigint), null: true)
 
       add(
         :application_source_id,
@@ -39,7 +37,6 @@ defmodule ExLingo.Migrations.Postgresql.V05 do
                          )
 
     create_if_not_exists index(@ex_lingo_glossary_entries, [:domain_id], prefix: prefix)
-    create_if_not_exists index(@ex_lingo_glossary_entries, [:context_id], prefix: prefix)
 
     create_if_not_exists index(@ex_lingo_glossary_entries, [:application_source_id],
                            prefix: prefix

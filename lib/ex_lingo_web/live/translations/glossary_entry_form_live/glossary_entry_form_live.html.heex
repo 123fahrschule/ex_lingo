@@ -75,7 +75,7 @@
 
         <% select_class = "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-body-sm shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" %>
 
-        <div class="grid gap-4 md:grid-cols-3">
+        <div class="grid gap-4 md:grid-cols-2">
           <.form_item>
             <.form_label field={@form[:domain_id]}>{t("Domain scope")}</.form_label>
             <.form_control>
@@ -91,23 +91,6 @@
               </select>
             </.form_control>
             <.form_message field={@form[:domain_id]} translate={false} />
-          </.form_item>
-
-          <.form_item>
-            <.form_label field={@form[:context_id]}>{t("Context scope")}</.form_label>
-            <.form_control>
-              <select
-                id={@form[:context_id].id}
-                name={@form[:context_id].name}
-                class={select_class}
-              >
-                <option value="">{t("Global")}</option>
-                <option :for={context <- @contexts} value={context.id} selected={to_string(context.id) == to_string(@form[:context_id].value)}>
-                  {context.name}
-                </option>
-              </select>
-            </.form_control>
-            <.form_message field={@form[:context_id]} translate={false} />
           </.form_item>
 
           <.form_item>

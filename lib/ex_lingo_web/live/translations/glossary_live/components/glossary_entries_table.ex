@@ -31,7 +31,6 @@ defmodule ExLingoWeb.Translations.GlossaryEntriesTable do
   def scope_label(glossary_entry) do
     [
       relation_label(t("Domain"), glossary_entry.domain),
-      relation_label(t("Context"), glossary_entry.context),
       relation_label(t("Application"), glossary_entry.application_source)
     ]
     |> Enum.reject(&is_nil/1)

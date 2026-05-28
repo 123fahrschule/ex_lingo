@@ -20,11 +20,9 @@ defmodule ExLingoWeb.Translations.PossibleDuplicatesLiveTest do
       })
 
     {:ok, domain} = Translations.create_domain(%{name: "default"})
-    {:ok, modal_context} = Translations.create_context(%{name: "modal"})
-    {:ok, form_context} = Translations.create_context(%{name: "form"})
 
-    create_singular(locale, domain, modal_context, "Cancel", "Abbrechen")
-    create_singular(locale, domain, form_context, "Cancel", "Abbrechen")
+    create_singular(locale, domain, "modal", "Cancel", "Abbrechen")
+    create_singular(locale, domain, "form", "Cancel", "Abbrechen")
 
     %{locale: locale}
   end
@@ -46,7 +44,7 @@ defmodule ExLingoWeb.Translations.PossibleDuplicatesLiveTest do
         msgid: msgid,
         message_type: :singular,
         domain_id: domain.id,
-        context_id: context.id
+        context: context
       })
 
     {:ok, _translation} =

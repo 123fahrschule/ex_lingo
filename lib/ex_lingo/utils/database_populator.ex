@@ -11,8 +11,9 @@ defmodule ExLingo.Utils.DatabasePopulator do
 
   @allowed_keys ~w(
     id name description color iso639_code native_name family wiki_url colors plurals_header
-    msgid message_type domain_id context_id application_source_id locale_id message_id
-    original_text translated_text nplural_index inserted_at updated_at
+    msgid context message_type domain_id application_source_id locale_id message_id
+    original_text translated_text nplural_index source_references context_review_requested_at
+    context_review_context inserted_at updated_at
   )
   @allowed_key_map Map.new(@allowed_keys, &{&1, String.to_atom(&1)})
 

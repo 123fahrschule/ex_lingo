@@ -19,14 +19,13 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
       })
 
     {:ok, domain} = Translations.create_domain(%{name: "test_domain"})
-    {:ok, context} = Translations.create_context(%{name: "test_context"})
 
     # Create a message for singular translation test
     {:ok, singular_message} =
       Translations.create_message(%{
         message_type: :singular,
         msgid: "Hello world",
-        context_id: context.id,
+        context: "test_context",
         domain_id: domain.id
       })
 
@@ -35,7 +34,7 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
       Translations.create_message(%{
         message_type: :plural,
         msgid: "One item",
-        context_id: context.id,
+        context: "test_context",
         domain_id: domain.id
       })
 
@@ -64,7 +63,7 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
         translated_text: "%{count} éléments"
       })
 
-    {:ok, %{locale: locale, domain: domain, context: context}}
+    {:ok, %{locale: locale, domain: domain, context: "test_context"}}
   end
 
   describe "lgettext/5" do
@@ -90,7 +89,7 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
         Translations.create_message(%{
           message_type: :singular,
           msgid: "Hello %{name}",
-          context_id: nil,
+          context: "default",
           domain_id: domain.id
         })
 
@@ -120,7 +119,7 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
         Translations.create_message(%{
           message_type: :singular,
           msgid: "One item",
-          context_id: context.id,
+          context: context,
           domain_id: domain.id
         })
 
@@ -188,7 +187,7 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
         Translations.create_message(%{
           message_type: :plural,
           msgid: "One custom item with %{extra}",
-          context_id: nil,
+          context: "default",
           domain_id: domain.id
         })
 

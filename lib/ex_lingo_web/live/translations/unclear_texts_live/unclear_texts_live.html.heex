@@ -1,0 +1,64 @@
+<.page_header title={t("Unclear texts")} class="px-0 pt-0">
+  <p class="text-body-sm text-muted-foreground">
+    {t("Texts marked by translators because the gettext context is not clear enough.")}
+  </p>
+</.page_header>
+
+<div class="space-y-4">
+  <.empty_state
+    :if={@messages == []}
+    icon="help"
+    title={t("No unclear texts.")}
+    description={t("When translators mark a text as unclear, it will appear here with source positions.")}
+  />
+
+  <.table_container :if={@messages != []}>
+    <.table aria-label={t("Unclear texts")}>
+      <.table_header>
+        <.table_row>
+          <.table_head>{t("Message")}</.table_head>
+          <.table_head>{t("Domain")}</.table_head>
+          <.table_head>{t("Application")}</.table_head>
+          <.table_head>{t("Source Positions")}</.table_head>
+          <.table_head>{t("Marked")}</.table_head>
+        </.table_row>
+      </.table_header>
+      <.table_body>
+        <.table_row :for={message <- @messages}>
+          <.table_cell>
+            <div class="max-w-xl space-y-1">
+              <div class="break-words text-body-sm font-medium text-foreground">
+                {message.msgid}
+              </div>
+              <div class="whitespace-pre-wrap text-body-xs text-muted-foreground">
+                {t("Context")}: {message.context || "default"}
+              </div>
+            </div>
+          </.table_cell>
+          <.table_cell>
+            <.badge variant={if message.domain, do: "default", else: "outline"} class="uppercase">
+              {if message.domain, do: message.domain.name, else: t("None")}
+            </.badge>
+          </.table_cell>
+          <.table_cell>
+            <.badge variant={if message.application_source, do: "default", else: "outline"} class="uppercase">
+              {if message.application_source, do: message.application_source.name, else: t("Global")}
+            </.badge>
+          </.table_cell>
+          <.table_cell>
+            <ul class="space-y-1">
+              <li :for={reference <- List.wrap(message.source_references)}>
+                <code class="break-all rounded bg-muted px-1.5 py-0.5 text-body-xs text-foreground">
+                  {source_reference_label(reference)}
+                </code>
+              </li>
+            </ul>
+          </.table_cell>
+          <.table_cell class="text-body-xs text-muted-foreground">
+            {message.context_review_requested_at}
+          </.table_cell>
+        </.table_row>
+      </.table_body>
+    </.table>
+  </.table_container>
+</div>

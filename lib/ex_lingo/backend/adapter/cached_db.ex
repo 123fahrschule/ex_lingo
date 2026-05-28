@@ -9,7 +9,6 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
   @behaviour ExLingo.Backend.Adapter
 
   alias ExLingo.Translations.{
-    Context,
     Domain,
     Locale,
     Message,
@@ -43,14 +42,13 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
            Translations.get_locale(filter: [iso639_code: locale]),
          {:ok, %Domain{id: domain_id}} <-
            Translations.get_domain(filter: [name: domain]),
-         {:ok, context_id} <- maybe_get_context_id(msgctxt),
          {:ok, %Message{id: message_id}} <-
            Translations.get_message(
              filter: [
                msgid: msgid,
-               context_id: context_id,
+               context: normalize_context(msgctxt),
                domain_id: domain_id,
-               application_source_id: application_source_id
+               application_source_id: application_source_filter(application_source_id)
              ]
            ),
          {:ok, %SingularTranslation{translated_text: text}} when not is_nil(text) <-
@@ -94,14 +92,13 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
            Translations.get_locale(filter: [iso639_code: locale]),
          {:ok, %Domain{id: domain_id}} <-
            Translations.get_domain(filter: [name: domain]),
-         {:ok, context_id} <- maybe_get_context_id(msgctxt),
          {:ok, %Message{id: message_id}} <-
            Translations.get_message(
              filter: [
                msgid: msgid,
-               context_id: context_id,
+               context: normalize_context(msgctxt),
                domain_id: domain_id,
-               application_source_id: application_source_id
+               application_source_id: application_source_filter(application_source_id)
              ]
            ),
          {:ok, plurals_options} <- Expo.PluralForms.parse(plurals_header),
@@ -122,14 +119,12 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
     end
   end
 
-  defp maybe_get_context_id(nil), do: {:ok, nil}
+  defp normalize_context(nil), do: ExLingo.PoFiles.Services.ExtractMessage.default_context()
 
-  defp maybe_get_context_id(msgctxt) do
-    case Translations.get_context(filter: [name: msgctxt]) do
-      {:ok, %Context{} = context} -> {:ok, context.id}
-      _ -> {:ok, nil}
-    end
-  end
+  defp normalize_context(msgctxt), do: msgctxt
+
+  defp application_source_filter(nil), do: :is_null
+  defp application_source_filter(application_source_id), do: application_source_id
 
   defp normalize_lookup_error({:error, _resource, :not_found}), do: {:error, :not_found}
   defp normalize_lookup_error({:error, :not_found}), do: {:error, :not_found}

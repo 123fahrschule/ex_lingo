@@ -5,7 +5,6 @@ defmodule ExLingo.Utils.GetSchemata do
 
   alias ExLingo.Translations.{
     ApplicationSource,
-    Context,
     Domain,
     Locale,
     Message,
@@ -15,7 +14,6 @@ defmodule ExLingo.Utils.GetSchemata do
 
   @schemata [
     {"application_sources", %{schema: ApplicationSource, conflict_target: [:name]}},
-    {"contexts", %{schema: Context, conflict_target: [:name]}},
     {"domains", %{schema: Domain, conflict_target: [:name]}},
     {"locales", %{schema: Locale, conflict_target: [:iso639_code]}},
     {"messages", %{schema: Message, conflict_target: [:id]}},

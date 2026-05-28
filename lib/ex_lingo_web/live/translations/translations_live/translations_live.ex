@@ -22,11 +22,11 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
 
   alias ExLingoWeb.Components.Shared.Pagination
 
-  @available_filters ~w(application_source_id domain_id context_id search not_translated stale page page_size)
+  @available_filters ~w(application_source_id domain_id search not_translated stale page page_size)
   @available_params ~w(page page_size search filter sort)
   @list_context_prefixes ~w(search page page_size filter[ sort[ edit_message_id highlight_message_id tab clear_list_context)
-  @params_in_filter ~w(application_source_id domain_id context_id not_translated stale)
-  @ids_to_parse ~w(application_source_id domain_id context_id locale_id)
+  @params_in_filter ~w(application_source_id domain_id not_translated stale)
+  @ids_to_parse ~w(application_source_id domain_id locale_id)
   @sortable_fields ~w(msgid message_type)
   @default_sort %{"field" => "msgid", "direction" => "asc"}
   @default_page_size 100
@@ -278,7 +278,6 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
         sort: normalize_sort(sort),
         preloads: [
           :application_source,
-          :context,
           :domain,
           singular_translations: singular_translation_query,
           plural_translations: plural_translation_query

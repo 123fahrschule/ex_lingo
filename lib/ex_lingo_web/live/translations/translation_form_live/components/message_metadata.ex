@@ -7,6 +7,7 @@ defmodule ExLingoWeb.Translations.MessageMetadata do
 
   attr :message, :map, required: true
   attr :translation, :any, default: nil
+  attr :mark_target, :any, default: nil
 
   def message_metadata(assigns) do
     assigns =
@@ -20,19 +21,33 @@ defmodule ExLingoWeb.Translations.MessageMetadata do
       data-message-id={@message.id}
       data-translation-id={@translation_id}
     >
-      <div class="grid gap-1.5">
-        <div class="flex min-w-0 items-baseline gap-2">
-          <div class="w-20 shrink-0">{t("Domain")}</div>
-          <div class="min-w-0 truncate font-medium text-foreground">
-            {relation_name(@message.domain, "default")}
+      <div class="flex items-start justify-between gap-3">
+        <div class="grid min-w-0 gap-1.5">
+          <div class="flex min-w-0 items-baseline gap-2">
+            <div class="w-20 shrink-0">{t("Domain")}</div>
+            <div class="min-w-0 truncate font-medium text-foreground">
+              {relation_name(@message.domain, "default")}
+            </div>
+          </div>
+          <div class="flex min-w-0 items-baseline gap-2">
+            <div class="w-20 shrink-0">{t("Context")}</div>
+            <div class="min-w-0 whitespace-pre-wrap font-medium text-foreground">
+              {context_label(@message.context)}
+            </div>
           </div>
         </div>
-        <div class="flex min-w-0 items-baseline gap-2">
-          <div class="w-20 shrink-0">{t("Context")}</div>
-          <div class="min-w-0 truncate font-medium text-foreground">
-            {relation_name(@message.context, "default")}
-          </div>
-        </div>
+        <.button
+          :if={@mark_target}
+          type="button"
+          variant={if @message.context_review_requested_at, do: "secondary", else: "outline"}
+          size="sm"
+          phx-click="mark_context_unclear"
+          phx-target={@mark_target}
+          disabled={not is_nil(@message.context_review_requested_at)}
+          title={t("Mark this text as unclear for developers")}
+        >
+          {if @message.context_review_requested_at, do: t("Marked unclear"), else: t("Unclear text")}
+        </.button>
       </div>
 
       <div class="space-y-0.5">
@@ -81,6 +96,9 @@ defmodule ExLingoWeb.Translations.MessageMetadata do
 
   defp relation_name(%{name: name}, _fallback) when is_binary(name) and name != "", do: name
   defp relation_name(_relation, fallback), do: fallback
+
+  defp context_label(context) when is_binary(context) and context != "", do: context
+  defp context_label(_context), do: "default"
 
   defp translation_id(%{id: id}) when not is_nil(id), do: id
   defp translation_id(_translation), do: nil

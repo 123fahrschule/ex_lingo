@@ -36,11 +36,6 @@ defmodule ExLingoWeb.Router do
                 live "/:id", ApplicationSourceFormLive, :index, route_opts
               end
 
-              scope "/contexts", Translations do
-                live "/", ContextsLive, :index, route_opts
-                live "/:id", ContextLive, :index, route_opts
-              end
-
               scope "/domains", Translations do
                 live "/", DomainsLive, :index, route_opts
                 live "/:id", DomainLive, :index, route_opts
@@ -54,6 +49,10 @@ defmodule ExLingoWeb.Router do
 
               scope "/possible_duplicates", Translations do
                 live "/", PossibleDuplicatesLive, :index, route_opts
+              end
+
+              scope "/unclear_texts", Translations do
+                live "/", UnclearTextsLive, :index, route_opts
               end
 
               scope "/locales", Translations do
@@ -94,7 +93,6 @@ defmodule ExLingoWeb.Router do
           get "/", ExLingoApiController, :index
 
           resources "/applications", ApplicationSourcesController, only: [:index, :update]
-          resources "/contexts", ContextsController, only: [:index, :update]
           resources "/domains", DomainsController, only: [:index, :update]
           resources "/locales", LocalesController, only: [:index, :update]
           resources "/messages", MessagesController, only: [:index, :update]

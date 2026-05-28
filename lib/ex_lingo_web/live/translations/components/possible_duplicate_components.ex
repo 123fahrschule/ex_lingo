@@ -226,7 +226,7 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponents do
   def scope_label(occurrence) do
     [
       "#{t("Domain")}: #{relation_name(occurrence.domain, t("None"))}",
-      "#{t("Context")}: #{relation_name(occurrence.context, t("None"))}",
+      "#{t("Context")}: #{occurrence.context || t("None")}",
       "#{t("Application")}: #{relation_name(occurrence.application_source, t("Global"))}"
     ]
     |> Enum.join(" · ")

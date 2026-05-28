@@ -15,25 +15,21 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslationsTest do
       })
 
     {:ok, domain} = Translations.create_domain(%{name: "default"})
-    {:ok, context} = Translations.create_context(%{name: "default"})
 
-    %{locale: locale, domain: domain, context: context}
+    %{locale: locale, domain: domain, context: "default"}
   end
 
   test "detects high-confidence duplicates for same source and target across scopes", %{
     locale: locale,
     domain: domain
   } do
-    {:ok, modal_context} = Translations.create_context(%{name: "modal"})
-    {:ok, form_context} = Translations.create_context(%{name: "form"})
-
     first =
-      create_singular(locale, domain, modal_context, "Cancel", "Abbrechen",
+      create_singular(locale, domain, "modal", "Cancel", "Abbrechen",
         refs: [%{"file" => "lib/app/modal.ex", "line" => 12}]
       )
 
     second =
-      create_singular(locale, domain, form_context, "Cancel", "Abbrechen",
+      create_singular(locale, domain, "form", "Cancel", "Abbrechen",
         refs: [%{"file" => "lib/app/form.ex", "line" => 20}]
       )
 
@@ -125,7 +121,7 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslationsTest do
         msgid: msgid,
         message_type: :singular,
         domain_id: domain.id,
-        context_id: context.id,
+        context: context,
         source_references: Keyword.get(opts, :refs, [])
       })
 
@@ -146,7 +142,7 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslationsTest do
         msgid: msgid,
         message_type: :plural,
         domain_id: domain.id,
-        context_id: context.id
+        context: context
       })
 
     {:ok, _translation} =

@@ -47,6 +47,19 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
     end
   end
 
+  def handle_event("mark_context_unclear", _params, socket) do
+    case Translations.mark_message_context_unclear(socket.assigns.message) do
+      {:ok, message} ->
+        {:noreply,
+         socket
+         |> assign(:message, message)
+         |> put_flash(:info, t("Text marked as unclear."))}
+
+      _error ->
+        {:noreply, put_flash(socket, :error, t("Could not mark text as unclear."))}
+    end
+  end
+
   defp after_success(%{assigns: %{return_to: :parent}} = socket, _locale) do
     send(self(), {:translation_saved, socket.assigns.message.id})
     {:noreply, socket}

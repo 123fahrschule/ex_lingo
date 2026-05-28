@@ -93,7 +93,7 @@ defmodule ExLingoWeb.Translations.TranslationEditorLoader do
       {:ok, id} ->
         Translations.get_message(
           filter: [id: id],
-          preloads: [:domain, :context, :application_source]
+          preloads: [:domain, :application_source]
         )
 
       _invalid ->

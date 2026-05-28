@@ -72,15 +72,13 @@ defmodule ExLingo.Translations.GlossaryEntries.Finders.ListGlossaryEntries do
     where(
       query,
       [glossary_entry: glossary_entry],
-      is_nil(glossary_entry.domain_id) and is_nil(glossary_entry.context_id) and
-        is_nil(glossary_entry.application_source_id)
+      is_nil(glossary_entry.domain_id) and is_nil(glossary_entry.application_source_id)
     )
   end
 
   defp scope_query(query, %Message{} = message) do
     query
     |> scope_field_query(:domain_id, message.domain_id)
-    |> scope_field_query(:context_id, message.context_id)
     |> scope_field_query(:application_source_id, message.application_source_id)
   end
 

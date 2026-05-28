@@ -72,8 +72,8 @@
                 "<span class="italic">{String.slice(matched_msgid, 0..40)}</span>"
               </div>
             <% end %>
-            <div :if={message.context} class="truncate text-body-xs text-muted-foreground">
-              {t("Context")}: {message.context.name}
+            <div :if={message.context && message.context != ""} class="truncate text-body-xs text-muted-foreground">
+              {t("Context")}: {message.context}
             </div>
           </div>
         </.table_cell>

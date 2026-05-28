@@ -54,14 +54,14 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
       )
     end
 
-    drop unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid], prefix: prefix)
+    drop unique_index(@ex_lingo_messages, [:domain_id, :context, :msgid], prefix: prefix)
 
     create_if_not_exists unique_index(
                            @ex_lingo_messages,
                            [
                              :application_source_id,
-                             :context_id,
                              :domain_id,
+                             :context,
                              :msgid
                            ],
                            prefix: prefix,
@@ -80,15 +80,16 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
            @ex_lingo_messages,
            [
              :application_source_id,
-             :context_id,
              :domain_id,
+             :context,
              :msgid
            ],
            prefix: prefix
          )
 
-    create_if_not_exists unique_index(@ex_lingo_messages, [:context_id, :domain_id, :msgid],
-                           prefix: prefix
+    create_if_not_exists unique_index(@ex_lingo_messages, [:domain_id, :context, :msgid],
+                           prefix: prefix,
+                           nulls_distinct: false
                          )
 
     alter table(@ex_lingo_messages, prefix: prefix) do

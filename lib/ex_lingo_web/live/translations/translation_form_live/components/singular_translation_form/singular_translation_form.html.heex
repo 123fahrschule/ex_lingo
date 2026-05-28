@@ -29,7 +29,7 @@
 
   <%= if @mode == :sheet do %>
     <div class="space-y-4">
-      <.message_metadata message={@message} translation={@translation} />
+      <.message_metadata message={@message} translation={@translation} mark_target={@myself} />
       <.possible_duplicate_details
         candidates={@possible_duplicate_candidates}
         current_message_id={@message.id}
@@ -82,7 +82,7 @@
         </.card_description>
       </.card_header>
       <.card_content class="space-y-4">
-        <.message_metadata message={@message} translation={@translation} />
+        <.message_metadata message={@message} translation={@translation} mark_target={@myself} />
         <.possible_duplicate_details
           candidates={@possible_duplicate_candidates}
           current_message_id={@message.id}
