@@ -1,5 +1,6 @@
 import Alpine from "alpinejs";
 import { ExLingoColorPicker } from "./components/color_picker";
+import { ExLingoGlossaryCapture } from "./components/glossary_capture";
 import { ExLingoListContext } from "./components/list_context";
 import { Select } from "./components/shared/select";
 import { Toggle } from "./components/shared/toggle";
@@ -54,6 +55,7 @@ const LocaleSelect = {
 
 Hooks.FlashMessage = FlashMessage;
 Hooks.ExLingoColorPicker = ExLingoColorPicker;
+Hooks.ExLingoGlossaryCapture = ExLingoGlossaryCapture;
 Hooks.ExLingoListContext = ExLingoListContext;
 Hooks.LocaleSelect = LocaleSelect;
 Hooks.Pagination = Pagination;

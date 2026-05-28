@@ -183,20 +183,6 @@ defmodule ExLingoWeb.Translations.ApplicationSourcesLive do
 
   defp parse_pagination(_params), do: {1, @default_page_size}
 
-  defp safe_dashboard_path(socket, to) when is_binary(to) do
-    cond do
-      String.contains?(to, "://") -> :error
-      String.starts_with?(to, "//") -> :error
-      String.contains?(to, "..") -> :error
-      true -> {:ok, dashboard_path(socket, normalize_path(to))}
-    end
-  end
-
-  defp safe_dashboard_path(_socket, _to), do: :error
-
-  defp normalize_path("/" <> _ = path), do: path
-  defp normalize_path(path), do: "/" <> path
-
   defp get_application_source(id) do
     case parse_id_filter(id) do
       {:ok, id} -> Translations.get_application_source(filter: [id: id])

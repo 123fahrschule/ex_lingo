@@ -8,7 +8,7 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
 
   @scope_options_limit 100
 
-  def mount(%{"id" => glossary_entry_id}, _session, socket) do
+  def mount(%{"id" => glossary_entry_id} = params, _session, socket) do
     socket =
       case get_glossary_entry(glossary_entry_id) do
         {:ok, glossary_entry} ->
@@ -16,6 +16,7 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
           |> assign_form(glossary_entry)
           |> assign(:glossary_entry, glossary_entry)
           |> assign_scope_options()
+          |> assign_return_to(params)
 
         _ ->
           redirect(socket, to: dashboard_path(socket, "/glossary"))
@@ -24,11 +25,19 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
     {:ok, socket}
   end
 
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
+    initial_attrs = initial_attrs_from_params(params)
+
     socket =
       socket
-      |> assign_form(%GlossaryEntry{})
+      |> assign(
+        :form,
+        %GlossaryEntry{}
+        |> Translations.change_glossary_entry(initial_attrs)
+        |> to_form()
+      )
       |> assign_scope_options()
+      |> assign_return_to(params)
 
     {:ok, socket}
   end
@@ -54,7 +63,7 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
     socket =
       case Translations.update_glossary_entry(glossary_entry, normalize_attrs(attrs)) do
         {:ok, _glossary_entry} ->
-          push_navigate(socket, to: dashboard_path(socket, "/glossary"))
+          redirect_after_save(socket)
 
         {:error, changeset} ->
           assign(socket, :form, to_form(changeset))
@@ -67,7 +76,7 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
     socket =
       case Translations.create_glossary_entry(normalize_attrs(attrs)) do
         {:ok, _glossary_entry} ->
-          push_navigate(socket, to: dashboard_path(socket, "/glossary"))
+          redirect_after_save(socket)
 
         {:error, changeset} ->
           assign(socket, :form, to_form(changeset))
@@ -76,8 +85,43 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
     {:noreply, socket}
   end
 
+  def handle_event("cancel", _params, socket) do
+    {:noreply, redirect_after_save(socket)}
+  end
+
   defp assign_form(socket, glossary_entry) do
     assign(socket, :form, to_form(Translations.change_glossary_entry(glossary_entry)))
+  end
+
+  defp assign_return_to(socket, params) do
+    assign(socket, :return_to, params["return_to"])
+  end
+
+  defp initial_attrs_from_params(params) do
+    %{
+      "source_locale" => params["source_locale"],
+      "target_locale" => params["target_locale"],
+      "source_term" => params["source_term"],
+      "target_term" => params["target_term"],
+      "domain_id" => params["domain_id"],
+      "application_source_id" => params["application_source_id"]
+    }
+    |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+    |> Map.new()
+  end
+
+  defp redirect_after_save(socket) do
+    return_to = socket.assigns[:return_to]
+
+    target_path =
+      with binary when is_binary(binary) <- return_to,
+           {:ok, path} <- safe_dashboard_path(socket, binary) do
+        path
+      else
+        _ -> dashboard_path(socket, "/glossary")
+      end
+
+    push_navigate(socket, to: target_path)
   end
 
   defp assign_scope_options(socket) do

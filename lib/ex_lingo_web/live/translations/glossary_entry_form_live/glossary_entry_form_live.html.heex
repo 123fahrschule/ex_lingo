@@ -111,7 +111,10 @@
           </.form_item>
         </div>
 
-        <div class="flex justify-end pt-4">
+        <div class="flex justify-end gap-2 pt-4">
+          <.button type="button" variant="outline" phx-click="cancel">
+            {t("Cancel")}
+          </.button>
           <.button type="submit" phx-disable-with={t("Saving...")}>
             <.icon name="save" size="sm" decorative /> {t("Save")}
           </.button>

@@ -8,6 +8,8 @@ defmodule ExLingoWeb.Translations.MessageMetadata do
   attr :message, :map, required: true
   attr :translation, :any, default: nil
   attr :mark_target, :any, default: nil
+  attr :glossary_target, :any, default: nil
+  attr :glossary_button_id, :string, default: "add-to-glossary"
 
   def message_metadata(assigns) do
     assigns =
@@ -36,18 +38,32 @@ defmodule ExLingoWeb.Translations.MessageMetadata do
             </div>
           </div>
         </div>
-        <.button
-          :if={@mark_target}
-          type="button"
-          variant={if @message.context_review_requested_at, do: "secondary", else: "outline"}
-          size="sm"
-          phx-click="mark_context_unclear"
-          phx-target={@mark_target}
-          disabled={not is_nil(@message.context_review_requested_at)}
-          title={t("Mark this text as unclear for developers")}
-        >
-          {if @message.context_review_requested_at, do: t("Marked unclear"), else: t("Unclear text")}
-        </.button>
+        <div class="flex shrink-0 flex-wrap items-center gap-2">
+          <.button
+            :if={@glossary_target}
+            id={@glossary_button_id}
+            type="button"
+            variant="outline"
+            size="sm"
+            phx-hook="ExLingoGlossaryCapture"
+            phx-target={@glossary_target}
+            title={t("Create a glossary entry from the selected source/target text")}
+          >
+            <.icon name="book" size="sm" decorative /> {t("Add to glossary")}
+          </.button>
+          <.button
+            :if={@mark_target}
+            type="button"
+            variant={if @message.context_review_requested_at, do: "secondary", else: "outline"}
+            size="sm"
+            phx-click="mark_context_unclear"
+            phx-target={@mark_target}
+            disabled={not is_nil(@message.context_review_requested_at)}
+            title={t("Mark this text as unclear for developers")}
+          >
+            {if @message.context_review_requested_at, do: t("Marked unclear"), else: t("Unclear text")}
+          </.button>
+        </div>
       </div>
 
       <div class="space-y-0.5">

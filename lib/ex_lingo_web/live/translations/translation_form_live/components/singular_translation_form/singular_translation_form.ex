@@ -7,6 +7,7 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
 
   alias ExLingo.Translations
   alias ExLingo.Translations.Validations
+  alias ExLingoWeb.Translations.GlossaryRedirect
   import ExLingoWeb.Translations.MessageMetadata, only: [message_metadata: 1]
 
   import ExLingoWeb.Translations.PossibleDuplicateComponents,
@@ -54,6 +55,16 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
          |> update(:form, &Map.merge(&1, %{"translated_text" => translated}))
          |> put_flash(:error, t("Could not update translation."))}
     end
+  end
+
+  def handle_event("open_glossary_for_selection", payload, socket) do
+    message = socket.assigns.message
+    locale = socket.assigns.locale
+    return_to = "/locales/#{locale.id}/translations" <> get_query(socket.assigns)
+    query = GlossaryRedirect.query_params(message, locale, payload, return_to)
+
+    {:noreply,
+     push_navigate(socket, to: dashboard_path(socket, "/glossary/new?" <> query))}
   end
 
   def handle_event("mark_context_unclear", _params, socket) do

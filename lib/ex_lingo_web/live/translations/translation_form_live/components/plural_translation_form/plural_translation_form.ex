@@ -9,6 +9,7 @@ defmodule ExLingoWeb.Translations.PluralTranslationForm do
   alias ExLingo.Translations.Validations
   alias ExLingo.Utils.ModuleUtils
   alias ExLingoWeb.Components.Shared.Tabs
+  alias ExLingoWeb.Translations.GlossaryRedirect
   import ExLingoWeb.Translations.MessageMetadata, only: [message_metadata: 1]
 
   import ExLingoWeb.Translations.PossibleDuplicateComponents,
@@ -94,6 +95,16 @@ defmodule ExLingoWeb.Translations.PluralTranslationForm do
       _invalid ->
         {:noreply, put_flash(socket, :error, t("Invalid plural translation form data."))}
     end
+  end
+
+  def handle_event("open_glossary_for_selection", payload, socket) do
+    message = socket.assigns.message
+    locale = socket.assigns.locale
+    return_to = "/locales/#{locale.id}/translations" <> get_query(socket.assigns)
+    query = GlossaryRedirect.query_params(message, locale, payload, return_to)
+
+    {:noreply,
+     push_navigate(socket, to: dashboard_path(socket, "/glossary/new?" <> query))}
   end
 
   def handle_event("mark_context_unclear", _params, socket) do

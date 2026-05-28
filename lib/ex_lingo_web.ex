@@ -181,6 +181,25 @@ defmodule ExLingoWeb do
           conn.private.phoenix_router.__ex_lingo_dashboard_prefix__() <> "/" <> path
         )
       end
+
+      @doc """
+      Returns `{:ok, dashboard_path}` for trusted dashboard-relative `to`
+      arguments, `:error` otherwise. Used to guard query-param-driven redirects
+      against open-redirect attacks.
+      """
+      def safe_dashboard_path(socket_or_conn, to) when is_binary(to) do
+        cond do
+          String.contains?(to, "://") -> :error
+          String.starts_with?(to, "//") -> :error
+          String.contains?(to, "..") -> :error
+          true -> {:ok, dashboard_path(socket_or_conn, ensure_leading_slash(to))}
+        end
+      end
+
+      def safe_dashboard_path(_socket_or_conn, _to), do: :error
+
+      defp ensure_leading_slash("/" <> _ = path), do: path
+      defp ensure_leading_slash(path), do: "/" <> path
     end
   end
 
