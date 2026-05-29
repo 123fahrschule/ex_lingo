@@ -2,6 +2,7 @@ defmodule ExLingoWeb.Translations.GlossaryRedirectTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
+  alias ExLingo.AI.Translations.Plugin
   alias ExLingoWeb.Translations.GlossaryRedirect
 
   defp build_message(opts \\ []) do
@@ -25,7 +26,7 @@ defmodule ExLingoWeb.Translations.GlossaryRedirectTest do
 
     params = URI.decode_query(query)
 
-    assert params["source_locale"] == "en"
+    assert params["source_locale"] == Plugin.source_locale()
     assert params["target_locale"] == "de"
     assert params["source_term"] == "welcome"
     assert params["target_term"] == "willkommen"
@@ -61,6 +62,21 @@ defmodule ExLingoWeb.Translations.GlossaryRedirectTest do
 
     assert params["domain_id"] == "5"
     assert params["application_source_id"] == "9"
+  end
+
+  test "handles nil source and target terms" do
+    query =
+      GlossaryRedirect.query_params(
+        build_message(msgid: "Fallback"),
+        locale(),
+        %{"source_term" => nil, "target_term" => nil},
+        "/back"
+      )
+
+    params = URI.decode_query(query)
+
+    assert params["source_term"] == "Fallback"
+    assert params["target_term"] == ""
   end
 
   test "trims whitespace around supplied terms" do

@@ -17,10 +17,13 @@ defmodule ExLingoWeb.Translations.GlossaryRedirect do
   @spec query_params(map, map, map, binary) :: binary
   def query_params(message, locale, payload, return_to)
       when is_map(message) and is_map(locale) and is_map(payload) and is_binary(return_to) do
+    msgid = Map.get(message, :msgid) || ""
+    target_locale = Map.get(locale, :iso639_code) || ""
+
     %{
       "source_locale" => Plugin.source_locale(),
-      "target_locale" => locale.iso639_code,
-      "source_term" => fallback(Map.get(payload, "source_term"), message.msgid),
+      "target_locale" => target_locale,
+      "source_term" => fallback(Map.get(payload, "source_term"), msgid),
       "target_term" => fallback(Map.get(payload, "target_term"), ""),
       "return_to" => return_to
     }
@@ -40,5 +43,6 @@ defmodule ExLingoWeb.Translations.GlossaryRedirect do
   end
 
   defp maybe_put(params, _key, nil), do: params
-  defp maybe_put(params, key, value), do: Map.put(params, key, to_string(value))
+  defp maybe_put(params, key, value) when is_integer(value), do: Map.put(params, key, Integer.to_string(value))
+  defp maybe_put(params, key, value) when is_binary(value), do: Map.put(params, key, value)
 end

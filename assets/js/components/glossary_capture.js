@@ -2,22 +2,35 @@
 // On click it inspects the active text selection inside the source block and
 // the target input, then pushes an `open_glossary_for_selection` event with the
 // captured terms so the LiveComponent can navigate to the prefilled glossary form.
+//
+// Source/target lookups are scoped to the button's enclosing form so multiple
+// editors on the same page (e.g. inline editing in the message list) cannot
+// cross-pollinate selections.
 export const ExLingoGlossaryCapture = {
   mounted() {
-    this.el.addEventListener("click", () => {
-      const sourceTerm = readSourceSelection();
-      const targetTerm = readTargetSelection();
+    this.handleClick = () => {
+      const root = this.el.closest("form") || this.el.parentElement || this.el;
+      const sourceTerm = readSourceSelection(root);
+      const targetTerm = readTargetSelection(root);
 
       this.pushEventTo(this.el, "open_glossary_for_selection", {
         source_term: sourceTerm,
         target_term: targetTerm,
       });
-    });
+    };
+
+    this.el.addEventListener("click", this.handleClick);
+  },
+
+  destroyed() {
+    if (this.handleClick) {
+      this.el.removeEventListener("click", this.handleClick);
+    }
   },
 };
 
-function readSourceSelection() {
-  const sourceEl = document.querySelector("[data-glossary-source]");
+function readSourceSelection(root) {
+  const sourceEl = root.querySelector("[data-glossary-source]");
   if (!sourceEl) {
     return "";
   }
@@ -36,8 +49,8 @@ function readSourceSelection() {
   return "";
 }
 
-function readTargetSelection() {
-  const targetEl = document.querySelector("[data-glossary-target]");
+function readTargetSelection(root) {
+  const targetEl = root.querySelector("[data-glossary-target]");
   if (!targetEl || typeof targetEl.selectionStart !== "number") {
     return "";
   }

@@ -62,10 +62,14 @@
         class="space-y-4"
       >
         <.form_item>
-          <.form_label>{t("PO file text")}</.form_label>
+          <.form_label id="original_text_label_plural_sheet">{t("PO file text")}</.form_label>
           <div
             id="original_text"
             data-glossary-source
+            role="textbox"
+            aria-readonly="true"
+            aria-labelledby="original_text_label_plural_sheet"
+            tabindex="0"
             class="min-h-16 whitespace-pre-wrap break-words rounded-md border border-input bg-muted px-3 py-2 text-body-sm text-foreground"
           >{@form["original_text"]}</div>
         </.form_item>
@@ -125,10 +129,14 @@
           class="space-y-6"
         >
           <.form_item>
-            <.form_label>{t("PO file text")}</.form_label>
+            <.form_label id="original_text_label_plural_page">{t("PO file text")}</.form_label>
             <div
               id="original_text"
               data-glossary-source
+              role="textbox"
+              aria-readonly="true"
+              aria-labelledby="original_text_label_plural_page"
+              tabindex="0"
               class="min-h-32 whitespace-pre-wrap break-words rounded-md border border-input bg-muted px-3 py-2 text-body-sm text-foreground"
             >{@form["original_text"]}</div>
           </.form_item>
