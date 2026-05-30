@@ -43,10 +43,10 @@ defmodule ExLingo.Translations.Validations do
 
   @spec sentence_ending_mismatch?(binary, binary) :: boolean
   def sentence_ending_mismatch?(source, target) when is_binary(source) and is_binary(target) do
-    case {sentence_ending(source), target} do
-      {nil, _} -> false
-      {_, ""} -> false
-      {ending, target} -> sentence_ending(target) != ending
+    if String.trim(target) == "" do
+      false
+    else
+      sentence_ending(source) != sentence_ending(target)
     end
   end
 

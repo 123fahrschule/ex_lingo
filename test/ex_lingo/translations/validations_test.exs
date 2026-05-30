@@ -93,8 +93,13 @@ defmodule ExLingo.Translations.ValidationsTest do
       assert Validations.sentence_ending_mismatch?("a; b; c;", "a, b, c")
     end
 
-    test "source has no sentence-ending — never a mismatch" do
-      refute Validations.sentence_ending_mismatch?("Save", "Speichern.")
+    test "target adds sentence-ending the source lacks — mismatch" do
+      assert Validations.sentence_ending_mismatch?("Save", "Speichern.")
+      assert Validations.sentence_ending_mismatch?("Save", "Weiter!")
+      assert Validations.sentence_ending_mismatch?("Name", "Name:")
+    end
+
+    test "neither source nor target has a sentence-ending — no mismatch" do
       refute Validations.sentence_ending_mismatch?("Save", "Speichern")
     end
 

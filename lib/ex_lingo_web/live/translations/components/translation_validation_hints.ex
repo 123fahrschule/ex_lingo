@@ -48,7 +48,7 @@ defmodule ExLingoWeb.Translations.TranslationValidationHints do
       </div>
 
       <div :if={@sentence_mismatch?} class="text-warning-500">
-        {t("Original ends with sentence punctuation but the translation does not match.")}
+        {t("Sentence-ending punctuation differs between the original and the translation.")}
       </div>
     </div>
     """
