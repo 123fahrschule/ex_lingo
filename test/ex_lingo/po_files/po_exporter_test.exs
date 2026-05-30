@@ -84,6 +84,18 @@ defmodule ExLingo.PoFiles.POExporterTest do
     assert content =~ ~s(msgstr[1] "Äpfel")
   end
 
+  test "fills gaps in plural indices so msgstr stays contiguous", %{locale: locale} do
+    # Indices 0 and 2 present, 1 missing — output must still include msgstr[1].
+    plural(locale, "file", [{0, "Datei"}, {2, "Dateien"}], %{msgid_plural: "files"})
+
+    content =
+      POExporter.export_files() |> file_for("de/LC_MESSAGES/default.po") |> Map.fetch!(:content)
+
+    assert content =~ ~s(msgstr[0] "Datei")
+    assert content =~ ~s(msgstr[1] "")
+    assert content =~ ~s(msgstr[2] "Dateien")
+  end
+
   test "falls back to msgid when no source plural form was stored", %{locale: locale} do
     plural(locale, "car", [{0, "Auto"}, {1, "Autos"}])
 

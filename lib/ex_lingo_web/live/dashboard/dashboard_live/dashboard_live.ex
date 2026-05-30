@@ -41,6 +41,10 @@ defmodule ExLingoWeb.Dashboard.DashboardLive do
   # "zip" → single ZIP download fallback.
   def handle_event("export_po", %{"mode" => "fs"}, socket) do
     {:noreply, push_event(socket, "po_export_files", %{files: POExporter.export_files()})}
+  rescue
+    exception ->
+      Logger.error("PO export failed: #{Exception.format(:error, exception, __STACKTRACE__)}")
+      {:noreply, put_flash(socket, :error, t("Could not export PO files."))}
   end
 
   def handle_event("export_po", %{"mode" => _zip}, socket) do

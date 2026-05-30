@@ -131,14 +131,18 @@ defmodule ExLingo.PoFiles.POExporter do
 
   defp plural_msgstr(%{plural_translations: translations}) do
     translations
-    |> Enum.sort_by(& &1.nplural_index)
     |> Map.new(fn translation -> {translation.nplural_index, [text_for(translation)]} end)
-    |> ensure_zero_index()
+    |> densify()
   end
 
-  # A plural message must have at least msgstr[0] to be valid.
-  defp ensure_zero_index(map) when map_size(map) == 0, do: %{0 => [""]}
-  defp ensure_zero_index(map), do: map
+  # gettext requires contiguous msgstr[0..n]; fill any gaps with empty strings
+  # so a missing plural form can't drop later indices from the output.
+  defp densify(map) when map_size(map) == 0, do: %{0 => [""]}
+
+  defp densify(map) do
+    max_index = map |> Map.keys() |> Enum.max()
+    Map.new(0..max_index, fn index -> {index, Map.get(map, index, [""])} end)
+  end
 
   defp text_for(%{translated_text: translated, original_text: original}) do
     cond do

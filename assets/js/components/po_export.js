@@ -5,12 +5,17 @@
 // directly into the matching subfolders, overwriting in place — no ZIP, no
 // manual moving. Fallback (Firefox/Safari): the server returns a single ZIP we
 // download.
+//
+// The directory picker must be opened synchronously inside the click handler so
+// it keeps the browser's transient user activation; opening it later (after the
+// server round-trip) raises a SecurityError. We therefore grab the directory
+// handle on click, then ask the server for the files and write them once they
+// arrive.
 export const PoExport = {
   mounted() {
-    this.el.addEventListener("click", () => {
-      const mode = window.showDirectoryPicker ? "fs" : "zip";
-      this.pushEvent("export_po", { mode });
-    });
+    this.directoryHandle = null;
+
+    this.el.addEventListener("click", () => this.start());
 
     this.handleEvent("po_export_files", ({ files }) => this.writeFiles(files));
     this.handleEvent("po_export_zip", ({ data, filename }) =>
@@ -18,14 +23,30 @@ export const PoExport = {
     );
   },
 
-  async writeFiles(files) {
-    let root;
-    try {
-      root = await window.showDirectoryPicker({ mode: "readwrite" });
-    } catch (error) {
-      // User cancelled the directory picker — nothing to do.
+  async start() {
+    if (!window.showDirectoryPicker) {
+      this.pushEvent("export_po", { mode: "zip" });
       return;
     }
+
+    try {
+      this.directoryHandle = await window.showDirectoryPicker({
+        mode: "readwrite",
+      });
+    } catch (error) {
+      // The user dismissing the picker is expected; anything else is a real error.
+      if (error && error.name === "AbortError") return;
+      console.error("Failed to open directory picker", error);
+      window.alert("Failed to open folder: " + (error && error.message));
+      return;
+    }
+
+    this.pushEvent("export_po", { mode: "fs" });
+  },
+
+  async writeFiles(files) {
+    const root = this.directoryHandle;
+    if (!root) return;
 
     try {
       for (const file of files) {
@@ -46,7 +67,9 @@ export const PoExport = {
       this.pushEvent("po_export_written", { count: files.length });
     } catch (error) {
       console.error("Failed to write PO files", error);
-      window.alert("Failed to write PO files: " + error.message);
+      window.alert("Failed to write PO files: " + (error && error.message));
+    } finally {
+      this.directoryHandle = null;
     }
   },
 
