@@ -6,71 +6,72 @@
     phx-target={@myself}
     class="space-y-1"
   >
-    <.textarea
-      id={"inline-singular-input-#{@message.id}"}
-      name="translated_text"
-      value={@form["translated_text"]}
-      rows="2"
-      data-glossary-target
-      data-inline-input
-      phx-blur="save"
-      phx-target={@myself}
-      phx-hook="ExLingoInlineEdit"
-      placeholder={t("Add translation…")}
-      class={["!min-h-12 w-full", length_border_class(@length_status)]}
-    />
+    <div class="relative">
+      <.textarea
+        id={"inline-singular-input-#{@message.id}"}
+        name="translated_text"
+        value={@form["translated_text"]}
+        rows="2"
+        data-glossary-target
+        data-inline-input
+        phx-blur="save"
+        phx-target={@myself}
+        phx-hook="ExLingoInlineEdit"
+        placeholder={t("Add translation…")}
+        class={["!min-h-12 w-full pr-10", length_border_class(@length_status)]}
+      />
+
+      <.dropdown_menu id={"inline-actions-singular-#{@message.id}"} class="absolute right-1.5 top-1.5 z-10">
+        <.dropdown_menu_trigger>
+          <.button variant="ghost" size="icon" type="button" class="size-7 bg-background/80" title={t("Actions")}>
+            <.icon name="more_horiz" size="sm" label={t("Actions")} />
+          </.button>
+        </.dropdown_menu_trigger>
+        <.dropdown_menu_content align="end">
+          <.dropdown_menu_item
+            :if={@ai_available?}
+            on-select={JS.push("ai_request", target: @myself)}
+          >
+            <.icon name="auto_awesome" size="sm" decorative /> {t("Get AI suggestion")}
+          </.dropdown_menu_item>
+          <.dropdown_menu_item
+            as="button"
+            type="button"
+            class="w-full"
+            id={"add-to-glossary-singular-#{@message.id}"}
+            phx-hook="ExLingoGlossaryCapture"
+            phx-target={@myself}
+          >
+            <.icon name="book" size="sm" decorative /> {t("Add to glossary")}
+          </.dropdown_menu_item>
+          <.dropdown_menu_item
+            on-select={JS.push("mark_context_unclear", target: @myself)}
+            disabled={not is_nil(@message.context_review_requested_at)}
+          >
+            <.icon name="flag" size="sm" decorative />
+            {if @message.context_review_requested_at,
+              do: t("Marked unclear"),
+              else: t("Mark context unclear")}
+          </.dropdown_menu_item>
+        </.dropdown_menu_content>
+      </.dropdown_menu>
+    </div>
+
     <.validation_hints source={@form["original_text"]} target={@form["translated_text"]} />
   </.form>
 
-  <div class="flex items-center justify-between gap-2">
-    <div
-      id={"save-indicator-singular-#{@message.id}"}
-      phx-hook="ExLingoSaveIndicator"
-      data-save-state={to_string(@save_state)}
-      class="flex items-center gap-1 text-body-xs transition-opacity duration-500"
-    >
-      <span :if={@save_state == :saved} class="flex items-center gap-1 text-success-500">
-        <.icon name="check" size="sm" decorative /> {t("Saved")}
-      </span>
-      <span :if={@save_state == :error} class="flex items-center gap-1 text-destructive">
-        <.icon name="error" size="sm" decorative /> {t("Error")}
-      </span>
-    </div>
-
-    <.dropdown_menu id={"inline-actions-singular-#{@message.id}"}>
-      <.dropdown_menu_trigger>
-        <.button variant="ghost" size="icon" type="button" title={t("Actions")}>
-          <.icon name="more_horiz" size="sm" label={t("Actions")} />
-        </.button>
-      </.dropdown_menu_trigger>
-      <.dropdown_menu_content align="end">
-        <.dropdown_menu_item
-          :if={@ai_available?}
-          on-select={JS.push("ai_request", target: @myself)}
-        >
-          <.icon name="auto_awesome" size="sm" decorative /> {t("Get AI suggestion")}
-        </.dropdown_menu_item>
-        <.dropdown_menu_item
-          as="button"
-          type="button"
-          class="w-full"
-          id={"add-to-glossary-singular-#{@message.id}"}
-          phx-hook="ExLingoGlossaryCapture"
-          phx-target={@myself}
-        >
-          <.icon name="book" size="sm" decorative /> {t("Add to glossary")}
-        </.dropdown_menu_item>
-        <.dropdown_menu_item
-          on-select={JS.push("mark_context_unclear", target: @myself)}
-          disabled={not is_nil(@message.context_review_requested_at)}
-        >
-          <.icon name="flag" size="sm" decorative />
-          {if @message.context_review_requested_at,
-            do: t("Marked unclear"),
-            else: t("Mark context unclear")}
-        </.dropdown_menu_item>
-      </.dropdown_menu_content>
-    </.dropdown_menu>
+  <div
+    id={"save-indicator-singular-#{@message.id}"}
+    phx-hook="ExLingoSaveIndicator"
+    data-save-state={to_string(@save_state)}
+    class="flex min-h-4 items-center justify-end gap-1 text-body-xs transition-opacity duration-500"
+  >
+    <span :if={@save_state == :saved} class="flex items-center gap-1 text-success-500">
+      <.icon name="check" size="sm" decorative /> {t("Saved")}
+    </span>
+    <span :if={@save_state == :error} class="flex items-center gap-1 text-destructive">
+      <.icon name="error" size="sm" decorative /> {t("Error")}
+    </span>
   </div>
 
   <div

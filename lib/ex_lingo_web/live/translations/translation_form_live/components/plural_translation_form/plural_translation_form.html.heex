@@ -1,35 +1,4 @@
 <div class="space-y-2">
-  <div class="flex items-center justify-end">
-    <.dropdown_menu id={"inline-actions-plural-#{@message.id}"}>
-      <.dropdown_menu_trigger>
-        <.button variant="ghost" size="icon" type="button" title={t("Actions")}>
-          <.icon name="more_horiz" size="sm" label={t("Actions")} />
-        </.button>
-      </.dropdown_menu_trigger>
-      <.dropdown_menu_content align="end">
-        <.dropdown_menu_item
-          as="button"
-          type="button"
-          class="w-full"
-          id={"add-to-glossary-plural-#{@message.id}"}
-          phx-hook="ExLingoGlossaryCapture"
-          phx-target={@myself}
-        >
-          <.icon name="book" size="sm" decorative /> {t("Add to glossary")}
-        </.dropdown_menu_item>
-        <.dropdown_menu_item
-          on-select={JS.push("mark_context_unclear", target: @myself)}
-          disabled={not is_nil(@message.context_review_requested_at)}
-        >
-          <.icon name="flag" size="sm" decorative />
-          {if @message.context_review_requested_at,
-            do: t("Marked unclear"),
-            else: t("Mark context unclear")}
-        </.dropdown_menu_item>
-      </.dropdown_menu_content>
-    </.dropdown_menu>
-  </div>
-
   <div :for={translation <- @translations} class="space-y-1">
     <% index = translation.nplural_index %>
     <.form
@@ -44,7 +13,7 @@
         <span class="mt-2 w-16 shrink-0 text-body-xs font-medium uppercase text-muted-foreground">
           {t("Form %{number}", number: index + 1)}
         </span>
-        <div class="flex-1">
+        <div class="relative flex-1">
           <.textarea
             id={"inline-plural-input-#{@message.id}-#{index}"}
             name="translated_text"
@@ -57,8 +26,58 @@
             phx-target={@myself}
             phx-hook="ExLingoInlineEdit"
             placeholder={t("Add translation…")}
-            class={["!min-h-12 w-full", length_border_class(@length_status[index])]}
+            class={[
+              "!min-h-12 w-full",
+              (index == 0 && "pr-16") || "pr-10",
+              length_border_class(@length_status[index])
+            ]}
           />
+
+          <div class="absolute right-1.5 top-1.5 z-10 flex items-center gap-1">
+            <.dropdown_menu :if={index == 0} id={"inline-actions-plural-#{@message.id}"}>
+              <.dropdown_menu_trigger>
+                <.button variant="ghost" size="icon" type="button" class="size-7 bg-background/80" title={t("Actions")}>
+                  <.icon name="more_horiz" size="sm" label={t("Actions")} />
+                </.button>
+              </.dropdown_menu_trigger>
+              <.dropdown_menu_content align="end">
+                <.dropdown_menu_item
+                  as="button"
+                  type="button"
+                  class="w-full"
+                  id={"add-to-glossary-plural-#{@message.id}"}
+                  phx-hook="ExLingoGlossaryCapture"
+                  phx-target={@myself}
+                >
+                  <.icon name="book" size="sm" decorative /> {t("Add to glossary")}
+                </.dropdown_menu_item>
+                <.dropdown_menu_item
+                  on-select={JS.push("mark_context_unclear", target: @myself)}
+                  disabled={not is_nil(@message.context_review_requested_at)}
+                >
+                  <.icon name="flag" size="sm" decorative />
+                  {if @message.context_review_requested_at,
+                    do: t("Marked unclear"),
+                    else: t("Mark context unclear")}
+                </.dropdown_menu_item>
+              </.dropdown_menu_content>
+            </.dropdown_menu>
+
+            <.button
+              :if={@ai_available?}
+              type="button"
+              variant="ghost"
+              size="icon"
+              class="size-7 bg-background/80"
+              phx-click="ai_request"
+              phx-value-index={index}
+              phx-target={@myself}
+              title={t("Get AI suggestion")}
+            >
+              <.icon name="auto_awesome" size="sm" label={t("Get AI suggestion")} />
+            </.button>
+          </div>
+
           <.validation_hints
             source={@forms[index]["original_text"]}
             target={@forms[index]["translated_text"]}
@@ -67,32 +86,18 @@
       </div>
     </.form>
 
-    <div class="flex items-center justify-between gap-2 pl-[4.5rem]">
-      <div
-        id={"save-indicator-plural-#{@message.id}-#{index}"}
-        phx-hook="ExLingoSaveIndicator"
-        data-save-state={to_string(@save_state[index] || :idle)}
-        class="flex items-center gap-1 text-body-xs transition-opacity duration-500"
-      >
-        <span :if={@save_state[index] == :saved} class="flex items-center gap-1 text-success-500">
-          <.icon name="check" size="sm" decorative /> {t("Saved")}
-        </span>
-        <span :if={@save_state[index] == :error} class="flex items-center gap-1 text-destructive">
-          <.icon name="error" size="sm" decorative /> {t("Error")}
-        </span>
-      </div>
-
-      <.button
-        :if={@ai_available?}
-        type="button"
-        variant="ghost"
-        size="sm"
-        phx-click="ai_request"
-        phx-value-index={index}
-        phx-target={@myself}
-      >
-        <.icon name="auto_awesome" size="sm" decorative /> {t("AI")}
-      </.button>
+    <div
+      id={"save-indicator-plural-#{@message.id}-#{index}"}
+      phx-hook="ExLingoSaveIndicator"
+      data-save-state={to_string(@save_state[index] || :idle)}
+      class="flex min-h-4 items-center justify-end gap-1 pl-[4.5rem] text-body-xs transition-opacity duration-500"
+    >
+      <span :if={@save_state[index] == :saved} class="flex items-center gap-1 text-success-500">
+        <.icon name="check" size="sm" decorative /> {t("Saved")}
+      </span>
+      <span :if={@save_state[index] == :error} class="flex items-center gap-1 text-destructive">
+        <.icon name="error" size="sm" decorative /> {t("Error")}
+      </span>
     </div>
 
     <div
