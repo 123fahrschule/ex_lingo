@@ -6,6 +6,7 @@ import { ExLingoListContext } from "./components/list_context";
 import { ExLingoSaveIndicator } from "./components/save_indicator";
 import { Select } from "./components/shared/select";
 import { Toggle } from "./components/shared/toggle";
+import { S3 } from "./uploaders/s3";
 import { SaladUIHook } from "../../deps/cognit/assets/js/ui/core/hook";
 import "../../deps/cognit/assets/js/ui/components/dialog.js";
 import "../../deps/cognit/assets/js/ui/components/select.js";
@@ -69,8 +70,11 @@ Hooks.SaladUI = SaladUIHook;
 Hooks.Select = Select;
 Hooks.Toggle = Toggle;
 
+let Uploaders = { S3 };
+
 let liveSocket = new LiveView.LiveSocket(socketPath, Phoenix.Socket, {
   hooks: Hooks,
+  uploaders: Uploaders,
   dom: {
     onBeforeElUpdated(from, to) {
       if (from._x_dataStack) {

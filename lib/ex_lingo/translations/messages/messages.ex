@@ -3,7 +3,10 @@ defmodule ExLingo.Translations.Messages do
   ExLingo Messages subcontext
   """
 
+  require Logger
+
   alias ExLingo.Repo
+  alias ExLingo.Storage.S3
 
   alias ExLingo.Translations.Message
   alias ExLingo.Translations.{MessageImage, SingularTranslation, PluralTranslation}
@@ -183,12 +186,19 @@ defmodule ExLingo.Translations.Messages do
 
   """
   def delete_message(message_id) do
-    Repo.get_repo()
-    |> then(& &1.transaction(fn -> delete_message_counts(message_id) end))
-    |> invalidate_message_cache_on_success()
+    keys = image_keys_for([message_id])
+
+    result =
+      Repo.get_repo()
+      |> then(& &1.transaction(fn -> delete_message_counts(message_id) end))
+      |> invalidate_message_cache_on_success()
+
+    cleanup_s3_images_on_success(result, keys)
   end
 
   def delete_messages(message_ids) when is_list(message_ids) do
+    keys = image_keys_for(message_ids)
+
     Repo.get_repo()
     |> then(fn repo ->
       repo.transaction(fn ->
@@ -204,6 +214,34 @@ defmodule ExLingo.Translations.Messages do
       end)
     end)
     |> invalidate_message_cache_on_success()
+    |> cleanup_s3_images_on_success(keys)
+  end
+
+  # Removes orphaned S3 objects after the message rows (and their image rows via
+  # FK cascade) are gone. Best-effort: failures are logged, never raised, so a
+  # storage hiccup can't undo a successful delete.
+  defp cleanup_s3_images_on_success({:ok, _result} = result, keys) do
+    if S3.configured?() do
+      Enum.each(keys, fn key ->
+        case S3.delete(key) do
+          {:ok, _} -> :ok
+          error -> Logger.warning("Failed to delete S3 object #{key}: #{inspect(error)}")
+        end
+      end)
+    end
+
+    result
+  end
+
+  defp cleanup_s3_images_on_success(result, _keys), do: result
+
+  defp image_keys_for(message_ids) do
+    import Ecto.Query
+
+    MessageImage
+    |> where([image], image.message_id in ^message_ids)
+    |> select([image], image.s3_key)
+    |> Repo.get_repo().all(Repo.opts())
   end
 
   defp delete_message_counts(message_id) do
@@ -303,6 +341,10 @@ defmodule ExLingo.Translations.Messages do
           where: pt.message_id == ^from_message.id
         )
         |> Repo.get_repo().update_all([set: [message_id: to_message.id]], Repo.opts())
+
+        # Move context images to the target before deleting the source, so the
+        # FK cascade does not remove them.
+        move_images(from_message.id, to_message.id)
 
         # Delete the source message
         Repo.get_repo().delete(from_message, Repo.opts())

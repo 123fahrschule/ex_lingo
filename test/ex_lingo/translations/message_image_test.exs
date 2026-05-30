@@ -97,4 +97,15 @@ defmodule ExLingo.Translations.MessageImageTest do
 
     assert Translations.list_message_images(message.id) == []
   end
+
+  test "merging messages transfers images to the target", %{message: message} do
+    {:ok, target} = Translations.create_message(%{msgid: "Reserve", message_type: :singular})
+    Translations.create_message_image(message.id, %{s3_key: "merge-1"})
+    Translations.create_message_image(message.id, %{s3_key: "merge-2"})
+
+    {:ok, _} = Translations.merge_messages(message.id, target.id)
+
+    # Source is gone, its images now belong to the target rather than being lost.
+    assert length(Translations.list_message_images(target.id)) == 2
+  end
 end

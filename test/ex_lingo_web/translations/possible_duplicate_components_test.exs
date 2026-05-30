@@ -92,7 +92,9 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponentsTest do
         stale_message_ids: MapSet.new(),
         fuzzy_matches: %{},
         possible_duplicate_summaries: %{1 => %{count: 1, highest_confidence: :high}},
-        highlighted_message_id: nil
+        highlighted_message_id: nil,
+        open_message_id: nil,
+        image_counts: %{}
       )
 
     assert html =~ "Duplicate?"

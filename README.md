@@ -71,6 +71,7 @@ If you're working on an Elixir/Phoenix project and need to manage translations, 
           <li><a href="#setting-up-an-s3-bucket">Setting up an S3 bucket</a></li>
         </ul>
       </li>
+      <li><a href="#context-images">Context images</a></li>
       <li><a href="#detection-of-stale-messages">Detection of stale messages</a></li>
       <li><a href="#translation-progress">Translation progress</a></li>
     </ul>
@@ -372,7 +373,7 @@ The dashboard includes a `/settings` page (linked at the bottom of the sidebar) 
 
 - **Translation quality warnings** — the thresholds for the advisory length warnings shown while translating (length warning/error ratios, the short-string threshold, and the absolute character allowances for short strings). Tighten them for mobile UIs and relax them for web. Each value cascades: stored override → `config :ex_lingo, :validations` → built-in default, so leaving a field empty falls back to the configured project default.
 
-- **S3 storage** — credentials used for image-based translation context (wired up in a later release), plus a configurable folder prefix so a single bucket can be shared across services with each one writing into its own subfolder (defaults to the bucket root `/`). The secret access key is encrypted at rest with [Cloak](https://hex.pm/packages/cloak_ecto) (AES-256-GCM) through `ExLingo.Vault`; it is decrypted transparently on load and is never rendered back into forms. The encryption key is derived from `config :ex_lingo, :settings_encryption_key`, which host applications should set to a strong, stable secret (a built-in fallback keeps dev/test working). Secrets are never stored in plaintext.
+- **S3 storage** — credentials for the image context feature (see below), plus a configurable folder prefix so a single bucket can be shared across services with each one writing into its own subfolder (defaults to the bucket root `/`). The secret access key is encrypted at rest with [Cloak](https://hex.pm/packages/cloak_ecto) (AES-256-GCM) through `ExLingo.Vault`; it is decrypted transparently on load and is never rendered back into forms. The encryption key is derived from `config :ex_lingo, :settings_encryption_key`, which host applications should set to a strong, stable secret (a built-in fallback keeps dev/test working). Secrets are never stored in plaintext.
 
 See [Setting up an S3 bucket](#setting-up-an-s3-bucket) for how to provision the bucket, user, and permissions.
 
@@ -419,12 +420,30 @@ Paste this, then replace **both** occurrences of `YOUR_BUCKET_NAME` with your bu
 
 If you share the bucket and want to restrict ExLingo strictly to its subfolder, scope the object statement's resource to the prefix (e.g. `arn:aws:s3:::YOUR_BUCKET_NAME/ex_lingo/*`) and add a `Condition` with `s3:prefix` to the `ListBucket` statement.
 
-**4. Get the credentials**
+**4. Configure CORS (required for image uploads)**
+
+Image uploads go straight from the browser to S3 via a presigned `PUT`, so the bucket must allow that origin. In the bucket's **Permissions → Cross-origin resource sharing (CORS)**, add (replace the origin with your dashboard's):
+
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["PUT", "GET"],
+    "AllowedOrigins": ["https://your-dashboard-domain"],
+    "ExposeHeaders": [],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+Without this, uploads fail with a browser CORS error even though the credentials and policy are correct.
+
+**5. Get the credentials**
 
 1. After creating the user, open it → **Security credentials** → **Create access key** → use case **Application running outside AWS**.
 2. Copy the **Access key ID** and **Secret access key**. The secret is shown only once — store it safely.
 
-**5. Enter them in ExLingo**
+**6. Enter them in ExLingo**
 
 Open **Settings → S3 storage** in the dashboard and fill in:
 
@@ -439,6 +458,10 @@ Open **Settings → S3 storage** in the dashboard and fill in:
 Save your settings, then click **Test connection** — it performs a `HEAD` on the bucket and reports success or the failure reason.
 
 > **Security note:** the settings page (and the rest of the ExLingo dashboard) is not authenticated by ExLingo itself — protect the mounted dashboard routes in your host application (e.g. behind your own auth pipeline). Grant the S3 IAM user only `PutObject`/`GetObject`/`DeleteObject` (and `ListBucket` for the connection test) on the configured bucket/prefix, and note that uploaded images are served via short-lived presigned URLs and are never public.
+
+### Context images
+
+Once S3 is configured, each message in the translation list has an **image** button (with a badge showing how many images it has). Expanding it reveals an inline panel where translators can drag-and-drop screenshots or mockups (PNG/JPG/WEBP, up to 10 files, 5 MB each). Uploads go directly from the browser to S3 via a presigned `PUT` — the file never passes through the server (Heroku-friendly). Stored images are listed as thumbnails and opened full-size through short-lived presigned URLs. Deleting an image removes it from S3 and the database; deleting a message removes its images too, and merging a message moves its images to the target.
 
 ### Detection of stale messages
 

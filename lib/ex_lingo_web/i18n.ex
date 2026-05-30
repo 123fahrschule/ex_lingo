@@ -271,7 +271,26 @@ defmodule ExLingoWeb.I18n do
     "Extra characters over a short source before a hard length problem flags." =>
       "Zusätzliche Zeichen gegenüber einem kurzen Quelltext, ab denen ein hartes Längenproblem gemeldet wird.",
     "Save quality thresholds" => "Qualitäts-Schwellwerte speichern",
-    "Translation quality thresholds saved." => "Qualitäts-Schwellwerte gespeichert."
+    "Translation quality thresholds saved." => "Qualitäts-Schwellwerte gespeichert.",
+    "Source" => "Quelle",
+    "Source text" => "Quelltext",
+    "Images" => "Bilder",
+    "Context images" => "Kontextbilder",
+    "Context image" => "Kontextbild",
+    "Close" => "Schließen",
+    "Open full size" => "In voller Größe öffnen",
+    "Delete image" => "Bild löschen",
+    "Delete this image?" => "Dieses Bild löschen?",
+    "No images yet." => "Noch keine Bilder.",
+    "Could not delete the image." => "Das Bild konnte nicht gelöscht werden.",
+    "Drag images here or click to choose (PNG, JPG, WEBP — max 5 MB)." =>
+      "Bilder hierher ziehen oder zum Auswählen klicken (PNG, JPG, WEBP — max. 5 MB).",
+    "Configure S3 storage in Settings to upload images." =>
+      "Konfiguriere den S3-Speicher in den Einstellungen, um Bilder hochzuladen.",
+    "File is too large (max 5 MB)." => "Datei ist zu groß (max. 5 MB).",
+    "Too many files (max 10)." => "Zu viele Dateien (max. 10).",
+    "Unsupported file type." => "Nicht unterstützter Dateityp.",
+    "Upload error." => "Upload-Fehler."
   }
 
   def on_mount(_arg, params, session, socket) do

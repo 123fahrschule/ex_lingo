@@ -16,8 +16,8 @@
       </.table_row>
     </.table_header>
     <.table_body>
+      <%= for message <- @messages do %>
       <.table_row
-        :for={message <- @messages}
         data-list-item-id={message.id}
         data-glossary-scope
         data-inline-row
@@ -125,8 +125,29 @@
           </.badge>
         </.table_cell>
         <.table_cell>
+          <div class="flex items-center gap-2">
+            <.button
+              type="button"
+              variant="ghost"
+              size="icon"
+              phx-click="toggle_images"
+              phx-value-message-id={message.id}
+              phx-target={@myself}
+              aria-expanded={@open_message_id == message.id}
+              title={t("Images")}
+            >
+              <.icon name="image" size="sm" label={t("Images")} />
+            </.button>
+            <.badge
+              :if={image_count(message, @image_counts) > 0}
+              variant="secondary"
+              class="border-info-300 bg-info-100 text-info-500"
+            >
+              {image_count(message, @image_counts)}
+            </.badge>
+          </div>
           <%= if message_stale?(message, @stale_message_ids) || Map.has_key?(@fuzzy_matches, message.id) do %>
-            <div class="flex items-center gap-2">
+            <div class="mt-2 flex items-center gap-2">
               <%= if Map.has_key?(@fuzzy_matches, message.id) do %>
                 <% fuzzy_match = Map.get(@fuzzy_matches, message.id) %>
                 <% matched_msgid = fuzzy_match.matched_msgid %>
@@ -189,6 +210,99 @@
           <% end %>
         </.table_cell>
       </.table_row>
+
+      <.table_row :if={@open_message_id == message.id} class="bg-muted/30">
+        <.table_cell colspan={column_count(@application_sources_empty?)} class="p-4">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h4 class="text-body-sm font-medium">{t("Context images")}</h4>
+              <.button
+                type="button"
+                variant="ghost"
+                size="icon"
+                phx-click="close_images"
+                phx-target={@myself}
+                title={t("Close")}
+              >
+                <.icon name="close" size="sm" label={t("Close")} />
+              </.button>
+            </div>
+
+            <div :if={@open_images != []} class="flex flex-wrap gap-3">
+              <div :for={%{image: image, url: url} <- @open_images} class="group relative">
+                <a href={url} target="_blank" rel="noopener" title={t("Open full size")}>
+                  <img
+                    src={url}
+                    alt={t("Context image")}
+                    class="h-24 w-24 rounded-md border border-border object-cover"
+                    loading="lazy"
+                  />
+                </a>
+                <.button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  class="absolute right-1 top-1 size-6 opacity-0 transition-opacity group-hover:opacity-100"
+                  phx-click="delete_image"
+                  phx-value-image-id={image.id}
+                  phx-target={@myself}
+                  data-confirm={t("Delete this image?")}
+                  title={t("Delete image")}
+                >
+                  <.icon name="delete" size="xs" label={t("Delete image")} />
+                </.button>
+              </div>
+            </div>
+
+            <p :if={@open_images == []} class="text-body-sm text-muted-foreground">
+              {t("No images yet.")}
+            </p>
+
+            <%= if @s3_ready? do %>
+              <form
+                id={"image-upload-#{message.id}"}
+                phx-change="validate_images"
+                phx-submit="validate_images"
+                phx-target={@myself}
+              >
+                <label
+                  class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border p-6 text-center text-body-sm text-muted-foreground hover:border-info-400"
+                  phx-drop-target={@uploads.message_images.ref}
+                >
+                  <.icon name="upload" size="sm" decorative />
+                  <span>{t("Drag images here or click to choose (PNG, JPG, WEBP — max 5 MB).")}</span>
+                  <.live_file_input upload={@uploads.message_images} class="sr-only" />
+                </label>
+
+                <div :for={entry <- @uploads.message_images.entries} class="mt-3 space-y-1">
+                  <div class="flex items-center gap-2 text-body-xs text-muted-foreground">
+                    <span class="truncate">{entry.client_name}</span>
+                    <span>{entry.progress}%</span>
+                  </div>
+                  <p
+                    :for={err <- upload_errors(@uploads.message_images, entry)}
+                    class="text-body-xs text-destructive"
+                  >
+                    {upload_error_to_string(err)}
+                  </p>
+                </div>
+
+                <p
+                  :for={err <- upload_errors(@uploads.message_images)}
+                  class="mt-2 text-body-xs text-destructive"
+                >
+                  {upload_error_to_string(err)}
+                </p>
+              </form>
+            <% else %>
+              <p class="text-body-sm text-muted-foreground">
+                {t("Configure S3 storage in Settings to upload images.")}
+              </p>
+            <% end %>
+          </div>
+        </.table_cell>
+      </.table_row>
+      <% end %>
     </.table_body>
     </.table>
   </.table_container>
