@@ -71,4 +71,23 @@ defmodule ExLingoWeb.Settings.SettingsLiveTest do
     assert setting.s3_bucket == "assets"
     assert setting.s3_secret_access_key == "top-secret"
   end
+
+  test "saves translation quality thresholds" do
+    {:ok, view, html} = build_conn() |> live_isolated(SettingsLive, session: %{})
+
+    assert html =~ "Translation quality warnings"
+
+    view
+    |> form("form[phx-submit='save_validations']",
+      validations: %{
+        "validation_length_warning_ratio" => "1.2",
+        "validation_short_abs_error" => "9"
+      }
+    )
+    |> render_submit()
+
+    validations = Settings.validations()
+    assert validations.length_warning_ratio == 1.2
+    assert validations.short_abs_error == 9
+  end
 end

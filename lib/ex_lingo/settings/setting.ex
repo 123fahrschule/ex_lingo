@@ -19,6 +19,18 @@ defmodule ExLingo.Settings.Setting do
     s3_region
     s3_prefix
     s3_secret_access_key
+    validation_length_warning_ratio
+    validation_length_error_ratio
+    validation_short_string_threshold
+    validation_short_abs_warning
+    validation_short_abs_error
+  )a
+
+  @validation_ratio_fields ~w(validation_length_warning_ratio validation_length_error_ratio)a
+  @validation_integer_fields ~w(
+    validation_short_string_threshold
+    validation_short_abs_warning
+    validation_short_abs_error
   )a
 
   @default_s3_prefix "/"
@@ -34,15 +46,47 @@ defmodule ExLingo.Settings.Setting do
     field :s3_region, :string
     field :s3_prefix, :string, default: @default_s3_prefix
 
+    # Translator quality-warning thresholds. nil = fall back to app config /
+    # built-in defaults (see ExLingo.Settings.validations/0). Mobile UIs are
+    # typically configured stricter than web UIs.
+    field :validation_length_warning_ratio, :float
+    field :validation_length_error_ratio, :float
+    field :validation_short_string_threshold, :integer
+    field :validation_short_abs_warning, :integer
+    field :validation_short_abs_error, :integer
+
     timestamps()
   end
 
   def changeset(struct, attrs \\ %{}) do
     struct
-    |> cast(attrs, @castable_fields)
+    |> cast(normalize_decimal_separators(attrs), @castable_fields)
     |> normalize_per_locale()
     |> normalize_s3_prefix()
     |> drop_blank_secret()
+    |> validate_thresholds()
+  end
+
+  # Accept a comma as the decimal separator for the ratio fields (e.g. German
+  # users typing "1,3"), since Ecto's :float cast only understands ".".
+  defp normalize_decimal_separators(attrs) when is_map(attrs) do
+    Enum.reduce(@validation_ratio_fields, attrs, fn field, acc ->
+      acc
+      |> swap_comma_at(Atom.to_string(field))
+      |> swap_comma_at(field)
+    end)
+  end
+
+  defp normalize_decimal_separators(attrs), do: attrs
+
+  defp swap_comma_at(attrs, key) do
+    case attrs do
+      %{^key => value} when is_binary(value) ->
+        Map.put(attrs, key, String.replace(value, ",", "."))
+
+      _other ->
+        attrs
+    end
   end
 
   @doc "Whether an S3 secret access key has been stored."
@@ -89,6 +133,34 @@ defmodule ExLingo.Settings.Setting do
 
       _other ->
         changeset
+    end
+  end
+
+  defp validate_thresholds(changeset) do
+    changeset =
+      Enum.reduce(@validation_ratio_fields, changeset, fn field, acc ->
+        validate_number(acc, field, greater_than: 0)
+      end)
+
+    changeset =
+      Enum.reduce(@validation_integer_fields, changeset, fn field, acc ->
+        validate_number(acc, field, greater_than_or_equal_to: 0)
+      end)
+
+    changeset
+    |> validate_order(:validation_length_warning_ratio, :validation_length_error_ratio)
+    |> validate_order(:validation_short_abs_warning, :validation_short_abs_error)
+  end
+
+  # The error threshold must not be below the warning threshold.
+  defp validate_order(changeset, warning_field, error_field) do
+    warning = get_field(changeset, warning_field)
+    error = get_field(changeset, error_field)
+
+    if is_number(warning) and is_number(error) and error < warning do
+      add_error(changeset, error_field, "must be greater than or equal to the warning threshold")
+    else
+      changeset
     end
   end
 end

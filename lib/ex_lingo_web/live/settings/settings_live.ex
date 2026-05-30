@@ -45,6 +45,19 @@ defmodule ExLingoWeb.Settings.SettingsLive do
      )}
   end
 
+  def handle_event("save_validations", %{"validations" => attrs}, socket) do
+    case Settings.update(take_validations(attrs)) do
+      {:ok, setting} ->
+        {:noreply,
+         socket
+         |> assign_settings(setting)
+         |> put_flash(:info, t("Translation quality thresholds saved."))}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :validations_form, to_form(changeset, as: :validations))}
+    end
+  end
+
   @doc "Per-locale prompt template currently stored for a locale code (empty when unset)."
   def locale_prompt(setting, locale_code) do
     setting.ai_prompt_template_per_locale
@@ -86,12 +99,16 @@ defmodule ExLingoWeb.Settings.SettingsLive do
     """
   end
 
+  @doc "Default validation thresholds, used as input placeholders."
+  def validation_defaults, do: Settings.validation_defaults()
+
   defp assign_settings(socket, %Setting{} = setting) do
     socket
     |> assign(:setting, setting)
     |> assign(:locales, list_locales())
     |> assign(:ai_form, to_form(Settings.change(setting), as: :ai))
     |> assign(:s3_form, to_form(Settings.change(setting), as: :s3))
+    |> assign(:validations_form, to_form(Settings.change(setting), as: :validations))
     |> assign(:s3_secret_present?, Setting.s3_secret_present?(setting))
   end
 
@@ -111,6 +128,16 @@ defmodule ExLingoWeb.Settings.SettingsLive do
       "s3_bucket",
       "s3_region",
       "s3_prefix"
+    ])
+  end
+
+  defp take_validations(attrs) do
+    Map.take(attrs, [
+      "validation_length_warning_ratio",
+      "validation_length_error_ratio",
+      "validation_short_string_threshold",
+      "validation_short_abs_warning",
+      "validation_short_abs_error"
     ])
   end
 end

@@ -23,6 +23,11 @@ defmodule ExLingo.Migrations.Postgresql.V08 do
       add(:s3_bucket, :text)
       add(:s3_region, :text)
       add(:s3_prefix, :text, null: false, default: "/")
+      add(:validation_length_warning_ratio, :float)
+      add(:validation_length_error_ratio, :float)
+      add(:validation_short_string_threshold, :integer)
+      add(:validation_short_abs_warning, :integer)
+      add(:validation_short_abs_error, :integer)
       timestamps()
     end
   end

@@ -370,6 +370,8 @@ The dashboard includes a `/settings` page (linked at the bottom of the sidebar) 
 
   The two **required** placeholders are always sent to the model even if you remove them from the template — ExLingo appends them automatically so a request is never missing the text to translate or its target locale. Empty optional values render as `(none)`.
 
+- **Translation quality warnings** — the thresholds for the advisory length warnings shown while translating (length warning/error ratios, the short-string threshold, and the absolute character allowances for short strings). Tighten them for mobile UIs and relax them for web. Each value cascades: stored override → `config :ex_lingo, :validations` → built-in default, so leaving a field empty falls back to the configured project default.
+
 - **S3 storage** — credentials used for image-based translation context (wired up in a later release), plus a configurable folder prefix so a single bucket can be shared across services with each one writing into its own subfolder (defaults to the bucket root `/`). The secret access key is encrypted at rest with [Cloak](https://hex.pm/packages/cloak_ecto) (AES-256-GCM) through `ExLingo.Vault`; it is decrypted transparently on load and is never rendered back into forms. The encryption key is derived from `config :ex_lingo, :settings_encryption_key`, which host applications should set to a strong, stable secret (a built-in fallback keeps dev/test working). Secrets are never stored in plaintext.
 
 See [Setting up an S3 bucket](#setting-up-an-s3-bucket) for how to provision the bucket, user, and permissions.

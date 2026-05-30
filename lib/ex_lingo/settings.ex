@@ -118,6 +118,54 @@ defmodule ExLingo.Settings do
 
   defp present?(value), do: is_binary(value) and String.trim(value) != ""
 
+  # Translator quality-warning thresholds. Each value cascades:
+  # stored override -> app config (`config :ex_lingo, :validations`) -> built-in default.
+  @validation_defaults %{
+    length_warning_ratio: 1.3,
+    length_error_ratio: 1.8,
+    short_string_threshold: 10,
+    short_abs_warning: 5,
+    short_abs_error: 15
+  }
+
+  @validation_db_fields %{
+    length_warning_ratio: :validation_length_warning_ratio,
+    length_error_ratio: :validation_length_error_ratio,
+    short_string_threshold: :validation_short_string_threshold,
+    short_abs_warning: :validation_short_abs_warning,
+    short_abs_error: :validation_short_abs_error
+  }
+
+  @doc "Default validation thresholds map, keyed by `config :ex_lingo, :validations` keys."
+  @spec validation_defaults() :: map()
+  def validation_defaults, do: @validation_defaults
+
+  @doc """
+  Returns the effective translator quality-warning thresholds.
+
+  Resolves each value as stored override -> app config -> built-in default.
+  Safe to call outside a database context (e.g. pure unit code): if the
+  settings store is unreachable it falls back to config/defaults instead of
+  raising, because these warnings are advisory.
+  """
+  @spec validations() :: map()
+  def validations do
+    setting = safe_get()
+    config = Application.get_env(:ex_lingo, :validations, [])
+
+    Map.new(@validation_defaults, fn {key, default} ->
+      stored = setting && Map.get(setting, Map.fetch!(@validation_db_fields, key))
+      value = if is_number(stored), do: stored, else: Keyword.get(config, key, default)
+      {key, value}
+    end)
+  end
+
+  defp safe_get do
+    get()
+  rescue
+    _error in [DBConnection.OwnershipError, DBConnection.ConnectionError] -> nil
+  end
+
   defp load_or_create do
     repo = Repo.get_repo()
 

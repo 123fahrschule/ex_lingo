@@ -214,7 +214,62 @@ defmodule ExLingoWeb.I18n do
       "Wenn Übersetzer einen Text als unverständlich markieren, erscheint er hier mit Quellpositionen.",
     "Used for badges and filters in translation tables." =>
       "Wird für Badges und Filter in Übersetzungstabellen verwendet.",
-    "Workspace" => "Arbeitsbereich"
+    "Workspace" => "Arbeitsbereich",
+    "Settings" => "Einstellungen",
+    "AI translation prompt" => "KI-Übersetzungs-Prompt",
+    "AI translation prompts saved." => "KI-Übersetzungs-Prompt gespeichert.",
+    "This template is the complete text sent to the AI for each suggestion. Edit it freely and use the placeholders below." =>
+      "Diese Vorlage ist der vollständige Text, der bei jedem Vorschlag an die KI gesendet wird. Bearbeite sie frei und nutze die Platzhalter unten.",
+    "Global prompt template" => "Globale Prompt-Vorlage",
+    "Used for all locales unless overridden below." =>
+      "Wird für alle Sprachen verwendet, sofern unten nicht überschrieben.",
+    "Per-locale overrides" => "Sprachspezifische Überschreibungen",
+    "Empty = use global template" => "Leer = globale Vorlage verwenden",
+    "Save AI prompt" => "KI-Prompt speichern",
+    "Available placeholders" => "Verfügbare Platzhalter",
+    "Insert these tokens anywhere in the template; they are replaced per request. Required placeholders are always sent to the AI even if you remove them from the template." =>
+      "Füge diese Tokens an beliebiger Stelle in die Vorlage ein; sie werden pro Anfrage ersetzt. Pflicht-Platzhalter werden immer an die KI gesendet, auch wenn du sie aus der Vorlage entfernst.",
+    "Required — always sent" => "Pflichtfeld – wird immer gesendet",
+    "Optional" => "Optional",
+    "* required — at minimum the AI always receives the source text and the target locale." =>
+      "* Pflichtfeld – die KI erhält mindestens den Quelltext und die Ziel-Sprache.",
+    "S3 storage" => "S3-Speicher",
+    "Credentials for image uploads used as translation context." =>
+      "Zugangsdaten für Bild-Uploads, die als Übersetzungskontext dienen.",
+    "Access key ID" => "Zugriffsschlüssel-ID",
+    "Secret access key" => "Geheimer Zugriffsschlüssel",
+    "Bucket" => "Bucket",
+    "Region" => "Region",
+    "Folder prefix" => "Ordner-Präfix",
+    "Not set" => "Nicht gesetzt",
+    "Stored — leave blank to keep" => "Gespeichert – leer lassen, um beizubehalten",
+    "Subfolder inside the bucket where screenshots are stored, e.g. ex_lingo/. Defaults to the bucket root (/) — useful when one bucket is shared across services." =>
+      "Unterordner im Bucket, in dem Screenshots gespeichert werden, z. B. ex_lingo/. Standard ist das Bucket-Stammverzeichnis (/) – nützlich, wenn ein Bucket von mehreren Diensten gemeinsam genutzt wird.",
+    "Test connection" => "Verbindung testen",
+    "S3 connection testing becomes available with image uploads (briefing 07)." =>
+      "Der S3-Verbindungstest wird mit den Bild-Uploads verfügbar (Briefing 07).",
+    "S3 storage settings saved." => "S3-Speichereinstellungen gespeichert.",
+    "Save S3 settings" => "S3-Einstellungen speichern",
+    "Translation quality warnings" => "Übersetzungsqualitäts-Warnungen",
+    "Thresholds for the advisory length warnings shown while translating. Tighten them for mobile UIs, relax them for web. Leave a field empty to use the default." =>
+      "Schwellwerte für die beratenden Längenwarnungen während des Übersetzens. Strenger für mobile Oberflächen, lockerer fürs Web. Leeres Feld = Standardwert.",
+    "Length warning ratio" => "Längen-Warnverhältnis",
+    "Translation longer than this multiple of the source shows a warning." =>
+      "Eine Übersetzung, die länger als dieses Vielfache des Quelltexts ist, zeigt eine Warnung.",
+    "Length error ratio" => "Längen-Fehlerverhältnis",
+    "Translation longer than this multiple flags a hard length problem." =>
+      "Eine Übersetzung, die länger als dieses Vielfache ist, meldet ein hartes Längenproblem.",
+    "Short string threshold" => "Kurztext-Schwelle",
+    "Sources shorter than this many characters use absolute character limits instead of ratios." =>
+      "Quelltexte, die kürzer als diese Zeichenanzahl sind, verwenden absolute Zeichengrenzen statt Verhältnisse.",
+    "Short string warning (characters)" => "Kurztext-Warnung (Zeichen)",
+    "Extra characters over a short source before a warning shows." =>
+      "Zusätzliche Zeichen gegenüber einem kurzen Quelltext, ab denen eine Warnung erscheint.",
+    "Short string error (characters)" => "Kurztext-Fehler (Zeichen)",
+    "Extra characters over a short source before a hard length problem flags." =>
+      "Zusätzliche Zeichen gegenüber einem kurzen Quelltext, ab denen ein hartes Längenproblem gemeldet wird.",
+    "Save quality thresholds" => "Qualitäts-Schwellwerte speichern",
+    "Translation quality thresholds saved." => "Qualitäts-Schwellwerte gespeichert."
   }
 
   def on_mount(_arg, params, session, socket) do

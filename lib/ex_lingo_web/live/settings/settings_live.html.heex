@@ -137,4 +137,116 @@
       </.form>
     </.card_content>
   </.card>
+
+  <.card class="max-w-3xl">
+    <.card_header>
+      <.card_title>{t("Translation quality warnings")}</.card_title>
+      <.card_description>
+        {t("Thresholds for the advisory length warnings shown while translating. Tighten them for mobile UIs, relax them for web. Leave a field empty to use the default.")}
+      </.card_description>
+    </.card_header>
+    <.card_content>
+      <.form for={@validations_form} phx-submit="save_validations" class="space-y-6">
+        <div class="grid gap-4 md:grid-cols-2">
+          <.form_item>
+            <.form_label field={@validations_form[:validation_length_warning_ratio]}>
+              {t("Length warning ratio")}
+            </.form_label>
+            <.form_control>
+              <.input
+                field={@validations_form[:validation_length_warning_ratio]}
+                type="number"
+                step="0.1"
+                min="0.1"
+                placeholder={to_string(validation_defaults().length_warning_ratio)}
+              />
+            </.form_control>
+            <p class="text-body-sm text-muted-foreground">
+              {t("Translation longer than this multiple of the source shows a warning.")}
+            </p>
+            <.form_message field={@validations_form[:validation_length_warning_ratio]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@validations_form[:validation_length_error_ratio]}>
+              {t("Length error ratio")}
+            </.form_label>
+            <.form_control>
+              <.input
+                field={@validations_form[:validation_length_error_ratio]}
+                type="number"
+                step="0.1"
+                min="0.1"
+                placeholder={to_string(validation_defaults().length_error_ratio)}
+              />
+            </.form_control>
+            <p class="text-body-sm text-muted-foreground">
+              {t("Translation longer than this multiple flags a hard length problem.")}
+            </p>
+            <.form_message field={@validations_form[:validation_length_error_ratio]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@validations_form[:validation_short_string_threshold]}>
+              {t("Short string threshold")}
+            </.form_label>
+            <.form_control>
+              <.input
+                field={@validations_form[:validation_short_string_threshold]}
+                type="number"
+                min="0"
+                placeholder={to_string(validation_defaults().short_string_threshold)}
+              />
+            </.form_control>
+            <p class="text-body-sm text-muted-foreground">
+              {t("Sources shorter than this many characters use absolute character limits instead of ratios.")}
+            </p>
+            <.form_message field={@validations_form[:validation_short_string_threshold]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@validations_form[:validation_short_abs_warning]}>
+              {t("Short string warning (characters)")}
+            </.form_label>
+            <.form_control>
+              <.input
+                field={@validations_form[:validation_short_abs_warning]}
+                type="number"
+                min="0"
+                placeholder={to_string(validation_defaults().short_abs_warning)}
+              />
+            </.form_control>
+            <p class="text-body-sm text-muted-foreground">
+              {t("Extra characters over a short source before a warning shows.")}
+            </p>
+            <.form_message field={@validations_form[:validation_short_abs_warning]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@validations_form[:validation_short_abs_error]}>
+              {t("Short string error (characters)")}
+            </.form_label>
+            <.form_control>
+              <.input
+                field={@validations_form[:validation_short_abs_error]}
+                type="number"
+                min="0"
+                placeholder={to_string(validation_defaults().short_abs_error)}
+              />
+            </.form_control>
+            <p class="text-body-sm text-muted-foreground">
+              {t("Extra characters over a short source before a hard length problem flags.")}
+            </p>
+            <.form_message field={@validations_form[:validation_short_abs_error]} translate={false} />
+          </.form_item>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <.button type="submit" phx-disable-with={t("Saving...")}>
+            <.icon name="save" size="sm" decorative /> {t("Save quality thresholds")}
+          </.button>
+        </div>
+      </.form>
+    </.card_content>
+  </.card>
 </div>

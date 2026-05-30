@@ -6,9 +6,11 @@ config :ex_lingo, ExLingo.Cache,
     backend: :ets
   ]
 
-# Thresholds for translator quality warnings. Override per project — mobile UIs
-# typically use tighter ratios, web UIs more relaxed. Once a settings UI exists
-# (briefing 06), these values should be writable through it.
+# Default thresholds for translator quality warnings. Override per project —
+# mobile UIs typically use tighter ratios, web UIs more relaxed. These act as
+# the fallback defaults: the settings page (`/settings`) can override any of
+# them per installation, and those stored values take precedence
+# (see `ExLingo.Settings.validations/0`).
 config :ex_lingo, :validations,
   length_warning_ratio: 1.3,
   length_error_ratio: 1.8,

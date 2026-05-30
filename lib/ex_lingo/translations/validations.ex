@@ -1,20 +1,18 @@
 defmodule ExLingo.Translations.Validations do
   @moduledoc """
-  Pure helpers for translator-facing quality warnings.
+  Helpers for translator-facing quality warnings.
 
   All checks are advisory: they produce a status or a list, never block saving.
-  Thresholds live under `config :ex_lingo, :validations, ...` so they can be
-  tuned per project (mobile UIs are stricter on length than web UIs).
+  Length thresholds are read from `ExLingo.Settings.validations/0`, which lets
+  them be tuned from the settings page (mobile UIs are stricter on length than
+  web UIs) and cascades to `config :ex_lingo, :validations` and built-in
+  defaults.
   """
+
+  alias ExLingo.Settings
 
   @placeholder_regex ~r/%\{[^}]+\}/
   @sentence_endings [".", "!", "?", ":", ";"]
-
-  @default_warning_ratio 1.3
-  @default_error_ratio 1.8
-  @default_short_threshold 10
-  @default_short_warning_abs 5
-  @default_short_error_abs 15
 
   @type length_status :: :ok | :slightly_long | :too_long
 
@@ -22,12 +20,20 @@ defmodule ExLingo.Translations.Validations do
   def length_status(source, target) when is_binary(source) and is_binary(target) do
     source_len = String.length(source)
     target_len = String.length(target)
+    thresholds = Settings.validations()
 
     cond do
-      target_len == 0 -> :ok
-      source_len == 0 -> length_status_for_empty_source(target_len)
-      source_len < short_threshold() -> length_status_absolute(source_len, target_len)
-      true -> length_status_ratio(source_len, target_len)
+      target_len == 0 ->
+        :ok
+
+      source_len == 0 ->
+        length_status_for_empty_source(target_len, thresholds)
+
+      source_len < thresholds.short_string_threshold ->
+        length_status_absolute(source_len, target_len, thresholds)
+
+      true ->
+        length_status_ratio(source_len, target_len, thresholds)
     end
   end
 
@@ -50,30 +56,30 @@ defmodule ExLingo.Translations.Validations do
     end
   end
 
-  defp length_status_for_empty_source(target_len) do
+  defp length_status_for_empty_source(target_len, thresholds) do
     cond do
-      target_len <= short_warning_abs() -> :ok
-      target_len <= short_error_abs() -> :slightly_long
+      target_len <= thresholds.short_abs_warning -> :ok
+      target_len <= thresholds.short_abs_error -> :slightly_long
       true -> :too_long
     end
   end
 
-  defp length_status_absolute(source_len, target_len) do
+  defp length_status_absolute(source_len, target_len, thresholds) do
     diff = target_len - source_len
 
     cond do
-      diff <= short_warning_abs() -> :ok
-      diff <= short_error_abs() -> :slightly_long
+      diff <= thresholds.short_abs_warning -> :ok
+      diff <= thresholds.short_abs_error -> :slightly_long
       true -> :too_long
     end
   end
 
-  defp length_status_ratio(source_len, target_len) do
+  defp length_status_ratio(source_len, target_len, thresholds) do
     ratio = target_len / source_len
 
     cond do
-      ratio < warning_ratio() -> :ok
-      ratio < error_ratio() -> :slightly_long
+      ratio < thresholds.length_warning_ratio -> :ok
+      ratio < thresholds.length_error_ratio -> :slightly_long
       true -> :too_long
     end
   end
@@ -88,21 +94,4 @@ defmodule ExLingo.Translations.Validations do
     last = text |> String.trim_trailing() |> String.last()
     if last in @sentence_endings, do: last
   end
-
-  defp config, do: Application.get_env(:ex_lingo, :validations, [])
-
-  defp warning_ratio,
-    do: Keyword.get(config(), :length_warning_ratio, @default_warning_ratio)
-
-  defp error_ratio,
-    do: Keyword.get(config(), :length_error_ratio, @default_error_ratio)
-
-  defp short_threshold,
-    do: Keyword.get(config(), :short_string_threshold, @default_short_threshold)
-
-  defp short_warning_abs,
-    do: Keyword.get(config(), :short_abs_warning, @default_short_warning_abs)
-
-  defp short_error_abs,
-    do: Keyword.get(config(), :short_abs_error, @default_short_error_abs)
 end
