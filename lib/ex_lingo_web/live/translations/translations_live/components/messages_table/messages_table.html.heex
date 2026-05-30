@@ -1,4 +1,4 @@
-<div>
+<div id="messages-table-rows" phx-hook="ExLingoRowGroupHover">
   <.table_container>
     <.table aria-label={t("Messages")}>
     <.table_header>
@@ -16,6 +16,7 @@
       <% source_refs = source_references(message) %>
       <.table_row
         data-list-item-id={message.id}
+        data-row-group={message.id}
         data-glossary-scope
         data-inline-row
         class={[
@@ -203,7 +204,7 @@
         </.table_cell>
       </.table_row>
 
-      <.table_row :if={source_refs != []}>
+      <.table_row :if={source_refs != []} data-row-group={message.id}>
         <.table_cell colspan={column_count(@application_sources_empty?)} class="py-0 align-top">
           <details class="text-body-xs text-muted-foreground">
             <summary class="cursor-pointer py-2">
@@ -220,7 +221,7 @@
         </.table_cell>
       </.table_row>
 
-      <.table_row :if={@open_message_id == message.id} class="bg-muted/30">
+      <.table_row :if={@open_message_id == message.id} data-row-group={message.id} class="bg-muted/30">
         <.table_cell colspan={column_count(@application_sources_empty?)} class="p-4">
           <div class="space-y-4">
             <div class="flex items-center justify-between">

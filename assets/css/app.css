@@ -6,6 +6,11 @@
 @tailwind utilities;
 
 @layer components {
+  /* Highlights a message row together with its source-positions / image rows. */
+  .ex-lingo-row-group-hover {
+    background-color: hsl(var(--muted) / 0.5);
+  }
+
   .locale-gradient--solid {
     background: var(--locale-color-1, #000000);
   }
