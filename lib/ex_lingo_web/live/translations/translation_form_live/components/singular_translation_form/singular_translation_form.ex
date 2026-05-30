@@ -23,9 +23,6 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
   import ExLingoWeb.Translations.TranslationValidationHints,
     only: [validation_hints: 1, length_border_class: 1]
 
-  import ExLingoWeb.Translations.MessageMetadata,
-    only: [source_references: 1, source_reference_label: 1]
-
   def update(assigns, socket) do
     socket =
       socket

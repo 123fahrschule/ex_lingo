@@ -14,10 +14,10 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
 
   alias ExLingoWeb.Components.Shared.Pagination
 
-  @available_filters ~w(application_source_id domain_id search not_translated stale page page_size)
+  @available_filters ~w(application_source_id domain_id message_type search not_translated stale page page_size)
   @available_params ~w(page page_size search filter sort)
   @list_context_prefixes ~w(search page page_size filter[ sort[ clear_list_context)
-  @params_in_filter ~w(application_source_id domain_id not_translated stale)
+  @params_in_filter ~w(application_source_id domain_id message_type not_translated stale)
   @ids_to_parse ~w(application_source_id domain_id locale_id)
   @sortable_fields ~w(msgid message_type)
   @default_sort %{"field" => "msgid", "direction" => "asc"}
@@ -270,6 +270,10 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
 
   defp update_filters_acc({"stale", value}, acc) do
     Keyword.put(acc, :filter, Map.put(acc[:filter] || %{}, "stale", value))
+  end
+
+  defp update_filters_acc({"message_type", value}, acc) do
+    Keyword.put(acc, :filter, Map.put(acc[:filter] || %{}, "message_type", value))
   end
 
   defp update_filters_acc({key, value}, acc) do

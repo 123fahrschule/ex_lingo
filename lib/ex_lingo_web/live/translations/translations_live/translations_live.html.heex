@@ -1,14 +1,3 @@
-<.breadcrumb>
-  <.breadcrumb_list>
-    <.breadcrumb_item>
-      <.breadcrumb_link href={dashboard_path(@socket, "/locales")}>{t("Locales")}</.breadcrumb_link>
-    </.breadcrumb_item>
-    <.breadcrumb_separator />
-    <.breadcrumb_item>
-      <.breadcrumb_page>{@locale.native_name}</.breadcrumb_page>
-    </.breadcrumb_item>
-  </.breadcrumb_list>
-</.breadcrumb>
 <.page_header title={@locale.native_name} class="px-0" />
 <div
   id={"ex-lingo-translations-list-#{@locale.id}"}

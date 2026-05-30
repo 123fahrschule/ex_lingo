@@ -53,6 +53,7 @@
         <.dropdown_menu_item
           as="button"
           type="button"
+          class="w-full"
           id={"add-to-glossary-singular-#{@message.id}"}
           phx-hook="ExLingoGlossaryCapture"
           phx-target={@myself}
@@ -71,22 +72,6 @@
       </.dropdown_menu_content>
     </.dropdown_menu>
   </div>
-
-  <details
-    :if={source_references(@message) != []}
-    class="text-body-xs text-muted-foreground"
-  >
-    <summary class="cursor-pointer">
-      {t("Source Positions")} ({length(source_references(@message))})
-    </summary>
-    <ul class="mt-1 space-y-1">
-      <li :for={reference <- source_references(@message)}>
-        <code class="break-all rounded bg-muted px-1.5 py-0.5 text-foreground">
-          {source_reference_label(reference)}
-        </code>
-      </li>
-    </ul>
-  </details>
 
   <div
     :if={@ai_open?}

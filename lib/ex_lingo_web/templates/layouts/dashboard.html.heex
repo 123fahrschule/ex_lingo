@@ -30,7 +30,7 @@
   </head>
   <body class="ex-lingo-dashboard">
     <.sidebar_provider>
-      <.sidebar id="sidebar" collapsible="icon">
+      <.sidebar id="sidebar" collapsible="icon" state={sidebar_state(@conn)}>
         <.sidebar_header>
           <.app_side_nav title="ExLingo" />
         </.sidebar_header>
@@ -79,19 +79,21 @@
             </.sidebar_group_content>
           </.sidebar_group>
 
-          <.sidebar_separator />
+          <div class="mt-auto">
+            <.sidebar_separator />
 
-          <.sidebar_group>
-            <.sidebar_group_content>
-              <.sidebar_menu>
-                <.sidebar_menu_item>
-                  <.sidebar_menu_button href={dashboard_path(@conn, "/settings")}>
-                    <.icon name="settings" decorative /> <span>{t("Settings")}</span>
-                  </.sidebar_menu_button>
-                </.sidebar_menu_item>
-              </.sidebar_menu>
-            </.sidebar_group_content>
-          </.sidebar_group>
+            <.sidebar_group>
+              <.sidebar_group_content>
+                <.sidebar_menu>
+                  <.sidebar_menu_item>
+                    <.sidebar_menu_button href={dashboard_path(@conn, "/settings")}>
+                      <.icon name="settings" decorative /> <span>{t("Settings")}</span>
+                    </.sidebar_menu_button>
+                  </.sidebar_menu_item>
+                </.sidebar_menu>
+              </.sidebar_group_content>
+            </.sidebar_group>
+          </div>
         </.sidebar_content>
       </.sidebar>
 

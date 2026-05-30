@@ -26,6 +26,11 @@ defmodule ExLingoWeb.Dashboard.DashboardLive do
       |> assign(:domains, domains)
       |> assign(:unclear_messages_count, length(unclear_messages))
       |> assign(:cache_count, cache_count())
+      # Per-locale duplicate detection is expensive; compute it off the mount so
+      # the dashboard renders immediately and the count fills in when ready.
+      |> assign_async(:possible_duplicates_count, fn ->
+        {:ok, %{possible_duplicates_count: possible_duplicates_count(locales)}}
+      end)
 
     {:ok, socket}
   end
@@ -113,6 +118,14 @@ defmodule ExLingoWeb.Dashboard.DashboardLive do
       MessagesExtractorAgent.get_stale_detection_result()
 
     stale_count
+  end
+
+  # Possible-duplicate detection is per-locale and in-memory; sum the candidate
+  # groups across locales for an at-a-glance dashboard count.
+  defp possible_duplicates_count(locales) do
+    Enum.reduce(locales, 0, fn locale, acc ->
+      acc + length(Translations.list_possible_duplicate_translations(locale_id: locale.id))
+    end)
   end
 
   defp get_mergeable_messages_count do

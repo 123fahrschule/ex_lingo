@@ -45,6 +45,32 @@
         <.card>
           <.card_content class="flex items-center justify-between gap-4 pt-6">
             <div>
+              <p class="text-sm font-medium text-muted-foreground">{t("Possible duplicates")}</p>
+              <p class="text-3xl font-semibold">
+                <.async_result :let={count} assign={@possible_duplicates_count}>
+                  <:loading>
+                    <.icon name="progress_activity" size="sm" class="animate-spin text-muted-foreground" decorative />
+                  </:loading>
+                  <:failed :let={_failure}>—</:failed>
+                  {count}
+                </.async_result>
+              </p>
+            </div>
+            <.button
+              as={&Phoenix.Component.link/1}
+              navigate={dashboard_path(@socket, "/possible_duplicates")}
+              variant="outline"
+              size="icon"
+              title={t("Open possible duplicates")}
+            >
+              <.icon name="difference" label={t("Open possible duplicates")} />
+            </.button>
+          </.card_content>
+        </.card>
+
+        <.card>
+          <.card_content class="flex items-center justify-between gap-4 pt-6">
+            <div>
               <p class="text-sm font-medium text-muted-foreground">{t("Domains")}</p>
               <p class="text-3xl font-semibold">{length(@domains)}</p>
             </div>
@@ -135,24 +161,6 @@
           >
             <.icon name="download" size="sm" decorative /> {t("Export to PO")}
           </.button>
-        </.card_content>
-      </.card>
-
-      <.card :if={length(ExLingo.config().plugins) > 0}>
-        <.card_header>
-          <.card_title>{t("Plugins")}</.card_title>
-        </.card_header>
-        <.card_content>
-          <div class="grid gap-4 md:grid-cols-2">
-            <%= for {plugin_name, _} <- ExLingo.config().plugins do %>
-              <%= if plugin_name |> Module.concat(DashboardComponent) |> module_exists?() do %>
-                <.live_component module={Module.concat(plugin_name, DashboardComponent)} id={plugin_name} />
-              <% end %>
-              <%= if plugin_name |> Module.concat(DashboardLive) |> module_exists?() do %>
-                {live_render(@socket, Module.concat(plugin_name, DashboardLive), id: plugin_name)}
-              <% end %>
-            <% end %>
-          </div>
         </.card_content>
       </.card>
 

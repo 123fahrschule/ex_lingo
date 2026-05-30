@@ -19,6 +19,7 @@ defmodule ExLingo.Translations.Messages.Finders.ListMessages do
 
     base()
     |> filter_query(query_filters)
+    |> message_type_query(filters)
     |> not_translated_query(filters)
     |> stale_query(filters)
     |> search_subquery(filters, params[:search])
@@ -44,6 +45,13 @@ defmodule ExLingo.Translations.Messages.Finders.ListMessages do
   defp sort_query(query, _sort) do
     order_by(query, [message: message], asc: message.msgid, asc: message.id)
   end
+
+  defp message_type_query(query, %{"message_type" => type}) when type in ["singular", "plural"] do
+    type_atom = String.to_existing_atom(type)
+    where(query, [message: m], m.message_type == ^type_atom)
+  end
+
+  defp message_type_query(query, _filters), do: query
 
   defp not_translated_query(query, %{"locale_id" => locale_id, "not_translated" => "true"}) do
     query

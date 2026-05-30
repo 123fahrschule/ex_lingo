@@ -13,6 +13,9 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
   require Logger
   import ExLingo.Utils.ParamParsers, only: [parse_id_filter: 1]
 
+  import ExLingoWeb.Translations.MessageMetadata,
+    only: [source_references: 1, source_reference_label: 1]
+
   alias ExLingo.Storage.S3
   alias ExLingo.Translations
   alias ExLingoWeb.Translations.{PluralTranslationForm, SingularTranslationForm}
@@ -134,8 +137,8 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
   def image_count(_message, _image_counts), do: 0
 
   def column_count(application_sources_empty?) do
-    # Source, Translation, Domain, [Application], Type, Actions
-    if application_sources_empty?, do: 5, else: 6
+    # Source, Translation, [Application], Actions
+    if application_sources_empty?, do: 3, else: 4
   end
 
   def upload_error_to_string(:too_large), do: t("File is too large (max 5 MB).")

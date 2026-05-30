@@ -6,54 +6,26 @@
         <.sortable_table_head field="msgid" sort={assigns[:sort] || %{}}>
           {t("Source")}
         </.sortable_table_head>
-        <.table_head>{t("ExLingo Translation")}</.table_head>
-        <.table_head>{t("Domain")}</.table_head>
+        <.table_head>{t("Translation")}</.table_head>
         <.table_head :if={!@application_sources_empty?}>{t("Application")}</.table_head>
-        <.sortable_table_head field="message_type" sort={assigns[:sort] || %{}}>
-          {t("Type")}
-        </.sortable_table_head>
-        <.table_head>{t("Actions")}</.table_head>
+        <.table_head class="w-px whitespace-nowrap text-right">{t("Actions")}</.table_head>
       </.table_row>
     </.table_header>
     <.table_body>
       <%= for message <- @messages do %>
+      <% source_refs = source_references(message) %>
       <.table_row
         data-list-item-id={message.id}
         data-glossary-scope
         data-inline-row
         class={[
           "align-top",
+          source_refs != [] && "border-b-0",
           message_stale?(message, @stale_message_ids) && "bg-warning-50/80"
         ]}
       >
-        <.table_cell>
+        <.table_cell class="align-top">
           <div class="flex max-w-sm flex-col gap-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <.badge
-                :if={message_stale?(message, @stale_message_ids)}
-                variant="secondary"
-                class="border-warning-300 bg-warning-100 text-warning-500"
-                title={t("This message exists in the database but is no longer present in any locale's PO files")}
-              >
-                {t("Stale")}
-              </.badge>
-              <.badge
-                :if={Map.has_key?(@fuzzy_matches, message.id)}
-                variant="secondary"
-                class="border-success-300 bg-success-100 text-success-500"
-                title={t("This message can be merged with a similar message that exists in PO files")}
-              >
-                {t("Merge")}
-              </.badge>
-              <.badge
-                :if={possible_duplicate?(message, assigns[:possible_duplicate_summaries] || %{})}
-                variant="secondary"
-                class="border-info-300 bg-info-100 text-info-500"
-                title={possible_duplicate_title(message, assigns[:possible_duplicate_summaries] || %{})}
-              >
-                {t("Duplicate?")}
-              </.badge>
-            </div>
             <div
               data-glossary-source
               tabindex="0"
@@ -77,9 +49,47 @@
             <div :if={message.context && message.context != ""} class="truncate text-body-xs text-muted-foreground">
               {t("Context")}: {message.context}
             </div>
+
+            <% tag_class = "px-1.5 py-0 text-[10px] font-medium leading-4" %>
+            <div class="flex flex-wrap items-center gap-1">
+              <.badge
+                variant={if is_nil(message.domain), do: "outline", else: "default"}
+                class={["uppercase", tag_class]}
+                style={unless is_nil(message.domain), do: "background-color:#{message.domain.color};"}
+              >
+                {if is_nil(message.domain), do: t("None"), else: message.domain.name}
+              </.badge>
+              <.badge variant="outline" class={["uppercase", tag_class]}>
+                {message.message_type}
+              </.badge>
+              <.badge
+                :if={possible_duplicate?(message, assigns[:possible_duplicate_summaries] || %{})}
+                variant="secondary"
+                class={["border-info-300 bg-info-100 text-info-500", tag_class]}
+                title={possible_duplicate_title(message, assigns[:possible_duplicate_summaries] || %{})}
+              >
+                {t("Duplicate?")}
+              </.badge>
+              <.badge
+                :if={message_stale?(message, @stale_message_ids)}
+                variant="secondary"
+                class={["border-warning-300 bg-warning-100 text-warning-500", tag_class]}
+                title={t("This message exists in the database but is no longer present in any locale's PO files")}
+              >
+                {t("Stale")}
+              </.badge>
+              <.badge
+                :if={Map.has_key?(@fuzzy_matches, message.id)}
+                variant="secondary"
+                class={["border-success-300 bg-success-100 text-success-500", tag_class]}
+                title={t("This message can be merged with a similar message that exists in PO files")}
+              >
+                {t("Merge")}
+              </.badge>
+            </div>
           </div>
         </.table_cell>
-        <.table_cell>
+        <.table_cell class="align-top">
           <div class="min-w-72">
             <.live_component
               :if={message.message_type == :singular}
@@ -101,16 +111,7 @@
             />
           </div>
         </.table_cell>
-        <.table_cell>
-          <.badge
-            variant={if is_nil(message.domain), do: "outline", else: "default"}
-            class="uppercase"
-            style={unless is_nil(message.domain), do: "background-color:#{message.domain.color};"}
-          >
-            {if is_nil(message.domain), do: t("None"), else: message.domain.name}
-          </.badge>
-        </.table_cell>
-        <.table_cell :if={!@application_sources_empty?}>
+        <.table_cell :if={!@application_sources_empty?} class="align-top">
           <.badge
             variant={if is_nil(message.application_source), do: "outline", else: "default"}
             class="uppercase"
@@ -119,13 +120,15 @@
             {if is_nil(message.application_source), do: t("None"), else: message.application_source.name}
           </.badge>
         </.table_cell>
-        <.table_cell>
-          <.badge variant="outline" class="uppercase">
-            {message.message_type}
-          </.badge>
-        </.table_cell>
-        <.table_cell>
-          <div class="flex items-center gap-2">
+        <.table_cell class="w-px whitespace-nowrap align-top text-right">
+          <div class="flex items-center justify-end gap-2">
+            <.badge
+              :if={image_count(message, @image_counts) > 0}
+              variant="secondary"
+              class="border-info-300 bg-info-100 text-info-500"
+            >
+              {image_count(message, @image_counts)}
+            </.badge>
             <.button
               type="button"
               variant="ghost"
@@ -138,76 +141,82 @@
             >
               <.icon name="image" size="sm" label={t("Images")} />
             </.button>
-            <.badge
-              :if={image_count(message, @image_counts) > 0}
-              variant="secondary"
-              class="border-info-300 bg-info-100 text-info-500"
-            >
-              {image_count(message, @image_counts)}
-            </.badge>
-          </div>
-          <%= if message_stale?(message, @stale_message_ids) || Map.has_key?(@fuzzy_matches, message.id) do %>
-            <div class="mt-2 flex items-center gap-2">
-              <%= if Map.has_key?(@fuzzy_matches, message.id) do %>
-                <% fuzzy_match = Map.get(@fuzzy_matches, message.id) %>
-                <% matched_msgid = fuzzy_match.matched_msgid %>
-                <% matched_message_id = fuzzy_match.matched_message_id %>
-                <.button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  phx-click="merge_messages"
-                  phx-value-from-id={message.id}
-                  phx-value-to-id={matched_message_id}
-                  phx-target={@myself}
-                  data-confirm={
-                    Enum.join(
-                      [
-                        "⚠️ #{t("Merge Message")}",
-                        "",
-                        t("This will:"),
-                        "1. " <> t("Move all translations from '%{from}' to '%{to}'", from: message.msgid, to: matched_msgid),
-                        "2. " <> t("Overwrite existing translations in '%{target}' (unless missing in source)", target: matched_msgid),
-                        "3. " <> t("Delete '%{message}' from all locales", message: message.msgid),
-                        "",
-                        t("This action is irreversible. Are you sure?")
-                      ],
-                      "\n"
-                    )
-                  }
-                  title={"#{t("Merge")}: '#{matched_msgid}'"}
-                >
-                  <.icon name="merge_type" size="sm" class="text-success-500" label={t("Merge message")} />
-                </.button>
-              <% end %>
+            <%= if Map.has_key?(@fuzzy_matches, message.id) do %>
+              <% fuzzy_match = Map.get(@fuzzy_matches, message.id) %>
+              <% matched_msgid = fuzzy_match.matched_msgid %>
+              <% matched_message_id = fuzzy_match.matched_message_id %>
               <.button
-                :if={message_stale?(message, @stale_message_ids)}
                 type="button"
                 variant="ghost"
                 size="icon"
-                phx-click="delete_stale"
-                phx-value-message-id={message.id}
+                phx-click="merge_messages"
+                phx-value-from-id={message.id}
+                phx-value-to-id={matched_message_id}
                 phx-target={@myself}
                 data-confirm={
                   Enum.join(
                     [
-                      "⚠️ #{t("Delete Stale Message")}",
+                      "⚠️ #{t("Merge Message")}",
                       "",
-                      t(
-                        "This will permanently delete this message and its translations across ALL locales."
-                      ),
+                      t("This will:"),
+                      "1. " <> t("Move all translations from '%{from}' to '%{to}'", from: message.msgid, to: matched_msgid),
+                      "2. " <> t("Overwrite existing translations in '%{target}' (unless missing in source)", target: matched_msgid),
+                      "3. " <> t("Delete '%{message}' from all locales", message: message.msgid),
                       "",
                       t("This action is irreversible. Are you sure?")
                     ],
                     "\n"
                   )
                 }
-                title={t("Delete stale message (all locales)")}
+                title={"#{t("Merge")}: '#{matched_msgid}'"}
               >
-                <.icon name="delete" size="sm" class="text-destructive" label={t("Delete stale message")} />
+                <.icon name="merge_type" size="sm" class="text-success-500" label={t("Merge message")} />
               </.button>
-            </div>
-          <% end %>
+            <% end %>
+            <.button
+              :if={message_stale?(message, @stale_message_ids)}
+              type="button"
+              variant="ghost"
+              size="icon"
+              phx-click="delete_stale"
+              phx-value-message-id={message.id}
+              phx-target={@myself}
+              data-confirm={
+                Enum.join(
+                  [
+                    "⚠️ #{t("Delete Stale Message")}",
+                    "",
+                    t(
+                      "This will permanently delete this message and its translations across ALL locales."
+                    ),
+                    "",
+                    t("This action is irreversible. Are you sure?")
+                  ],
+                  "\n"
+                )
+              }
+              title={t("Delete stale message (all locales)")}
+            >
+              <.icon name="delete" size="sm" class="text-destructive" label={t("Delete stale message")} />
+            </.button>
+          </div>
+        </.table_cell>
+      </.table_row>
+
+      <.table_row :if={source_refs != []}>
+        <.table_cell colspan={column_count(@application_sources_empty?)} class="py-0 align-top">
+          <details class="text-body-xs text-muted-foreground">
+            <summary class="cursor-pointer py-2">
+              {t("Source Positions")} ({length(source_refs)})
+            </summary>
+            <ul class="mb-2 flex flex-wrap gap-2">
+              <li :for={reference <- source_refs}>
+                <code class="break-all rounded bg-muted px-1.5 py-0.5 text-foreground">
+                  {source_reference_label(reference)}
+                </code>
+              </li>
+            </ul>
+          </details>
         </.table_cell>
       </.table_row>
 

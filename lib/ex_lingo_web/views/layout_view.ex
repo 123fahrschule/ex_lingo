@@ -8,6 +8,19 @@ defmodule ExLingoWeb.LayoutView do
 
   def render(_, assigns), do: dashboard(assigns)
 
+  @doc """
+  Restores the sidebar expanded/collapsed state from the `sidebar_state` cookie
+  the Cognit sidebar hook writes, so the choice survives reloads and navigation.
+  """
+  def sidebar_state(conn) do
+    cookies = Map.get(conn, :cookies)
+
+    case is_map(cookies) && Map.get(cookies, "sidebar_state") do
+      state when state in ["expanded", "collapsed"] -> state
+      _other -> "expanded"
+    end
+  end
+
   def csp_nonce(conn, type) when type in [:script, :style, :img] do
     private = Map.get(conn, :private) || %{}
     assigns = Map.get(conn, :assigns) || %{}

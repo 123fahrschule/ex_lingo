@@ -83,7 +83,6 @@ defmodule ExLingoWeb.I18n do
     "Failed to merge messages." => "Die Texte konnten nicht zusammengeführt werden.",
     "Form %{number}" => "Form %{number}",
     "Generating..." => "Wird erstellt...",
-    "Generating suggestion..." => "Vorschlag wird erstellt...",
     "Global" => "Global",
     "Glossary" => "Glossar",
     "Glossary entries" => "Glossareinträge",
@@ -296,7 +295,21 @@ defmodule ExLingoWeb.I18n do
       "Schreibt die Datenbank-Übersetzungen zurück in .po-Dateien. In Chrome/Edge kannst du deinen priv/gettext-Ordner wählen und direkt überschreiben; andere Browser laden ein ZIP.",
     "Export to PO" => "Nach PO exportieren",
     "Could not export PO files." => "PO-Dateien konnten nicht exportiert werden.",
-    "Wrote %{count} PO file(s)." => "%{count} PO-Datei(en) geschrieben."
+    "Wrote %{count} PO file(s)." => "%{count} PO-Datei(en) geschrieben.",
+    "AI" => "KI",
+    "Singular" => "Singular",
+    "Plural" => "Plural",
+    "Open possible duplicates" => "Mögliche Duplikate öffnen",
+    "Get AI suggestion" => "KI-Vorschlag holen",
+    "Add to glossary" => "Zum Glossar hinzufügen",
+    "Mark context unclear" => "Kontext als unklar markieren",
+    "Add translation…" => "Übersetzung hinzufügen…",
+    "Generating suggestion…" => "Vorschlag wird erstellt…",
+    "Reject" => "Verwerfen",
+    "Saved" => "Gespeichert",
+    "Error" => "Fehler",
+    "Create a glossary entry from the selected source/target text" =>
+      "Aus dem ausgewählten Quell-/Zieltext einen Glossareintrag erstellen"
   }
 
   def on_mount(_arg, params, session, socket) do
