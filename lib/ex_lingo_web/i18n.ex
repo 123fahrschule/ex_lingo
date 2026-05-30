@@ -246,8 +246,10 @@ defmodule ExLingoWeb.I18n do
     "Subfolder inside the bucket where screenshots are stored, e.g. ex_lingo/. Defaults to the bucket root (/) — useful when one bucket is shared across services." =>
       "Unterordner im Bucket, in dem Screenshots gespeichert werden, z. B. ex_lingo/. Standard ist das Bucket-Stammverzeichnis (/) – nützlich, wenn ein Bucket von mehreren Diensten gemeinsam genutzt wird.",
     "Test connection" => "Verbindung testen",
-    "S3 connection testing becomes available with image uploads (briefing 07)." =>
-      "Der S3-Verbindungstest wird mit den Bild-Uploads verfügbar (Briefing 07).",
+    "S3 connection succeeded." => "S3-Verbindung erfolgreich.",
+    "Enter and save the S3 credentials before testing." =>
+      "Bitte die S3-Zugangsdaten eingeben und speichern, bevor du testest.",
+    "S3 connection failed: %{reason}" => "S3-Verbindung fehlgeschlagen: %{reason}",
     "S3 storage settings saved." => "S3-Speichereinstellungen gespeichert.",
     "Save S3 settings" => "S3-Einstellungen speichern",
     "Translation quality warnings" => "Übersetzungsqualitäts-Warnungen",

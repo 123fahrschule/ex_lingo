@@ -56,6 +56,14 @@ defmodule ExLingo.Translations do
   defdelegate delete_messages(message_ids), to: Messages
   defdelegate merge_messages(from_message_id, to_message_id), to: Messages
 
+  # MESSAGE IMAGES
+  defdelegate list_message_images(message_id), to: Messages, as: :list_images
+  defdelegate get_message_image(image_id), to: Messages, as: :get_image
+  defdelegate create_message_image(message_id, attrs, opts \\ []), to: Messages, as: :create_image
+  defdelegate delete_message_image(image_id, opts \\ []), to: Messages, as: :delete_image
+  defdelegate message_image_counts(message_ids), to: Messages, as: :image_counts
+  defdelegate move_message_images(from_id, to_id, opts \\ []), to: Messages, as: :move_images
+
   # LOCALES
   defdelegate list_locales(params \\ []), to: Locales
   defdelegate get_locale(params \\ []), to: Locales

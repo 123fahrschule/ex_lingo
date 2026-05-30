@@ -4,6 +4,7 @@ defmodule ExLingoWeb.Settings.SettingsLive do
   alias ExLingo.AI.Translations.PromptRenderer
   alias ExLingo.Settings
   alias ExLingo.Settings.Setting
+  alias ExLingo.Storage.S3
   alias ExLingo.Translations
 
   def mount(_params, _session, socket) do
@@ -37,12 +38,19 @@ defmodule ExLingoWeb.Settings.SettingsLive do
   end
 
   def handle_event("test_s3", _params, socket) do
-    {:noreply,
-     put_flash(
-       socket,
-       :info,
-       t("S3 connection testing becomes available with image uploads (briefing 07).")
-     )}
+    socket =
+      case S3.test_connection() do
+        :ok ->
+          put_flash(socket, :info, t("S3 connection succeeded."))
+
+        {:error, :not_configured} ->
+          put_flash(socket, :error, t("Enter and save the S3 credentials before testing."))
+
+        {:error, reason} ->
+          put_flash(socket, :error, t("S3 connection failed: %{reason}", reason: inspect(reason)))
+      end
+
+    {:noreply, socket}
   end
 
   def handle_event("save_validations", %{"validations" => attrs}, socket) do

@@ -72,6 +72,14 @@ defmodule ExLingoWeb.Settings.SettingsLiveTest do
     assert setting.s3_secret_access_key == "top-secret"
   end
 
+  test "Test connection reports missing credentials before any are saved" do
+    {:ok, view, _html} = build_conn() |> live_isolated(SettingsLive, session: %{})
+
+    html = view |> element("button[phx-click='test_s3']") |> render_click()
+
+    assert html =~ "Enter and save the S3 credentials before testing."
+  end
+
   test "saves translation quality thresholds" do
     {:ok, view, html} = build_conn() |> live_isolated(SettingsLive, session: %{})
 

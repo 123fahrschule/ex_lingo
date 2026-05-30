@@ -6,7 +6,7 @@ defmodule ExLingo.Translations.Messages do
   alias ExLingo.Repo
 
   alias ExLingo.Translations.Message
-  alias ExLingo.Translations.{SingularTranslation, PluralTranslation}
+  alias ExLingo.Translations.{MessageImage, SingularTranslation, PluralTranslation}
 
   alias ExLingo.Translations.Messages.Finders.{GetMessage, ListAllMessages, ListMessages}
 
@@ -24,6 +24,72 @@ defmodule ExLingo.Translations.Messages do
 
   def get_messages_count do
     Repo.get_repo().aggregate(Message, :count, Repo.opts())
+  end
+
+  # MESSAGE IMAGES
+
+  @doc "Lists a message's images, oldest first."
+  def list_images(message_id) do
+    import Ecto.Query
+
+    MessageImage
+    |> where([image], image.message_id == ^message_id)
+    |> order_by([image], asc: image.inserted_at, asc: image.id)
+    |> Repo.get_repo().all(Repo.opts())
+  end
+
+  @doc "Fetches a single image by id."
+  def get_image(image_id) do
+    case Repo.get_repo().get(MessageImage, image_id, Repo.opts()) do
+      %MessageImage{} = image -> {:ok, image}
+      nil -> {:error, :not_found}
+    end
+  end
+
+  @doc "Creates an image row for a message after the binary was stored in S3."
+  def create_image(message_id, attrs, opts \\ []) do
+    attrs = attrs |> Map.new() |> Map.put(:message_id, message_id)
+
+    %MessageImage{}
+    |> MessageImage.changeset(attrs)
+    |> Repo.get_repo().insert(Repo.opts(opts))
+  end
+
+  @doc "Deletes an image row. The S3 object must be removed separately."
+  def delete_image(image_id, opts \\ []) do
+    with {:ok, image} <- get_image(image_id) do
+      Repo.get_repo().delete(image, Repo.opts(opts))
+    end
+  end
+
+  @doc """
+  Returns a `%{message_id => count}` map for the given message ids, so the
+  translation list can show an image badge per row without an N+1 query.
+  """
+  def image_counts(message_ids) when is_list(message_ids) do
+    import Ecto.Query
+
+    case message_ids do
+      [] ->
+        %{}
+
+      ids ->
+        MessageImage
+        |> where([image], image.message_id in ^ids)
+        |> group_by([image], image.message_id)
+        |> select([image], {image.message_id, count(image.id)})
+        |> Repo.get_repo().all(Repo.opts())
+        |> Map.new()
+    end
+  end
+
+  @doc "Reassigns all images from one message to another (used when merging)."
+  def move_images(from_message_id, to_message_id, opts \\ []) do
+    import Ecto.Query
+
+    MessageImage
+    |> where([image], image.message_id == ^from_message_id)
+    |> Repo.get_repo().update_all([set: [message_id: to_message_id]], Repo.opts(opts))
   end
 
   def create_message(attrs, opts \\ []) do

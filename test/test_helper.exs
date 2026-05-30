@@ -10,6 +10,9 @@ ExLingo.start_link(
   plugins: []
 )
 
+Application.ensure_all_started(:mox)
+Mox.defmock(ExLingo.Storage.S3.ClientMock, for: ExLingo.Storage.S3.Client)
+
 ExUnit.start()
 
 # clear translations cache

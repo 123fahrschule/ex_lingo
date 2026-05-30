@@ -201,7 +201,7 @@ Open the generated migration file and set up `up` and `down` functions.
 
 **Current Migration Versions:**
 
-- PostgreSQL: **v8** (adds the `ex_lingo_settings` table for configurable AI prompts and S3 storage)
+- PostgreSQL: **v9** (adds `ex_lingo_message_images` for screenshot context; v8 added `ex_lingo_settings`)
 
 If you're upgrading from an earlier version of ExLingo, update your migration version to the latest.
 
@@ -212,7 +212,7 @@ defmodule MyApp.Repo.Migrations.AddExLingoTranslationsTable do
   use Ecto.Migration
 
   def up do
-    ExLingo.Migration.up(version: 8)
+    ExLingo.Migration.up(version: 9)
   end
 
   # We specify `version: 1` because we want to rollback all the way down including the first migration.
@@ -228,7 +228,7 @@ To use a dedicated PostgreSQL schema, pass the same prefix to the migration and 
 
 ```elixir
 # migration
-def up, do: ExLingo.Migration.up(version: 8, prefix: "ex_lingo")
+def up, do: ExLingo.Migration.up(version: 9, prefix: "ex_lingo")
 def down, do: ExLingo.Migration.down(version: 1, prefix: "ex_lingo")
 
 # config/config.exs
@@ -243,7 +243,7 @@ config :my_app, ExLingo,
 If your database user is not allowed to create schemas and the schema is managed externally, disable automatic schema creation explicitly:
 
 ```elixir
-def up, do: ExLingo.Migration.up(version: 8, prefix: "ex_lingo", create_schema: false)
+def up, do: ExLingo.Migration.up(version: 9, prefix: "ex_lingo", create_schema: false)
 ```
 
 After that run:
@@ -436,7 +436,9 @@ Open **Settings → S3 storage** in the dashboard and fill in:
 | Region            | the bucket's region, e.g. `eu-central-1`                                 |
 | Folder prefix     | subfolder for this service, e.g. `ex_lingo/`, or `/` for the bucket root |
 
-Save your settings. A **Test connection** button is available and will verify bucket access once image uploads are wired up.
+Save your settings, then click **Test connection** — it performs a `HEAD` on the bucket and reports success or the failure reason.
+
+> **Security note:** the settings page (and the rest of the ExLingo dashboard) is not authenticated by ExLingo itself — protect the mounted dashboard routes in your host application (e.g. behind your own auth pipeline). Grant the S3 IAM user only `PutObject`/`GetObject`/`DeleteObject` (and `ListBucket` for the connection test) on the configured bucket/prefix, and note that uploaded images are served via short-lived presigned URLs and are never public.
 
 ### Detection of stale messages
 

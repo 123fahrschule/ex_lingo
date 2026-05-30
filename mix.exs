@@ -48,6 +48,10 @@ defmodule ExLingo.MixProject do
       {:jason, "~> 1.4"},
       {:cloak, "~> 1.1"},
       {:cloak_ecto, "~> 1.3"},
+      {:ex_aws, "~> 2.5"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:sweet_xml, "~> 0.7"},
+      {:hackney, "~> 1.20"},
       {:finch, "~> 0.21"},
       {:telemetry, "~> 1.4"},
       {:nebulex, "~> 3.0"},
@@ -66,7 +70,8 @@ defmodule ExLingo.MixProject do
       {:gettext, ">= 0.26.0 and < 2.0.0"},
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
       {:postgrex, "~> 0.22.2", only: :test},
-      {:lazy_html, ">= 0.1.0", only: :test}
+      {:lazy_html, ">= 0.1.0", only: :test},
+      {:mox, "~> 1.2", only: :test}
     ]
   end
 
