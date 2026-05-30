@@ -1,8 +1,15 @@
 defmodule ExLingo.AI.Providers.OpenAITest do
-  use ExUnit.Case, async: true
+  # Not async: build_payload/1 now resolves the system prompt from the settings
+  # row, which requires the database sandbox.
+  use ExLingo.Test.DataCase, async: false
 
   alias ExLingo.AI.Providers.OpenAI
   alias ExLingo.AI.Translations.SuggestionRequest
+
+  setup do
+    ExLingo.Cache.delete_all()
+    :ok
+  end
 
   test "validates allowed and default models" do
     assert :ok =
@@ -18,7 +25,7 @@ defmodule ExLingo.AI.Providers.OpenAITest do
              )
   end
 
-  test "builds payload that requests translation text only" do
+  test "builds payload from the rendered prompt template" do
     payload =
       OpenAI.build_payload(%SuggestionRequest{
         source_locale: "en",
@@ -26,18 +33,20 @@ defmodule ExLingo.AI.Providers.OpenAITest do
         target_locale_name: "German",
         source_text: "Download certificate",
         message_type: :singular,
+        message_metadata: %{context: "button on the dashboard"},
         glossary_entries: [],
         current_translation: %{},
         model: "gpt-5.4-nano"
       })
 
     assert payload.model == "gpt-5.4-nano"
-    system_prompt = payload.input |> List.first() |> Map.fetch!(:content)
-    user_prompt = payload.input |> List.last() |> Map.fetch!(:content)
+    assert [%{role: "user", content: prompt}] = payload.input
 
-    assert system_prompt =~ "Return only the final translation text"
-    assert user_prompt =~ "Download certificate"
-    assert user_prompt =~ "Glossary"
+    assert prompt =~ "Return only the final translation text"
+    assert prompt =~ "Download certificate"
+    assert prompt =~ "button on the dashboard"
+    refute prompt =~ "{{source_text}}"
+    refute prompt =~ "{{context}}"
   end
 
   test "parses responses API output text" do

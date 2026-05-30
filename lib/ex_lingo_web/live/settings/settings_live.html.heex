@@ -1,0 +1,140 @@
+<.flash_group flash={@flash} />
+
+<div class="space-y-6">
+  <.page_header title={t("Settings")} class="px-0 pt-0" />
+
+  <.card class="max-w-3xl">
+    <.card_header>
+      <.card_title>{t("AI translation prompt")}</.card_title>
+      <.card_description>
+        {t("This template is the complete text sent to the AI for each suggestion. Edit it freely and use the placeholders below.")}
+      </.card_description>
+    </.card_header>
+    <.card_content>
+      <.placeholder_box />
+
+      <.form for={@ai_form} phx-submit="save_ai" class="space-y-6">
+        <.form_item>
+          <.form_label field={@ai_form[:ai_prompt_template]}>
+            {t("Global prompt template")}
+          </.form_label>
+          <.form_control>
+            <.textarea field={@ai_form[:ai_prompt_template]} rows="14" class="font-mono" />
+          </.form_control>
+          <p class="text-body-sm text-muted-foreground">
+            {t("Used for all locales unless overridden below.")}
+          </p>
+          <.form_message field={@ai_form[:ai_prompt_template]} translate={false} />
+        </.form_item>
+
+        <div :if={@locales != []} class="space-y-4">
+          <h3 class="text-body-sm font-medium">{t("Per-locale overrides")}</h3>
+          <div class="grid gap-4 md:grid-cols-2">
+            <.card :for={locale <- @locales}>
+              <.card_content class="pt-6 space-y-2">
+                <label
+                  class="text-body-sm font-medium"
+                  for={"ai_prompt_#{locale.iso639_code}"}
+                >
+                  {locale.native_name} ({locale.iso639_code})
+                </label>
+                <.textarea
+                  id={"ai_prompt_#{locale.iso639_code}"}
+                  name={"ai[ai_prompt_template_per_locale][#{locale.iso639_code}]"}
+                  value={locale_prompt(@setting, locale.iso639_code)}
+                  rows="5"
+                  class="font-mono"
+                  placeholder={t("Empty = use global template")}
+                />
+              </.card_content>
+            </.card>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <.button type="submit" phx-disable-with={t("Saving...")}>
+            <.icon name="save" size="sm" decorative /> {t("Save AI prompt")}
+          </.button>
+        </div>
+      </.form>
+    </.card_content>
+  </.card>
+
+  <.card class="max-w-3xl">
+    <.card_header>
+      <.card_title>{t("S3 storage")}</.card_title>
+      <.card_description>
+        {t("Credentials for image uploads used as translation context.")}
+      </.card_description>
+    </.card_header>
+    <.card_content>
+      <.form for={@s3_form} phx-submit="save_s3" class="space-y-6">
+        <div class="grid gap-4 md:grid-cols-2">
+          <.form_item>
+            <.form_label field={@s3_form[:s3_access_key_id]}>{t("Access key ID")}</.form_label>
+            <.form_control>
+              <.input field={@s3_form[:s3_access_key_id]} type="text" autocomplete="off" />
+            </.form_control>
+            <.form_message field={@s3_form[:s3_access_key_id]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@s3_form[:s3_secret_access_key]}>
+              {t("Secret access key")}
+            </.form_label>
+            <.form_control>
+              <.input
+                field={@s3_form[:s3_secret_access_key]}
+                type="password"
+                value=""
+                autocomplete="off"
+                placeholder={
+                  if @s3_secret_present?,
+                    do: t("Stored — leave blank to keep"),
+                    else: t("Not set")
+                }
+              />
+            </.form_control>
+            <.form_message field={@s3_form[:s3_secret_access_key]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@s3_form[:s3_bucket]}>{t("Bucket")}</.form_label>
+            <.form_control>
+              <.input field={@s3_form[:s3_bucket]} type="text" />
+            </.form_control>
+            <.form_message field={@s3_form[:s3_bucket]} translate={false} />
+          </.form_item>
+
+          <.form_item>
+            <.form_label field={@s3_form[:s3_region]}>{t("Region")}</.form_label>
+            <.form_control>
+              <.input field={@s3_form[:s3_region]} type="text" placeholder="eu-central-1" />
+            </.form_control>
+            <.form_message field={@s3_form[:s3_region]} translate={false} />
+          </.form_item>
+
+          <.form_item class="md:col-span-2">
+            <.form_label field={@s3_form[:s3_prefix]}>{t("Folder prefix")}</.form_label>
+            <.form_control>
+              <.input field={@s3_form[:s3_prefix]} type="text" placeholder="/" />
+            </.form_control>
+            <p class="text-body-sm text-muted-foreground">
+              {t("Subfolder inside the bucket where screenshots are stored, e.g. ex_lingo/. Defaults to the bucket root (/) — useful when one bucket is shared across services.")}
+            </p>
+            <.form_message field={@s3_form[:s3_prefix]} translate={false} />
+          </.form_item>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <.button type="button" variant="outline" phx-click="test_s3">
+            <.icon name="cloud" size="sm" decorative /> {t("Test connection")}
+          </.button>
+          <.button type="submit" phx-disable-with={t("Saving...")}>
+            <.icon name="save" size="sm" decorative /> {t("Save S3 settings")}
+          </.button>
+        </div>
+      </.form>
+    </.card_content>
+  </.card>
+</div>

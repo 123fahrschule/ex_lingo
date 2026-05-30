@@ -69,6 +69,8 @@ if config_env() == :test do
   config :ex_lingo,
     ecto_repos: [ExLingo.Test.Repo]
 
+  config :ex_lingo, :settings_encryption_key, "test-settings-encryption-key"
+
   config :ex_lingo, ExLingo.Test.Repo,
     username: System.get_env("POSTGRES_USERNAME", "postgres"),
     password: System.get_env("POSTGRES_PASSWORD", "postgres"),

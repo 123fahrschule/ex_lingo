@@ -64,6 +64,10 @@ defmodule ExLingoWeb.Router do
                   end
                 end
               end
+
+              scope "/settings", Settings do
+                live "/", SettingsLive, :index, route_opts
+              end
             end
           end
         end

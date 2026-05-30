@@ -8,7 +8,8 @@ defmodule ExLingo.AI.Providers.OpenAI do
   use GenServer
 
   alias ExLingo.AI.Providers.OpenAI.Client
-  alias ExLingo.AI.Translations.SuggestionRequest
+  alias ExLingo.AI.Translations.{PromptRenderer, SuggestionRequest}
+  alias ExLingo.Settings
 
   @default_endpoint "https://api.openai.com/v1/responses"
   @default_models ["gpt-5.4-nano", "gpt-5.4-mini", "gpt-4o-mini"]
@@ -82,8 +83,7 @@ defmodule ExLingo.AI.Providers.OpenAI do
     %{
       model: request.model || default_model(),
       input: [
-        %{role: "system", content: system_prompt()},
-        %{role: "user", content: user_prompt(request)}
+        %{role: "user", content: prompt(request)}
       ],
       max_output_tokens: 600,
       temperature: 0.2
@@ -125,65 +125,11 @@ defmodule ExLingo.AI.Providers.OpenAI do
     if api_key == "", do: {:error, {:missing_api_key, provider_name()}}, else: {:ok, api_key}
   end
 
-  defp system_prompt do
-    """
-    You are a translation assistant for software product text in the driving school domain.
-    Return only the final translation text.
-    Do not include Markdown, labels, quotes, notes, confidence, rationale, or alternatives.
-    Follow glossary terminology when relevant.
-    """
-  end
+  defp prompt(%SuggestionRequest{target_locale: target_locale} = request) do
+    template =
+      ExLingo.Settings.prompt_template_for(target_locale) || Settings.default_prompt_template()
 
-  defp user_prompt(%SuggestionRequest{} = request) do
-    [
-      "Source locale: #{request.source_locale}",
-      "Target locale: #{request.target_locale}#{target_locale_name(request)}",
-      "Message type: #{request.message_type}",
-      plural_context(request),
-      "Source text:",
-      request.source_text,
-      current_translation_context(request),
-      glossary_context(request)
-    ]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.join("\n\n")
-  end
-
-  defp target_locale_name(%SuggestionRequest{target_locale_name: nil}), do: ""
-  defp target_locale_name(%SuggestionRequest{target_locale_name: name}), do: " (#{name})"
-
-  defp plural_context(%SuggestionRequest{message_type: :plural} = request) do
-    "Plural form index: #{request.plural_form_index}\nQuantity examples: #{request.plural_examples}"
-  end
-
-  defp plural_context(_request), do: nil
-
-  defp current_translation_context(%SuggestionRequest{current_translation: current_translation}) do
-    translated_text = Map.get(current_translation, :translated_text)
-
-    if is_binary(translated_text) and String.trim(translated_text) != "" do
-      "Current translation to improve or replace:\n#{translated_text}"
-    end
-  end
-
-  defp glossary_context(%SuggestionRequest{glossary_entries: []}) do
-    "Glossary: no relevant glossary entries."
-  end
-
-  defp glossary_context(%SuggestionRequest{glossary_entries: glossary_entries}) do
-    entries =
-      Enum.map_join(glossary_entries, "\n", fn entry ->
-        guidance =
-          if is_binary(entry.usage_guidance) and String.trim(entry.usage_guidance) != "" do
-            " (#{String.trim(entry.usage_guidance)})"
-          else
-            ""
-          end
-
-        "- #{entry.source_term} => #{entry.target_term}#{guidance}"
-      end)
-
-    "Glossary entries to honor when applicable:\n#{entries}"
+    PromptRenderer.render(template, request)
   end
 
   defp normalize_suggestion(nil), do: {:error, :empty_suggestion}

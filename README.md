@@ -1,4 +1,5 @@
 # ExLingo Guide
+
 <div align="center">
   <h1>ExLingo</h1>
   <p><strong>User-friendly translations manager for Elixir/Phoenix projects</strong></p>
@@ -64,6 +65,12 @@ If you're working on an Elixir/Phoenix project and need to manage translations, 
       <li><a href="#storing-messages-in-the-database">Storing messages in the database</a></li>
       <li><a href="#translation-glossary">Translation glossary</a></li>
       <li><a href="#ai-translation-suggestions">AI translation suggestions</a></li>
+      <li>
+        <a href="#settings">Settings</a>
+        <ul>
+          <li><a href="#setting-up-an-s3-bucket">Setting up an S3 bucket</a></li>
+        </ul>
+      </li>
       <li><a href="#detection-of-stale-messages">Detection of stale messages</a></li>
       <li><a href="#translation-progress">Translation progress</a></li>
     </ul>
@@ -140,6 +147,7 @@ end
 ```
 
 Inside your `[my_app]_web.ex` file:
+
 ```elixir
 defmodule MyAppWeb do
   defp html_helpers do
@@ -170,6 +178,15 @@ config :my_app, ExLingo,
 
 Ecto repo module is used mostly for translations persistency. We also need endpoint to use VerifiedRoutes and project_root to locate the project's .po files.
 
+ExLingo encrypts sensitive settings (e.g. the S3 secret access key) at rest. Set a strong, stable encryption secret in production:
+
+```elixir
+# config/runtime.exs
+config :ex_lingo, :settings_encryption_key, System.fetch_env!("EX_LINGO_SETTINGS_KEY")
+```
+
+The value is hashed (SHA-256) into the AES-256-GCM key used by `ExLingo.Vault`. If it is not configured, a built-in fallback is used so development and tests work out of the box — do not rely on the fallback in production, and note that changing the secret makes previously encrypted values unreadable.
+
 You can store ExLingo data in another database by configuring `repo:` with a dedicated Ecto repo, for example `MyApp.ExLingoRepo`. You can also store ExLingo tables in a PostgreSQL schema by setting `prefix: "ex_lingo"` and running the ExLingo migration with the same prefix. When a non-`public` prefix is used, ExLingo creates the PostgreSQL schema automatically during its migration by default.
 
 ### Database migrations
@@ -183,7 +200,8 @@ mix ecto.gen.migration add_ex_lingo_translations_table
 Open the generated migration file and set up `up` and `down` functions.
 
 **Current Migration Versions:**
-- PostgreSQL: **v6** (adds PO source references on messages)
+
+- PostgreSQL: **v8** (adds the `ex_lingo_settings` table for configurable AI prompts and S3 storage)
 
 If you're upgrading from an earlier version of ExLingo, update your migration version to the latest.
 
@@ -194,7 +212,7 @@ defmodule MyApp.Repo.Migrations.AddExLingoTranslationsTable do
   use Ecto.Migration
 
   def up do
-    ExLingo.Migration.up(version: 6)
+    ExLingo.Migration.up(version: 8)
   end
 
   # We specify `version: 1` because we want to rollback all the way down including the first migration.
@@ -210,7 +228,7 @@ To use a dedicated PostgreSQL schema, pass the same prefix to the migration and 
 
 ```elixir
 # migration
-def up, do: ExLingo.Migration.up(version: 6, prefix: "ex_lingo")
+def up, do: ExLingo.Migration.up(version: 8, prefix: "ex_lingo")
 def down, do: ExLingo.Migration.down(version: 1, prefix: "ex_lingo")
 
 # config/config.exs
@@ -225,7 +243,7 @@ config :my_app, ExLingo,
 If your database user is not allowed to create schemas and the schema is managed externally, disable automatic schema creation explicitly:
 
 ```elixir
-def up, do: ExLingo.Migration.up(version: 6, prefix: "ex_lingo", create_schema: false)
+def up, do: ExLingo.Migration.up(version: 8, prefix: "ex_lingo", create_schema: false)
 ```
 
 After that run:
@@ -311,7 +329,6 @@ kept and are not overwritten by later PO-file scans.
 
 ### Storing messages in the database
 
-
 ![Singular translation edit](assets/images/readme/singular.png)
 
 Messages and translations from .po files are stored in tables created by the ExLingo.Migration module. This allows easy viewing and modification of messages from the ExLingo UI or directly from database tools.
@@ -329,6 +346,95 @@ The glossary is core translation data. Provider plugins can use it, but the term
 AI translation suggestions can be added to the translation edit screen through plugins. The user-facing result is intentionally only the suggested translation text. ExLingo does not ask providers for confidence scores, notes, rationale, or alternatives.
 
 When a suggestion is requested, ExLingo matches only glossary entries that apply to the current source locale, target locale, source text, and optional message scope. Irrelevant glossary entries are not sent to the provider.
+
+### Settings
+
+The dashboard includes a `/settings` page (linked at the bottom of the sidebar) backed by a single row in `ex_lingo_settings`.
+
+- **AI translation prompt** — a single, fully editable prompt template (global plus optional per-locale overrides) that is the complete text sent to the AI for each suggestion. The template uses `{{placeholders}}` (see below) that are replaced per request, so everything the model receives is visible and controllable in one place — no hidden, hardcoded message. When a suggestion is requested the template is resolved by cascading: per-locale override → global template → a built-in default. The row is created lazily on first access and seeded with the built-in template, so upgrading loses nothing. It is cached to avoid a database round-trip on every request and invalidated on save.
+
+  **Available placeholders** (also shown in a reference box on the settings page):
+
+  | Placeholder | Sent value |
+  | --- | --- |
+  | `{{source_text}}` | the text to translate — **required** |
+  | `{{target_locale}}` | target locale code, e.g. `de` — **required** |
+  | `{{source_locale}}` | source locale code, e.g. `en` |
+  | `{{target_locale_name}}` | human-readable target language name |
+  | `{{context}}` | the message's gettext context / disambiguation note |
+  | `{{message_type}}` | `singular` or `plural` |
+  | `{{current_translation}}` | the existing translation to improve, if any |
+  | `{{glossary}}` | matching glossary terms for this request |
+  | `{{plural_form_index}}` | plural form index (plural messages) |
+  | `{{plural_examples}}` | example quantities for the plural form |
+
+  The two **required** placeholders are always sent to the model even if you remove them from the template — ExLingo appends them automatically so a request is never missing the text to translate or its target locale. Empty optional values render as `(none)`.
+
+- **S3 storage** — credentials used for image-based translation context (wired up in a later release), plus a configurable folder prefix so a single bucket can be shared across services with each one writing into its own subfolder (defaults to the bucket root `/`). The secret access key is encrypted at rest with [Cloak](https://hex.pm/packages/cloak_ecto) (AES-256-GCM) through `ExLingo.Vault`; it is decrypted transparently on load and is never rendered back into forms. The encryption key is derived from `config :ex_lingo, :settings_encryption_key`, which host applications should set to a strong, stable secret (a built-in fallback keeps dev/test working). Secrets are never stored in plaintext.
+
+See [Setting up an S3 bucket](#setting-up-an-s3-bucket) for how to provision the bucket, user, and permissions.
+
+#### Setting up an S3 bucket
+
+ExLingo stores screenshots (used as extra translation context) in an Amazon S3 bucket. You can dedicate a bucket to ExLingo, or share one bucket across several services and keep ExLingo's files in their own subfolder via the **Folder prefix** setting. The steps below use the AWS Console; the AWS CLI works just as well.
+
+**1. Create the bucket**
+
+1. Open the [S3 console](https://s3.console.aws.amazon.com/s3/) → **Create bucket**.
+2. Pick a globally unique **Bucket name** (e.g. `my-company-assets`) and a **Region** (e.g. `eu-central-1`). Note both — you enter them in ExLingo's settings.
+3. Leave **Block all public access** enabled. ExLingo accesses the bucket with credentials, not public URLs.
+4. Create the bucket. If you share it across services, decide on a subfolder for ExLingo now (e.g. `ex_lingo/`) and put it in the **Folder prefix** field.
+
+**2. Create an IAM user for ExLingo**
+
+1. Open the [IAM console](https://console.aws.amazon.com/iam/) → **Users** → **Create user**.
+2. Name it (e.g. `ex-lingo-s3`) and do **not** grant console access — it only needs programmatic access.
+3. On the permissions step choose **Attach policies directly** → **Create inline policy** → the **JSON** tab, and paste the policy below.
+
+**3. Inline policy (least privilege)**
+
+Paste this, then replace **both** occurrences of `YOUR_BUCKET_NAME` with your bucket name. It grants read/write/delete on objects and listing on the bucket — nothing else.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ExLingoObjectAccess",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+    },
+    {
+      "Sid": "ExLingoListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME"
+    }
+  ]
+}
+```
+
+If you share the bucket and want to restrict ExLingo strictly to its subfolder, scope the object statement's resource to the prefix (e.g. `arn:aws:s3:::YOUR_BUCKET_NAME/ex_lingo/*`) and add a `Condition` with `s3:prefix` to the `ListBucket` statement.
+
+**4. Get the credentials**
+
+1. After creating the user, open it → **Security credentials** → **Create access key** → use case **Application running outside AWS**.
+2. Copy the **Access key ID** and **Secret access key**. The secret is shown only once — store it safely.
+
+**5. Enter them in ExLingo**
+
+Open **Settings → S3 storage** in the dashboard and fill in:
+
+| Field             | Value                                                                    |
+| ----------------- | ------------------------------------------------------------------------ |
+| Access key ID     | the access key ID from step 4                                            |
+| Secret access key | the secret access key from step 4 (write-only; stored encrypted)         |
+| Bucket            | the bucket name from step 1                                              |
+| Region            | the bucket's region, e.g. `eu-central-1`                                 |
+| Folder prefix     | subfolder for this service, e.g. `ex_lingo/`, or `/` for the bucket root |
+
+Save your settings. A **Test connection** button is available and will verify bucket access once image uploads are wired up.
 
 ### Detection of stale messages
 
@@ -486,6 +592,7 @@ See the [open issues](https://github.com/123fahrschule/ex_lingo/issues) for a fu
 If you're contributing to ExLingo development, you'll need to run the test suite. The tests require a PostgreSQL database.
 
 #### Prerequisites for Development
+
 - PostgreSQL 15+ (for running tests)
 - All prerequisites listed in [Getting Started](#prerequisites)
 
