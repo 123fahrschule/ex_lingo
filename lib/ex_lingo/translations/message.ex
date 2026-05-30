@@ -14,7 +14,7 @@ defmodule ExLingo.Translations.Message do
   }
 
   @required_fields ~w(msgid message_type)a
-  @optional_fields ~w(context domain_id application_source_id source_references context_review_requested_at context_review_context)a
+  @optional_fields ~w(msgid_plural context domain_id application_source_id source_references context_review_requested_at context_review_context)a
   @relations ~w(domain singular_translations plural_translations application_source)a
   @max_msgid_length 10_000
 
@@ -24,6 +24,7 @@ defmodule ExLingo.Translations.Message do
 
   schema "ex_lingo_messages" do
     field :msgid, :string
+    field :msgid_plural, :string
     field :context, :string
     field :message_type, Ecto.Enum, values: [:singular, :plural]
     field :source_references, {:array, :map}, default: []

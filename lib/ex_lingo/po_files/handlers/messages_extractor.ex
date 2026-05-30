@@ -66,11 +66,13 @@ defmodule ExLingo.PoFiles.MessagesExtractor do
       %Expo.Message.Plural{
         msgctxt: nil,
         msgid: msgid,
+        msgid_plural: msgid_plural,
         msgstr: plurals_map,
         references: references
       } ->
         ExtractPluralTranslation.call(%{
           msgid: Enum.join(msgid),
+          msgid_plural: Enum.join(msgid_plural),
           context_name: @default_context,
           locale_name: locale,
           domain_name: domain,
@@ -82,11 +84,13 @@ defmodule ExLingo.PoFiles.MessagesExtractor do
       %Expo.Message.Plural{
         msgctxt: [msgctxt],
         msgid: msgid,
+        msgid_plural: msgid_plural,
         msgstr: plurals_map,
         references: references
       } ->
         ExtractPluralTranslation.call(%{
           msgid: Enum.join(msgid),
+          msgid_plural: Enum.join(msgid_plural),
           context_name: msgctxt,
           locale_name: locale,
           domain_name: domain,

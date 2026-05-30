@@ -92,6 +92,7 @@ defmodule ExLingo.PoFiles.Services.ExtractMessage do
       message
       |> context_changes(attrs)
       |> source_reference_changes(message, attrs)
+      |> msgid_plural_changes(message, attrs)
 
     if changes == %{} do
       {:ok, message}
@@ -104,6 +105,16 @@ defmodule ExLingo.PoFiles.Services.ExtractMessage do
         error ->
           error
       end
+    end
+  end
+
+  defp msgid_plural_changes(changes, message, attrs) do
+    incoming = attrs[:msgid_plural]
+
+    if is_binary(incoming) and incoming != "" and message.msgid_plural != incoming do
+      Map.put(changes, :msgid_plural, incoming)
+    else
+      changes
     end
   end
 

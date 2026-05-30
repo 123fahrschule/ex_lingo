@@ -119,6 +119,25 @@
         </.card>
       </div>
 
+      <.card>
+        <.card_content class="flex items-center justify-between gap-4 pt-6">
+          <div>
+            <p class="text-sm font-medium">{t("Export translations to PO files")}</p>
+            <p class="text-body-sm text-muted-foreground">
+              {t("Write the database translations back to .po files. In Chrome/Edge you can pick your priv/gettext folder and overwrite in place; other browsers download a ZIP.")}
+            </p>
+          </div>
+          <.button
+            id="po-export-button"
+            type="button"
+            variant="outline"
+            phx-hook="PoExport"
+          >
+            <.icon name="download" size="sm" decorative /> {t("Export to PO")}
+          </.button>
+        </.card_content>
+      </.card>
+
       <.card :if={length(ExLingo.config().plugins) > 0}>
         <.card_header>
           <.card_title>{t("Plugins")}</.card_title>

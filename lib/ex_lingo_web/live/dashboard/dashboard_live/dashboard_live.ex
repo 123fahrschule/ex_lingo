@@ -4,6 +4,7 @@ defmodule ExLingoWeb.Dashboard.DashboardLive do
 
   alias ExLingo.Cache
   alias ExLingo.PoFiles.MessagesExtractorAgent
+  alias ExLingo.PoFiles.POExporter
   alias ExLingo.PoFiles.Services.StaleDetection.Result
   alias ExLingo.Translations
   alias ExLingo.Translations.Locale.Finders.GetLocaleTranslationProgress
@@ -33,6 +34,32 @@ defmodule ExLingoWeb.Dashboard.DashboardLive do
     Cache.delete_all()
 
     {:noreply, assign(socket, :cache_count, cache_count())}
+  end
+
+  # The client picks the delivery mode based on browser capability:
+  # "fs" → File System Access API (overwrite priv/gettext in place),
+  # "zip" → single ZIP download fallback.
+  def handle_event("export_po", %{"mode" => "fs"}, socket) do
+    {:noreply, push_event(socket, "po_export_files", %{files: POExporter.export_files()})}
+  end
+
+  def handle_event("export_po", %{"mode" => _zip}, socket) do
+    case POExporter.export_zip() do
+      {:ok, binary} ->
+        {:noreply,
+         push_event(socket, "po_export_zip", %{
+           data: Base.encode64(binary),
+           filename: "ex_lingo_translations.zip"
+         })}
+
+      {:error, reason} ->
+        Logger.error("PO export failed: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, t("Could not export PO files."))}
+    end
+  end
+
+  def handle_event("po_export_written", %{"count" => count}, socket) do
+    {:noreply, put_flash(socket, :info, t("Wrote %{count} PO file(s).", count: count))}
   end
 
   def handle_event("delete-stale", _, socket) do

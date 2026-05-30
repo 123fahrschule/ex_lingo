@@ -290,7 +290,13 @@ defmodule ExLingoWeb.I18n do
     "File is too large (max 5 MB)." => "Datei ist zu groß (max. 5 MB).",
     "Too many files (max 10)." => "Zu viele Dateien (max. 10).",
     "Unsupported file type." => "Nicht unterstützter Dateityp.",
-    "Upload error." => "Upload-Fehler."
+    "Upload error." => "Upload-Fehler.",
+    "Export translations to PO files" => "Übersetzungen in PO-Dateien exportieren",
+    "Write the database translations back to .po files. In Chrome/Edge you can pick your priv/gettext folder and overwrite in place; other browsers download a ZIP." =>
+      "Schreibt die Datenbank-Übersetzungen zurück in .po-Dateien. In Chrome/Edge kannst du deinen priv/gettext-Ordner wählen und direkt überschreiben; andere Browser laden ein ZIP.",
+    "Export to PO" => "Nach PO exportieren",
+    "Could not export PO files." => "PO-Dateien konnten nicht exportiert werden.",
+    "Wrote %{count} PO file(s)." => "%{count} PO-Datei(en) geschrieben."
   }
 
   def on_mount(_arg, params, session, socket) do

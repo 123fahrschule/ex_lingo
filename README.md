@@ -80,7 +80,7 @@ If you're working on an Elixir/Phoenix project and need to manage translations, 
     <a href="#plugins">Plugins</a>
     <ul>
       <li><a href="#ai-translation-suggestions-plugin">AI translation suggestions</a></li>
-      <li><a href="#po-writer">PO Writer</a></li>
+      <li><a href="#exporting-translations-back-to-po-files">Exporting translations back to PO files</a></li>
       <li><a href="#deepl">DeepL</a></li>
       <li><a href="#ex_lingosync">Translation synchronization</a></li>
     </ul>
@@ -202,7 +202,7 @@ Open the generated migration file and set up `up` and `down` functions.
 
 **Current Migration Versions:**
 
-- PostgreSQL: **v9** (adds `ex_lingo_message_images` for screenshot context; v8 added `ex_lingo_settings`)
+- PostgreSQL: **v10** (adds `msgid_plural` on messages for PO export; v9 added `ex_lingo_message_images`, v8 `ex_lingo_settings`)
 
 If you're upgrading from an earlier version of ExLingo, update your migration version to the latest.
 
@@ -213,7 +213,7 @@ defmodule MyApp.Repo.Migrations.AddExLingoTranslationsTable do
   use Ecto.Migration
 
   def up do
-    ExLingo.Migration.up(version: 9)
+    ExLingo.Migration.up(version: 10)
   end
 
   # We specify `version: 1` because we want to rollback all the way down including the first migration.
@@ -229,7 +229,7 @@ To use a dedicated PostgreSQL schema, pass the same prefix to the migration and 
 
 ```elixir
 # migration
-def up, do: ExLingo.Migration.up(version: 9, prefix: "ex_lingo")
+def up, do: ExLingo.Migration.up(version: 10, prefix: "ex_lingo")
 def down, do: ExLingo.Migration.down(version: 1, prefix: "ex_lingo")
 
 # config/config.exs
@@ -244,7 +244,7 @@ config :my_app, ExLingo,
 If your database user is not allowed to create schemas and the schema is managed externally, disable automatic schema creation explicitly:
 
 ```elixir
-def up, do: ExLingo.Migration.up(version: 9, prefix: "ex_lingo", create_schema: false)
+def up, do: ExLingo.Migration.up(version: 10, prefix: "ex_lingo", create_schema: false)
 ```
 
 After that run:
@@ -575,25 +575,25 @@ Set `EX_LINGO_SECRET_TOKEN` environment variable for restricting API access. It 
 
 You can also disable default authorization mechanism and use your own, by passing `disable_api_authorization: true` option into ExLingo's config.
 
-### PO Writer
+### Exporting translations back to PO files
 
-ExLingo was created to allow easy management of static text translations in the application, however, for various reasons like wanting a backup or parallel use of other tools like TMS etc. you may want to overwrite .po files with translations entered in ExLingo. To install it append `{:ex_lingo_po_writer_plugin, "~> 0.1.0"}` to your `deps` list. Then add `ExLingo.Plugins.POWriter` to the list of plugins, and new functions will appear in the ExLingo UI to allow writing to .po files.
+ExLingo manages translations in the database, but you often want them mirrored back into your project's gettext `.po` files (for backups, version control, or other tooling). This is **built in** — no plugin required — and uses `Expo` (the same library ExLingo reads PO files with), so there is no extra dependency.
+
+On the dashboard, **Export to PO** writes one file per locale + domain (`<locale>/LC_MESSAGES/<domain>.po`) from the current database translations:
+
+- **Chrome/Edge** (File System Access API, on `localhost` or HTTPS): you pick your project's `priv/gettext` folder once and the files are written straight into the matching subfolders, **overwriting in place** — no ZIP, no manual moving.
+- **Other browsers**: a single ZIP download with the gettext directory layout.
+
+Singular messages round-trip exactly (`msgid` → source key, `msgstr` → stored translation). Plural messages keep their source plural form (`msgid_plural`, captured on import) and per-form translations (`msgstr[i]`). Plural messages imported before this capture existed fall back to `msgid` for `msgid_plural` until the next PO import re-populates it.
+
+Programmatic access is available too:
 
 ```elixir
-# mix.exs
-defp deps
-  ...
-  {:ex_lingo_po_writer_plugin, "~> 0.1.0"},
-end
-```
+ExLingo.PoFiles.POExporter.export_files()
+# => [%{path: "de/LC_MESSAGES/default.po", content: <po binary>}, ...]
 
-```elixir
-# config/config.exs
-config :ex_lingo,
-  ...
-  plugins: [
-    ExLingo.POWriter.Plugin
-  ]
+ExLingo.PoFiles.POExporter.export_zip()
+# => {:ok, <zip binary>}
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
