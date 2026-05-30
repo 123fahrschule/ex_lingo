@@ -6,27 +6,6 @@
 @tailwind utilities;
 
 @layer components {
-  @keyframes ex-lingo-list-highlight-pulse {
-    0% {
-      box-shadow:
-        inset 3px 0 0 hsl(var(--primary)),
-        inset 0 0 0 9999px hsl(var(--primary) / 0.16);
-    }
-
-    100% {
-      box-shadow:
-        inset 3px 0 0 hsl(var(--primary)),
-        inset 0 0 0 9999px hsl(var(--primary) / 0.06);
-    }
-  }
-
-  .ex-lingo-list-highlight {
-    box-shadow:
-      inset 3px 0 0 hsl(var(--primary)),
-      inset 0 0 0 9999px hsl(var(--primary) / 0.06);
-    animation: ex-lingo-list-highlight-pulse 1.6s ease-out;
-  }
-
   .locale-gradient--solid {
     background: var(--locale-color-1, #000000);
   }

@@ -55,25 +55,6 @@ const writeUiState = (storageKey, attrs) => {
   );
 };
 
-const visibleListItem = (root, itemId) => {
-  if (!itemId) return null;
-
-  return [...root.querySelectorAll("[data-list-item-id]")].find(
-    (item) => item.dataset.listItemId === String(itemId),
-  );
-};
-
-const removeHighlight = (root) => {
-  root
-    .querySelectorAll(".ex-lingo-list-highlight")
-    .forEach((item) => item.classList.remove("ex-lingo-list-highlight"));
-};
-
-const highlightedItemIdFromUrl = () => {
-  const url = new URL(window.location.href);
-  return url.searchParams.get("highlight_message_id") || url.searchParams.get("edit_message_id");
-};
-
 export const ExLingoListContext = {
   mounted() {
     this.restoreAttempted = false;
@@ -173,12 +154,6 @@ export const ExLingoListContext = {
     if (!storageKey) return;
 
     const uiState = readUiState(storageKey);
-    const highlightedItemId = highlightedItemIdFromUrl() || uiState.lastItemId;
-
-    removeHighlight(this.el);
-
-    const item = visibleListItem(this.el, highlightedItemId);
-    if (item) item.classList.add("ex-lingo-list-highlight");
 
     if (restoreScroll && !this.scrollRestored && Number.isFinite(uiState.scrollY)) {
       this.scrollRestored = true;
