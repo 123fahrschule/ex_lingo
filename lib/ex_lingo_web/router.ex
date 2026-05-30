@@ -61,7 +61,6 @@ defmodule ExLingoWeb.Router do
                 scope "/:locale_id" do
                   scope "/translations" do
                     live "/", TranslationsLive, :index, route_opts
-                    live "/:message_id", TranslationFormLive, :show, route_opts
                   end
                 end
               end

@@ -1,7 +1,9 @@
 import Alpine from "alpinejs";
 import { ExLingoColorPicker } from "./components/color_picker";
 import { ExLingoGlossaryCapture } from "./components/glossary_capture";
+import { ExLingoInlineEdit } from "./components/inline_edit";
 import { ExLingoListContext } from "./components/list_context";
+import { ExLingoSaveIndicator } from "./components/save_indicator";
 import { Select } from "./components/shared/select";
 import { Toggle } from "./components/shared/toggle";
 import { SaladUIHook } from "../../deps/cognit/assets/js/ui/core/hook";
@@ -56,7 +58,9 @@ const LocaleSelect = {
 Hooks.FlashMessage = FlashMessage;
 Hooks.ExLingoColorPicker = ExLingoColorPicker;
 Hooks.ExLingoGlossaryCapture = ExLingoGlossaryCapture;
+Hooks.ExLingoInlineEdit = ExLingoInlineEdit;
 Hooks.ExLingoListContext = ExLingoListContext;
+Hooks.ExLingoSaveIndicator = ExLingoSaveIndicator;
 Hooks.LocaleSelect = LocaleSelect;
 Hooks.Pagination = Pagination;
 Hooks.Sidebar = Sidebar;

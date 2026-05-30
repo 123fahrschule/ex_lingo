@@ -1,189 +1,134 @@
-<div class={if @mode == :sheet, do: "space-y-4", else: "space-y-6"}>
-  <.breadcrumb :if={@mode == :page}>
-    <.breadcrumb_list>
-      <.breadcrumb_item>
-        <.breadcrumb_link href={dashboard_path(@socket, "/locales")}>{t("Locales")}</.breadcrumb_link>
-      </.breadcrumb_item>
-      <.breadcrumb_separator />
-      <.breadcrumb_item>
-        <.breadcrumb_link href={dashboard_path(@socket, "/locales/#{@locale.id}/translations")}>
-          {@locale.native_name}
-        </.breadcrumb_link>
-      </.breadcrumb_item>
-      <.breadcrumb_separator />
-      <.breadcrumb_item>
-        <.breadcrumb_page>{String.slice(@message.msgid, 0..30)}</.breadcrumb_page>
-      </.breadcrumb_item>
-    </.breadcrumb_list>
-  </.breadcrumb>
+<div class="space-y-2">
+  <div class="flex items-center justify-end">
+    <.dropdown_menu id={"inline-actions-plural-#{@message.id}"}>
+      <.dropdown_menu_trigger>
+        <.button variant="ghost" size="icon" type="button" title={t("Actions")}>
+          <.icon name="more_horiz" size="sm" label={t("Actions")} />
+        </.button>
+      </.dropdown_menu_trigger>
+      <.dropdown_menu_content align="end">
+        <.dropdown_menu_item
+          as="button"
+          type="button"
+          id={"add-to-glossary-plural-#{@message.id}"}
+          phx-hook="ExLingoGlossaryCapture"
+          phx-target={@myself}
+        >
+          <.icon name="book" size="sm" decorative /> {t("Add to glossary")}
+        </.dropdown_menu_item>
+        <.dropdown_menu_item
+          on-select={JS.push("mark_context_unclear", target: @myself)}
+          disabled={not is_nil(@message.context_review_requested_at)}
+        >
+          <.icon name="flag" size="sm" decorative />
+          {if @message.context_review_requested_at,
+            do: t("Marked unclear"),
+            else: t("Mark context unclear")}
+        </.dropdown_menu_item>
+      </.dropdown_menu_content>
+    </.dropdown_menu>
+  </div>
 
-  <.page_header
-    :if={@mode == :page}
-    title={t("Translate to %{locale}", locale: @locale.native_name)}
-    class="px-0 pt-0"
-  >
-    <div class="min-w-0 flex-1 text-sm text-muted-foreground">
-      <span class="truncate">{@message.msgid}</span>
-    </div>
-  </.page_header>
-
-  <.live_component
-    module={Tabs}
-    id="tabs"
-    tabs={@tabs}
-    current_url={@current_url || dashboard_path(@socket, "/locales/#{@locale.id}/translations/#{@message.id}")}
-    current_tab={@current_tab}
-  />
-
-  <%= if @mode == :sheet do %>
-    <div class="space-y-4">
-      <.message_metadata
-        message={@message}
-        translation={@translation}
-        mark_target={@myself}
-        glossary_target={@myself}
-        glossary_button_id={"add-to-glossary-plural-sheet-" <> to_string(@message.id)}
-      />
-      <.possible_duplicate_details
-        candidates={@possible_duplicate_candidates}
-        current_message_id={@message.id}
-        compact={true}
-      />
-
-      <div class="text-body-xs text-muted-foreground">
-        {t("Quantity examples: %{examples}", examples: plural_examples(@locale, @current_tab_index))}
-      </div>
-
-      <.form
-        for={@form}
-        phx-change="validate"
-        phx-submit="submit"
-        phx-target={@myself}
-        class="space-y-4"
-      >
-        <.form_item>
-          <.form_label id="original_text_label_plural_sheet">{t("PO file text")}</.form_label>
-          <div
-            id="original_text"
-            data-glossary-source
-            role="textbox"
-            aria-readonly="true"
-            aria-labelledby="original_text_label_plural_sheet"
-            tabindex="0"
-            class="min-h-16 whitespace-pre-wrap break-words rounded-md border border-input bg-muted px-3 py-2 text-body-sm text-foreground"
-          >{@form["original_text"]}</div>
-        </.form_item>
-
-        <.form_item>
-          <.form_label for={"translated_text.#{@current_tab_index}"}>
-            {t("ExLingo translated text")}
-          </.form_label>
+  <div :for={translation <- @translations} class="space-y-1">
+    <% index = translation.nplural_index %>
+    <.form
+      for={%{}}
+      phx-change="validate"
+      phx-submit="save"
+      phx-target={@myself}
+      phx-value-index={index}
+      class="space-y-1"
+    >
+      <div class="flex items-start gap-2">
+        <span class="mt-2 w-16 shrink-0 text-body-xs font-medium uppercase text-muted-foreground">
+          {t("Form %{number}", number: index + 1)}
+        </span>
+        <div class="flex-1">
           <.textarea
-            id={"translated_text.#{@current_tab_index}"}
-            name={"translated_text.#{@current_tab_index}"}
-            value={@form["translated_text"]}
-            rows="4"
+            id={"inline-plural-input-#{@message.id}-#{index}"}
+            name="translated_text"
+            value={@forms[index]["translated_text"]}
+            rows="2"
             data-glossary-target
-            class={["!min-h-24", length_border_class(@length_status)]}
+            data-inline-input
+            phx-blur="save"
+            phx-value-index={index}
+            phx-target={@myself}
+            phx-hook="ExLingoInlineEdit"
+            placeholder={t("Add translation…")}
+            class={["!min-h-12 w-full", length_border_class(@length_status[index])]}
           />
           <.validation_hints
-            source={@form["original_text"]}
-            target={@form["translated_text"]}
+            source={@forms[index]["original_text"]}
+            target={@forms[index]["translated_text"]}
           />
-        </.form_item>
+        </div>
+      </div>
+    </.form>
 
-        <div class="flex justify-end">
-          <.button type="submit" phx-disable-with={t("Saving...")}>
-            <.icon name="save" size="sm" decorative /> {t("Save")}
+    <div class="flex items-center justify-between gap-2 pl-[4.5rem]">
+      <div
+        id={"save-indicator-plural-#{@message.id}-#{index}"}
+        phx-hook="ExLingoSaveIndicator"
+        data-save-state={to_string(@save_state[index] || :idle)}
+        class="flex items-center gap-1 text-body-xs transition-opacity duration-500"
+      >
+        <span :if={@save_state[index] == :saved} class="flex items-center gap-1 text-success-500">
+          <.icon name="check" size="sm" decorative /> {t("Saved")}
+        </span>
+        <span :if={@save_state[index] == :error} class="flex items-center gap-1 text-destructive">
+          <.icon name="error" size="sm" decorative /> {t("Error")}
+        </span>
+      </div>
+
+      <.button
+        :if={@ai_available?}
+        type="button"
+        variant="ghost"
+        size="sm"
+        phx-click="ai_request"
+        phx-value-index={index}
+        phx-target={@myself}
+      >
+        <.icon name="auto_awesome" size="sm" decorative /> {t("AI")}
+      </.button>
+    </div>
+
+    <div
+      :if={@ai_index == index}
+      class="ml-[4.5rem] space-y-2 rounded-md border border-info-200 bg-info-50 p-2 text-body-xs"
+    >
+      <div :if={@ai_loading?} class="flex items-center gap-2 text-muted-foreground">
+        <.icon name="progress_activity" size="sm" decorative /> {t("Generating suggestion…")}
+      </div>
+      <div :if={@ai_error} class="text-destructive">{@ai_error}</div>
+      <div :if={@ai_suggestion} class="space-y-2">
+        <p class="whitespace-pre-wrap break-words text-foreground">{@ai_suggestion}</p>
+        <div class="flex gap-2">
+          <.button type="button" size="sm" phx-click="ai_accept" phx-target={@myself}>
+            <.icon name="check" size="sm" decorative /> {t("Accept")}
+          </.button>
+          <.button type="button" size="sm" variant="outline" phx-click="ai_dismiss" phx-target={@myself}>
+            {t("Reject")}
           </.button>
         </div>
-      </.form>
+      </div>
     </div>
-  <% else %>
-    <.card>
-      <.card_header>
-        <.card_title>{t("Plural Translation")}</.card_title>
-        <.card_description>
-          {t("Quantity examples: %{examples}", examples: plural_examples(@locale, @current_tab_index))}
-        </.card_description>
-      </.card_header>
-      <.card_content class="space-y-4">
-        <.message_metadata
-          message={@message}
-          translation={@translation}
-          mark_target={@myself}
-          glossary_target={@myself}
-          glossary_button_id={"add-to-glossary-plural-page-" <> to_string(@message.id)}
-        />
-        <.possible_duplicate_details
-          candidates={@possible_duplicate_candidates}
-          current_message_id={@message.id}
-          compact={true}
-        />
+  </div>
 
-        <.form
-          for={@form}
-          phx-change="validate"
-          phx-submit="submit"
-          phx-target={@myself}
-          class="space-y-6"
-        >
-          <.form_item>
-            <.form_label id="original_text_label_plural_page">{t("PO file text")}</.form_label>
-            <div
-              id="original_text"
-              data-glossary-source
-              role="textbox"
-              aria-readonly="true"
-              aria-labelledby="original_text_label_plural_page"
-              tabindex="0"
-              class="min-h-32 whitespace-pre-wrap break-words rounded-md border border-input bg-muted px-3 py-2 text-body-sm text-foreground"
-            >{@form["original_text"]}</div>
-          </.form_item>
-
-          <.form_item>
-            <.form_label for={"translated_text.#{@current_tab_index}"}>
-              {t("ExLingo translated text")}
-            </.form_label>
-            <.textarea
-              id={"translated_text.#{@current_tab_index}"}
-              name={"translated_text.#{@current_tab_index}"}
-              value={@form["translated_text"]}
-              rows="5"
-              data-glossary-target
-              class={length_border_class(@length_status)}
-            />
-            <.validation_hints
-              source={@form["original_text"]}
-              target={@form["translated_text"]}
-            />
-          </.form_item>
-
-          <div class="flex justify-end">
-            <.button type="submit" phx-disable-with={t("Saving...")}>
-              <.icon name="save" size="sm" decorative /> {t("Save")}
-            </.button>
-          </div>
-        </.form>
-      </.card_content>
-    </.card>
-  <% end %>
-
-  <.card :if={length(@valid_plugins) > 0}>
-    <.card_header>
-      <.card_title>{t("Plugins")}</.card_title>
-    </.card_header>
-    <.card_content class="space-y-2">
-      <%= for {plugin_name, component} <- @valid_plugins do %>
-        <.live_component
-          module={component}
-          id={plugin_name}
-          message={@message}
-          locale={@locale}
-          translation={@translation}
-          return_to={assigns[:return_to]}
-        />
-      <% end %>
-    </.card_content>
-  </.card>
+  <details
+    :if={source_references(@message) != []}
+    class="text-body-xs text-muted-foreground"
+  >
+    <summary class="cursor-pointer">
+      {t("Source Positions")} ({length(source_references(@message))})
+    </summary>
+    <ul class="mt-1 space-y-1">
+      <li :for={reference <- source_references(@message)}>
+        <code class="break-all rounded bg-muted px-1.5 py-0.5 text-foreground">
+          {source_reference_label(reference)}
+        </code>
+      </li>
+    </ul>
+  </details>
 </div>

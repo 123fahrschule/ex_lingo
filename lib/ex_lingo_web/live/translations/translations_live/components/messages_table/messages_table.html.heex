@@ -4,9 +4,8 @@
     <.table_header>
       <.table_row>
         <.sortable_table_head field="msgid" sort={assigns[:sort] || %{}}>
-          {t("Message ID")}
+          {t("Source")}
         </.sortable_table_head>
-        <.table_head>{t("PO Translation")}</.table_head>
         <.table_head>{t("ExLingo Translation")}</.table_head>
         <.table_head>{t("Domain")}</.table_head>
         <.table_head :if={!@application_sources_empty?}>{t("Application")}</.table_head>
@@ -20,19 +19,16 @@
       <.table_row
         :for={message <- @messages}
         data-list-item-id={message.id}
+        data-glossary-scope
+        data-inline-row
         class={[
-          !message_stale?(message, @stale_message_ids) && "cursor-pointer",
-          message_stale?(message, @stale_message_ids) && "bg-warning-50/80 hover:bg-warning-100/70",
-          highlighted_message?(message, @highlighted_message_id) && "ex-lingo-list-highlight"
+          "align-top",
+          message_stale?(message, @stale_message_ids) && "bg-warning-50/80"
         ]}
-        {if !message_stale?(message, @stale_message_ids), do: [{"phx-click", "edit_message"}, {"phx-value-id", message.id}], else: []}
       >
         <.table_cell>
-          <div class="flex max-w-72 flex-col gap-2">
-            <div class="flex items-center gap-2">
-              <div class="truncate text-body-sm font-medium text-foreground">
-                {String.slice(message.msgid, 0..30)}
-              </div>
+          <div class="flex max-w-sm flex-col gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <.badge
                 :if={message_stale?(message, @stale_message_ids)}
                 variant="secondary"
@@ -58,6 +54,12 @@
                 {t("Duplicate?")}
               </.badge>
             </div>
+            <div
+              data-glossary-source
+              tabindex="0"
+              aria-label={t("Source text")}
+              class="whitespace-pre-wrap break-words text-body-sm font-medium text-foreground"
+            >{source_text(message)}</div>
             <%= if Map.has_key?(@fuzzy_matches, message.id) do %>
               <% fuzzy_match = Map.get(@fuzzy_matches, message.id) %>
               <% matched_msgid = fuzzy_match.matched_msgid %>
@@ -78,19 +80,25 @@
           </div>
         </.table_cell>
         <.table_cell>
-          <div class={[
-            "text-body-sm font-medium",
-            if(translated?(message, @locale, :original_text), do: "text-success-500", else: "text-error-500")
-          ]}>
-            {original_text(assigns, message)}
-          </div>
-        </.table_cell>
-        <.table_cell>
-          <div class={[
-            "text-body-sm font-medium",
-            if(translated?(message, @locale, :translated_text), do: "text-success-500", else: "text-error-500")
-          ]}>
-            {translated_text(assigns, message)}
+          <div class="min-w-72">
+            <.live_component
+              :if={message.message_type == :singular}
+              module={SingularTranslationForm}
+              id={"inline-singular-#{message.id}"}
+              message={message}
+              locale={@locale}
+              translation={singular_translation(message, @locale)}
+              filters={@filters}
+            />
+            <.live_component
+              :if={message.message_type == :plural}
+              module={PluralTranslationForm}
+              id={"inline-plural-#{message.id}"}
+              message={message}
+              locale={@locale}
+              translations={plural_translations(message, @locale)}
+              filters={@filters}
+            />
           </div>
         </.table_cell>
         <.table_cell>

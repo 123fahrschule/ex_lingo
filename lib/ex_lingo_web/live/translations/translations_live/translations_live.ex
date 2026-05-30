@@ -3,8 +3,6 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
 
   import ExLingo.Utils.ParamParsers, only: [parse_id_filter: 1]
 
-  require Logger
-
   alias ExLingo.PoFiles.MessagesExtractorAgent
   alias ExLingo.PoFiles.Services.StaleDetection.Result
   alias ExLingo.Translations
@@ -12,19 +10,13 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
   alias ExLingo.Translations.PluralTranslations.Finders.ListPluralTranslations
   alias ExLingoWeb.ListContext
 
-  alias ExLingoWeb.Translations.{
-    PluralTranslationForm,
-    SingularTranslationForm,
-    TranslationEditorLoader
-  }
-
   alias ExLingoWeb.Translations.Components.{FiltersBar, MessagesTable}
 
   alias ExLingoWeb.Components.Shared.Pagination
 
   @available_filters ~w(application_source_id domain_id search not_translated stale page page_size)
   @available_params ~w(page page_size search filter sort)
-  @list_context_prefixes ~w(search page page_size filter[ sort[ edit_message_id highlight_message_id tab clear_list_context)
+  @list_context_prefixes ~w(search page page_size filter[ sort[ clear_list_context)
   @params_in_filter ~w(application_source_id domain_id not_translated stale)
   @ids_to_parse ~w(application_source_id domain_id locale_id)
   @sortable_fields ~w(msgid message_type)
@@ -40,7 +32,6 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
 
           socket
           |> assign(:locale, locale)
-          |> assign_editor_defaults()
           |> assign(
             :list_context_storage_key,
             ListContext.storage_key(socket, "translations:#{locale.id}")
@@ -71,7 +62,6 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
       )
       |> assign(:list_context_payload, list_context_payload(params))
       |> assign(:list_context_prefixes, @list_context_prefixes)
-      |> assign_editor_from_params(params)
 
     {:noreply, socket}
   end
@@ -153,29 +143,6 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
 
   def handle_event("sort", _params, socket), do: {:noreply, socket}
 
-  def handle_event("edit_message", %{"id" => id}, socket) do
-    case parse_id_filter(id) do
-      {:ok, message_id} ->
-        {:noreply,
-         push_patch(socket,
-           to: translations_list_path(socket, edit_message_id: message_id)
-         )}
-
-      _invalid ->
-        {:noreply, socket}
-    end
-  end
-
-  def handle_event("close_translation", _params, socket) do
-    highlighted_message_id =
-      socket.assigns[:highlighted_message_id] || socket.assigns[:editing_message_id]
-
-    {:noreply,
-     push_patch(socket,
-       to: translations_list_path(socket, highlight_message_id: highlighted_message_id)
-     )}
-  end
-
   def handle_event("navigate", %{"to" => to}, socket) do
     case safe_dashboard_path(socket, to) do
       {:ok, path} -> {:noreply, push_navigate(socket, to: path)}
@@ -233,22 +200,6 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
       )
 
     {:noreply, socket}
-  end
-
-  def handle_info({:translation_saved, message_id}, socket) do
-    {:noreply,
-     push_patch(socket,
-       to: translations_list_path(socket, highlight_message_id: message_id)
-     )}
-  end
-
-  def handle_info({:ai_suggestion_accepted, message_id}, socket) do
-    params = %{
-      "edit_message_id" => to_string(message_id),
-      "tab" => socket.assigns.editing_tab
-    }
-
-    {:noreply, assign_editor_from_params(socket, params)}
   end
 
   defp get_locale(id) do
@@ -351,74 +302,6 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
   defp assign_filter_from_param({"page_size", value}, acc), do: Map.put(acc, "page_size", value)
   defp assign_filter_from_param(_param, acc), do: acc
 
-  defp assign_editor_defaults(socket) do
-    socket
-    |> assign(:editing_message, nil)
-    |> assign(:editing_message_id, nil)
-    |> assign(:editing_translations, nil)
-    |> assign(:editing_possible_duplicate_candidates, [])
-    |> assign(:editing_tab, "1")
-    |> assign(:editing_current_tab_index, 0)
-    |> assign(:editing_current_url, nil)
-    |> assign(:highlighted_message_id, nil)
-  end
-
-  defp assign_editor_from_params(socket, %{"edit_message_id" => message_id} = params) do
-    {tab, current_tab_index} = normalize_tab(Map.get(params, "tab", "1"))
-
-    case TranslationEditorLoader.load(socket.assigns.locale.id, message_id) do
-      {:ok,
-       %{
-         message: message,
-         translations: translations,
-         possible_duplicate_candidates: possible_duplicate_candidates
-       }} ->
-        socket
-        |> assign(:editing_message, message)
-        |> assign(:editing_message_id, message.id)
-        |> assign(:editing_translations, translations)
-        |> assign(:editing_possible_duplicate_candidates, possible_duplicate_candidates)
-        |> assign(:editing_tab, tab)
-        |> assign(:editing_current_tab_index, current_tab_index)
-        |> assign(
-          :editing_current_url,
-          translations_list_path(socket, edit_message_id: message.id)
-        )
-        |> assign(:highlighted_message_id, message.id)
-
-      error ->
-        Logger.error("Failed to load translation editor: #{inspect(error)}")
-
-        socket
-        |> assign_editor_defaults()
-        |> put_flash(:error, t("Could not load translation."))
-    end
-  end
-
-  defp assign_editor_from_params(socket, params) do
-    socket
-    |> assign(:editing_message, nil)
-    |> assign(:editing_message_id, nil)
-    |> assign(:editing_translations, nil)
-    |> assign(:editing_possible_duplicate_candidates, [])
-    |> assign(:editing_tab, "1")
-    |> assign(:editing_current_tab_index, 0)
-    |> assign(:editing_current_url, nil)
-    |> assign(
-      :highlighted_message_id,
-      normalize_highlighted_message_id(params["highlight_message_id"])
-    )
-  end
-
-  defp normalize_highlighted_message_id(message_id) when is_binary(message_id) do
-    case parse_id_filter(message_id) do
-      {:ok, id} -> id
-      _invalid -> nil
-    end
-  end
-
-  defp normalize_highlighted_message_id(_message_id), do: nil
-
   defp list_context_payload(%{"clear_list_context" => _}), do: %{}
 
   defp list_context_payload(params) do
@@ -502,30 +385,6 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
     end
   end
 
-  defp translations_list_path(socket, opts) do
-    query =
-      socket.assigns.filters
-      |> format_filters()
-      |> put_sort_param(socket.assigns.sort)
-      |> put_optional_param(:edit_message_id, opts[:edit_message_id])
-      |> put_optional_param(:highlight_message_id, opts[:highlight_message_id])
-      |> put_optional_param(:tab, opts[:tab])
-      |> UriQuery.params()
-      |> URI.encode_query()
-
-    path = "/locales/#{socket.assigns.locale.id}/translations"
-
-    if query == "" do
-      dashboard_path(socket, path)
-    else
-      dashboard_path(socket, path <> "?" <> query)
-    end
-  end
-
-  defp put_optional_param(params, _key, nil), do: params
-  defp put_optional_param(params, _key, ""), do: params
-  defp put_optional_param(params, key, value), do: Keyword.put(params, key, value)
-
   defp get_not_translated_default_value(%{"filter" => filter}) do
     case filter["not_translated"] do
       "true" -> true
@@ -583,12 +442,4 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
     do: {parse_page(page), @default_page_size}
 
   defp parse_pagination(_params), do: {1, @default_page_size}
-
-  defp normalize_tab(tab) do
-    case Integer.parse(to_string(tab)) do
-      {tab, ""} when tab > 0 -> {to_string(tab), tab - 1}
-      _invalid -> {"1", 0}
-    end
-  end
-
 end

@@ -7,7 +7,6 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponentsTest do
   alias ExLingo.Translations.{Locale, Message, SingularTranslation}
   alias ExLingoWeb.Translations.Components.MessagesTable
   alias ExLingoWeb.Translations.PossibleDuplicateComponents
-  alias ExLingoWeb.Translations.SingularTranslationForm
 
   test "renders duplicate candidate details" do
     html =
@@ -97,42 +96,6 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponentsTest do
       )
 
     assert html =~ "Duplicate?"
-  end
-
-  test "renders duplicate details inside singular translation editor" do
-    message = %Message{
-      id: 1,
-      msgid: "Cancel",
-      message_type: :singular,
-      domain: nil,
-      context: nil,
-      application_source: nil
-    }
-
-    translation = %SingularTranslation{
-      id: 1,
-      message_id: 1,
-      locale_id: 1,
-      original_text: "Cancel",
-      translated_text: "Abbrechen"
-    }
-
-    html =
-      render_component(&SingularTranslationForm.render/1,
-        id: "singular-form",
-        myself: nil,
-        mode: :sheet,
-        translation: translation,
-        message: message,
-        locale: %Locale{id: 1, native_name: "Deutsch"},
-        filters: %{},
-        form: %{"original_text" => "Cancel", "translated_text" => "Abbrechen"},
-        possible_duplicate_candidates: [candidate()],
-        length_status: :ok
-      )
-
-    assert html =~ "Possible duplicate"
-    assert html =~ "This translation may be shared with other active messages."
   end
 
   defp candidate do

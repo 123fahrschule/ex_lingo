@@ -100,11 +100,14 @@ defmodule ExLingoWeb.Translations.MessageMetadata do
     """
   end
 
-  defp source_references(%{source_references: references}) when is_list(references) do
+  @doc """
+  Returns the message's valid source references (those with a file).
+  """
+  def source_references(%{source_references: references}) when is_list(references) do
     Enum.filter(references, &source_reference?/1)
   end
 
-  defp source_references(_message), do: []
+  def source_references(_message), do: []
 
   defp source_reference?(%{"file" => file}) when is_binary(file), do: true
   defp source_reference?(%{file: file}) when is_binary(file), do: true
@@ -119,9 +122,12 @@ defmodule ExLingoWeb.Translations.MessageMetadata do
   defp translation_id(%{id: id}) when not is_nil(id), do: id
   defp translation_id(_translation), do: nil
 
-  defp source_reference_label(%{"file" => file, "line" => line}), do: reference_label(file, line)
-  defp source_reference_label(%{file: file, line: line}), do: reference_label(file, line)
-  defp source_reference_label(reference), do: inspect(reference)
+  @doc """
+  Renders a `file:line` label for a source reference.
+  """
+  def source_reference_label(%{"file" => file, "line" => line}), do: reference_label(file, line)
+  def source_reference_label(%{file: file, line: line}), do: reference_label(file, line)
+  def source_reference_label(reference), do: inspect(reference)
 
   defp reference_label(file, line) when is_integer(line), do: "#{file}:#{line}"
   defp reference_label(file, line) when is_binary(line) and line != "", do: "#{file}:#{line}"

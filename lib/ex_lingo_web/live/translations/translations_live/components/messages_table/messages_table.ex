@@ -1,6 +1,9 @@
 defmodule ExLingoWeb.Translations.Components.MessagesTable do
   @moduledoc """
-  Gettext messages table component
+  Gettext messages table with inline translation editing.
+
+  Each row shows the source text on the left and embeds an inline translation
+  editor (`SingularTranslationForm`/`PluralTranslationForm`) on the right.
   """
 
   use ExLingoWeb, :live_component
@@ -8,7 +11,7 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
   require Logger
   import ExLingo.Utils.ParamParsers, only: [parse_id_filter: 1]
 
-  alias ExLingo.Translations.{Message, SingularTranslation}
+  alias ExLingoWeb.Translations.{PluralTranslationForm, SingularTranslationForm}
 
   def update(assigns, socket) do
     {:ok, assign(socket, assigns)}
@@ -48,33 +51,23 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
     end
   end
 
-  def translated?(%Message{message_type: :singular} = message, locale, source) do
-    case Enum.find(message.singular_translations, &(&1.locale_id == locale.id)) do
-      nil ->
-        false
+  @doc """
+  Source text shown in the left column and used as the glossary source.
+  """
+  def source_text(message), do: message.msgid
 
-      %SingularTranslation{} = translation ->
-        case get_in(translation, [Access.key!(source)]) do
-          nil -> false
-          "" -> false
-          _text -> true
-        end
-    end
+  @doc """
+  Singular translation (persisted or transient) bound to the inline editor.
+  """
+  def singular_translation(message, locale) do
+    SingularTranslationForm.transient_translation(message, locale, message.singular_translations)
   end
 
-  def translated?(%Message{message_type: :plural} = message, locale, source) do
-    case Enum.filter(message.plural_translations, &(&1.locale_id == locale.id)) do
-      [] ->
-        false
-
-      translations ->
-        Enum.all?(translations, &plural_form_translated?(&1, source))
-    end
-  end
-
-  def highlighted_message?(message, highlighted_message_id) do
-    not is_nil(highlighted_message_id) and
-      to_string(message.id) == to_string(highlighted_message_id)
+  @doc """
+  Plural translations (persisted + transient placeholders) for the inline editor.
+  """
+  def plural_translations(message, locale) do
+    PluralTranslationForm.transient_translations(message, locale, message.plural_translations)
   end
 
   def possible_duplicate?(message, summaries) when is_map(summaries) do
@@ -99,94 +92,6 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
   defp confidence_label(:medium), do: t("Medium confidence")
   defp confidence_label(:low), do: t("Low confidence")
   defp confidence_label(_confidence), do: t("Possible duplicate")
-
-  defp plural_form_translated?(translation, source) do
-    case get_in(translation, [Access.key!(source)]) do
-      nil ->
-        false
-
-      "" ->
-        false
-
-      _text ->
-        true
-    end
-  end
-
-  def translated_text(assigns, %Message{message_type: :singular} = message),
-    do: translated_singular_text(assigns, message, :translated_text)
-
-  def translated_text(assigns, %Message{message_type: :plural} = message),
-    do: translated_plural_text(assigns, message, :translated_text)
-
-  def original_text(assigns, %Message{message_type: :singular} = message),
-    do: translated_singular_text(assigns, message, :original_text)
-
-  def original_text(assigns, %Message{message_type: :plural} = message),
-    do: translated_plural_text(assigns, message, :original_text)
-
-  def translated_singular_text(assigns, message, source) do
-    case Enum.find(message.singular_translations, &(&1.locale_id == assigns.locale.id)) do
-      nil ->
-        "Missing"
-
-      %SingularTranslation{} = translation ->
-        case get_in(translation, [Access.key!(source)]) do
-          nil -> "Missing"
-          "" -> "Missing"
-          text -> truncate_translation(text)
-        end
-    end
-  end
-
-  def translated_plural_text(assigns, message, source) do
-    translations =
-      case Enum.filter(message.plural_translations, &(&1.locale_id == assigns.locale.id)) do
-        [] ->
-          []
-
-        translations ->
-          translations
-          |> Enum.map(fn translation ->
-            text = get_plural_form_text(translation, source)
-
-            %{index: translation.nplural_index, text: text}
-          end)
-      end
-
-    assigns = assign(assigns, :translations, translations)
-
-    if translations != [] do
-      ~H"""
-        <div>
-          <%= for plural_translation <- Enum.sort_by(@translations, & &1[:index], :asc) do %>
-            <div class={if plural_translation[:text] != "Missing", do: "text-success-500", else: "text-error-500"}>
-              Plural form <%= plural_translation[:index] %>: <%= plural_translation[:text] %>
-            </div>
-          <% end %>
-        </div>
-      """
-    else
-      "Missing"
-    end
-  end
-
-  defp get_plural_form_text(translation, source) do
-    case get_in(translation, [Access.key!(source)]) do
-      nil ->
-        "Missing"
-
-      "" ->
-        "Missing"
-
-      text ->
-        truncate_translation(text)
-    end
-  end
-
-  defp truncate_translation(text) do
-    if String.length(text) > 45, do: String.slice(text, 0..45) <> "... ", else: text
-  end
 
   defp notify_parent_refresh do
     send(self(), :refresh_messages)

@@ -43,6 +43,9 @@ defmodule ExLingoWeb.Translations.GlossaryRedirect do
   end
 
   defp maybe_put(params, _key, nil), do: params
-  defp maybe_put(params, key, value) when is_integer(value), do: Map.put(params, key, Integer.to_string(value))
+
+  defp maybe_put(params, key, value) when is_integer(value),
+    do: Map.put(params, key, Integer.to_string(value))
+
   defp maybe_put(params, key, value) when is_binary(value), do: Map.put(params, key, value)
 end
