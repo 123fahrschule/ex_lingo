@@ -66,7 +66,6 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslations do
       :target_placeholders,
       :domain,
       :context,
-      :application_source,
       :source_references
     ]
   end
@@ -147,7 +146,7 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslations do
   defp singular_occurrences(locale_id) do
     [
       filter: [locale_id: locale_id],
-      preloads: [message: [:domain, :application_source]],
+      preloads: [message: [:domain]],
       skip_pagination: true
     ]
     |> Translations.list_singular_translations()
@@ -157,7 +156,7 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslations do
   defp plural_occurrences(locale_id) do
     [
       filter: [locale_id: locale_id],
-      preloads: [message: [:domain, :application_source]],
+      preloads: [message: [:domain]],
       skip_pagination: true
     ]
     |> Translations.list_plural_translations()
@@ -200,7 +199,6 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslations do
         target_placeholders: placeholders(target_text),
         domain: message.domain,
         context: message.context,
-        application_source: message.application_source,
         source_references: source_references(message)
       }
     ]
@@ -379,11 +377,7 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslations do
   defp type_key(%Occurrence{translation_type: :singular}), do: {:singular, nil}
 
   defp scope_key(occurrence) do
-    {
-      relation_id(occurrence.domain),
-      occurrence.context,
-      relation_id(occurrence.application_source)
-    }
+    {relation_id(occurrence.domain), occurrence.context}
   end
 
   defp relation_id(%{id: id}), do: id

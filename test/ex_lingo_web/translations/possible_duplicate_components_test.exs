@@ -67,7 +67,6 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponentsTest do
       message_type: :singular,
       domain: nil,
       context: nil,
-      application_source: nil,
       singular_translations: [
         %SingularTranslation{
           id: 1,
@@ -88,7 +87,6 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponentsTest do
         filters: %{},
         sort: %{},
         locale: %Locale{id: 1, native_name: "Deutsch"},
-        application_sources_empty?: true,
         stale_message_ids: MapSet.new(),
         fuzzy_matches: %{},
         possible_duplicate_summaries: %{1 => %{count: 1, highest_confidence: :high}},

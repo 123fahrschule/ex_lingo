@@ -4,7 +4,6 @@ defmodule ExLingo.Translations.MessageSpec do
   """
 
   alias ExLingo.Translations.{
-    ApplicationSource,
     Domain,
     Message,
     PluralTranslation,
@@ -21,8 +20,6 @@ defmodule ExLingo.Translations.MessageSpec do
           source_references: [map()],
           context_review_requested_at: Types.field(DateTime.t()),
           context_review_context: Types.field(String.t()),
-          application_source: Types.field(ApplicationSource.t()),
-          application_source_id: Types.field(Types.id()),
           domain: Types.field(Domain.t()),
           domain_id: Types.field(Types.id()),
           singular_translations: [SingularTranslation.t()],

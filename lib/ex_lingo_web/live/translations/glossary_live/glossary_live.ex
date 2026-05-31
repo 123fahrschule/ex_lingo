@@ -152,7 +152,7 @@ defmodule ExLingoWeb.Translations.GlossaryLive do
         per_page: page_size,
         filter: socket.assigns.filters,
         sort: socket.assigns.sort,
-        preloads: [:domain, :application_source]
+        preloads: [:domain]
       )
 
     socket
@@ -240,7 +240,7 @@ defmodule ExLingoWeb.Translations.GlossaryLive do
       {:ok, id} ->
         Translations.get_glossary_entry(
           filter: [id: id],
-          preloads: [:domain, :application_source]
+          preloads: [:domain]
         )
 
       _invalid ->
@@ -286,12 +286,7 @@ defmodule ExLingoWeb.Translations.GlossaryLive do
   defp assign_scope_options(socket) do
     %{entries: domains} = Translations.list_domains(per_page: @scope_options_limit)
 
-    %{entries: application_sources} =
-      Translations.list_application_sources(per_page: @scope_options_limit)
-
-    socket
-    |> assign(:domains, domains)
-    |> assign(:application_sources, application_sources)
+    assign(socket, :domains, domains)
   end
 
   defp normalize_attrs(attrs) do
@@ -299,7 +294,6 @@ defmodule ExLingoWeb.Translations.GlossaryLive do
     |> normalize_locale_attr("source_locale")
     |> normalize_locale_attr("target_locale")
     |> normalize_optional_id("domain_id")
-    |> normalize_optional_id("application_source_id")
   end
 
   defp normalize_locale_attr(attrs, key) do

@@ -10,7 +10,7 @@ defmodule ExLingo.Translations.Messages.Finders.ListMessages do
   alias ExLingo.Translations.PluralTranslations.Finders.ListPluralTranslations
   alias ExLingo.Translations.SingularTranslations.Finders.ListSingularTranslations
 
-  @available_filters ~w(domain_id application_source_id)
+  @available_filters ~w(domain_id)
   @sortable_fields ~w(msgid message_type)
 
   def find(params \\ []) do

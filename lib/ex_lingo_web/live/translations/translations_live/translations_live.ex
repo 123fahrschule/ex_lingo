@@ -14,11 +14,11 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
 
   alias ExLingoWeb.Components.Shared.Pagination
 
-  @available_filters ~w(application_source_id domain_id message_type search not_translated stale page page_size)
+  @available_filters ~w(domain_id message_type search not_translated stale page page_size)
   @available_params ~w(page page_size search filter sort)
   @list_context_prefixes ~w(search page page_size filter[ sort[ clear_list_context)
-  @params_in_filter ~w(application_source_id domain_id message_type not_translated stale)
-  @ids_to_parse ~w(application_source_id domain_id locale_id)
+  @params_in_filter ~w(domain_id message_type not_translated stale)
+  @ids_to_parse ~w(domain_id locale_id)
   @sortable_fields ~w(msgid message_type)
   @default_sort %{"field" => "msgid", "direction" => "asc"}
   @default_page_size 100
@@ -36,7 +36,6 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
             :list_context_storage_key,
             ListContext.storage_key(socket, "translations:#{locale.id}")
           )
-          |> assign(:application_sources_empty?, Translations.application_sources_empty?())
           |> assign(:stale_message_ids, stale_result.stale_message_ids)
           |> assign(:fuzzy_matches, stale_result.fuzzy_matches_map)
           |> assign(get_assigns_from_params(params))
@@ -228,7 +227,6 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
         filter: parse_filters(filters),
         sort: normalize_sort(sort),
         preloads: [
-          :application_source,
           :domain,
           singular_translations: singular_translation_query,
           plural_translations: plural_translation_query

@@ -15,8 +15,7 @@ defmodule ExLingo.AI.Translations.SuggestionRequest do
   @type message_metadata :: %{
           optional(:message_id) => term(),
           optional(:domain_id) => term(),
-          optional(:context) => String.t() | nil,
-          optional(:application_source_id) => term()
+          optional(:context) => String.t() | nil
         }
 
   @type t :: %__MODULE__{

@@ -76,12 +76,6 @@ defmodule ExLingoWeb.Translations.MessageMetadata do
           <dt>{t("Type")}</dt>
           <dd class="min-w-0 capitalize text-foreground">{@message.message_type}</dd>
         </div>
-        <div class="flex min-w-0 gap-1.5">
-          <dt>{t("Application")}</dt>
-          <dd class="min-w-0 truncate text-foreground">
-            {relation_name(@message.application_source, t("Global"))}
-          </dd>
-        </div>
       </dl>
 
       <details :if={@source_references != []} class="group">

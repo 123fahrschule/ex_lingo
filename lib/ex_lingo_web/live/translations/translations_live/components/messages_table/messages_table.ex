@@ -136,10 +136,8 @@ defmodule ExLingoWeb.Translations.Components.MessagesTable do
 
   def image_count(_message, _image_counts), do: 0
 
-  def column_count(application_sources_empty?) do
-    # Source, Translation, [Application], Actions
-    if application_sources_empty?, do: 3, else: 4
-  end
+  # Source, Translation, Actions
+  def column_count, do: 3
 
   def upload_error_to_string(:too_large), do: t("File is too large (max 5 MB).")
   def upload_error_to_string(:too_many_files), do: t("Too many files (max 10).")

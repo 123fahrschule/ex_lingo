@@ -7,7 +7,7 @@ defmodule ExLingo.Translations.Messages.Finders.ListAllMessages do
     module: ExLingo.Translations.Message,
     binding: :message
 
-  @available_filters ~w(domain_id application_source_id)a
+  @available_filters ~w(domain_id)a
 
   def find(params \\ []) do
     filters = params[:filter] || %{}

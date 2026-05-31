@@ -8,8 +8,7 @@ defmodule ExLingoWeb.Translations.GlossaryRedirectTest do
   defp build_message(opts \\ []) do
     %{
       msgid: Keyword.get(opts, :msgid, "Welcome"),
-      domain_id: Keyword.get(opts, :domain_id),
-      application_source_id: Keyword.get(opts, :application_source_id)
+      domain_id: Keyword.get(opts, :domain_id)
     }
   end
 
@@ -52,7 +51,7 @@ defmodule ExLingoWeb.Translations.GlossaryRedirectTest do
   test "includes scope ids when present" do
     query =
       GlossaryRedirect.query_params(
-        build_message(domain_id: 5, application_source_id: 9),
+        build_message(domain_id: 5),
         locale(),
         %{"source_term" => "x", "target_term" => "y"},
         "/back"
@@ -61,7 +60,6 @@ defmodule ExLingoWeb.Translations.GlossaryRedirectTest do
     params = URI.decode_query(query)
 
     assert params["domain_id"] == "5"
-    assert params["application_source_id"] == "9"
   end
 
   test "handles nil source and target terms" do

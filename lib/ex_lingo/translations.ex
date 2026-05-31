@@ -4,7 +4,6 @@ defmodule ExLingo.Translations do
   """
 
   alias ExLingo.Translations.{
-    ApplicationSources,
     Domains,
     GlossaryEntries,
     Locales,
@@ -13,16 +12,6 @@ defmodule ExLingo.Translations do
     PluralTranslations,
     SingularTranslations
   }
-
-  # APPLICATION SOURCES
-  defdelegate list_application_sources(params \\ []), to: ApplicationSources
-  defdelegate get_application_source(params), to: ApplicationSources
-  defdelegate create_application_source(attrs, opts \\ []), to: ApplicationSources
-  defdelegate change_application_source(attrs, params \\ %{}), to: ApplicationSources
-  defdelegate application_sources_empty?(), to: ApplicationSources
-
-  defdelegate update_application_source(application_source, attrs, opts \\ []),
-    to: ApplicationSources
 
   # DOMAINS
   defdelegate list_domains(params \\ []), to: Domains

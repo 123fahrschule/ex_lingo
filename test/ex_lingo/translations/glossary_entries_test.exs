@@ -63,7 +63,6 @@ defmodule ExLingo.Translations.GlossaryEntriesTest do
 
     test "changeset supports optional scope references" do
       {:ok, domain} = Translations.create_domain(%{name: "driver_training"})
-      {:ok, application_source} = Translations.create_application_source(%{name: "admin"})
 
       assert {:ok, %GlossaryEntry{} = entry} =
                Translations.create_glossary_entry(%{
@@ -71,12 +70,10 @@ defmodule ExLingo.Translations.GlossaryEntriesTest do
                  target_locale: "de",
                  source_term: "Certificate",
                  target_term: "Ausbildungsnachweis",
-                 domain_id: domain.id,
-                 application_source_id: application_source.id
+                 domain_id: domain.id
                })
 
       assert entry.domain_id == domain.id
-      assert entry.application_source_id == application_source.id
     end
   end
 end

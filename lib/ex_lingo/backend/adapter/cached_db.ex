@@ -34,10 +34,6 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
   """
   @impl true
   def lgettext(locale, domain, msgctxt, msgid, bindings) do
-    lgettext(locale, domain, msgctxt, msgid, bindings, nil)
-  end
-
-  def lgettext(locale, domain, msgctxt, msgid, bindings, application_source_id) do
     with {:ok, %Locale{id: locale_id}} <-
            Translations.get_locale(filter: [iso639_code: locale]),
          {:ok, %Domain{id: domain_id}} <-
@@ -47,8 +43,7 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
              filter: [
                msgid: msgid,
                context: normalize_context(msgctxt),
-               domain_id: domain_id,
-               application_source_id: application_source_filter(application_source_id)
+               domain_id: domain_id
              ]
            ),
          {:ok, %SingularTranslation{translated_text: text}} when not is_nil(text) <-
@@ -83,11 +78,7 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
     * `{:error, :not_found}` - When translation is not found
   """
   @impl true
-  def lngettext(locale, domain, msgctxt, msgid, msgid_plural, n, bindings) do
-    lngettext(locale, domain, msgctxt, msgid, msgid_plural, n, bindings, nil)
-  end
-
-  def lngettext(locale, domain, msgctxt, msgid, _msgid_plural, n, bindings, application_source_id) do
+  def lngettext(locale, domain, msgctxt, msgid, _msgid_plural, n, bindings) do
     with {:ok, %Locale{id: locale_id, plurals_header: plurals_header}} <-
            Translations.get_locale(filter: [iso639_code: locale]),
          {:ok, %Domain{id: domain_id}} <-
@@ -97,8 +88,7 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
              filter: [
                msgid: msgid,
                context: normalize_context(msgctxt),
-               domain_id: domain_id,
-               application_source_id: application_source_filter(application_source_id)
+               domain_id: domain_id
              ]
            ),
          {:ok, plurals_options} <- Expo.PluralForms.parse(plurals_header),
@@ -122,9 +112,6 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
   defp normalize_context(nil), do: ExLingo.PoFiles.Services.ExtractMessage.default_context()
 
   defp normalize_context(msgctxt), do: msgctxt
-
-  defp application_source_filter(nil), do: :is_null
-  defp application_source_filter(application_source_id), do: application_source_id
 
   defp normalize_lookup_error({:error, _resource, :not_found}), do: {:error, :not_found}
   defp normalize_lookup_error({:error, :not_found}), do: {:error, :not_found}

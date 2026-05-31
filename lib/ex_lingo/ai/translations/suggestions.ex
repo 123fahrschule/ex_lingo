@@ -99,8 +99,7 @@ defmodule ExLingo.AI.Translations.Suggestions do
     %{
       message_id: message.id,
       domain_id: message.domain_id,
-      context: message.context,
-      application_source_id: message.application_source_id
+      context: message.context
     }
   end
 

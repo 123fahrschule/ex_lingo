@@ -19,7 +19,7 @@ defmodule ExLingoWeb.Translations.MessageImagesLiveTest do
 
     alias ExLingoWeb.Translations.Components.MessagesTable
 
-    @preloads [:domain, :application_source, :singular_translations, :plural_translations]
+    @preloads [:domain, :singular_translations, :plural_translations]
 
     def mount(_params, %{"locale_id" => locale_id}, socket) do
       {:ok, locale} = Translations.get_locale(filter: [id: locale_id])
@@ -42,7 +42,6 @@ defmodule ExLingoWeb.Translations.MessageImagesLiveTest do
         filters={%{}}
         sort={%{}}
         locale={@locale}
-        application_sources_empty?={true}
         stale_message_ids={MapSet.new()}
         fuzzy_matches={%{}}
         possible_duplicate_summaries={%{}}

@@ -28,55 +28,51 @@
             placeholder={t("Add translation…")}
             class={[
               "!min-h-12 w-full",
-              (index == 0 && "pr-16") || "pr-10",
+              if(index == 0 or @ai_available?, do: "pr-10"),
               length_border_class(@length_status[index])
             ]}
           />
 
-          <div class="absolute right-1.5 top-1.5 z-10 flex items-center gap-1">
-            <.dropdown_menu :if={index == 0} id={"inline-actions-plural-#{@message.id}"}>
-              <.dropdown_menu_trigger>
-                <.button variant="ghost" size="icon" type="button" class="size-7 bg-background/80" title={t("Actions")}>
-                  <.icon name="more_horiz" size="sm" label={t("Actions")} />
-                </.button>
-              </.dropdown_menu_trigger>
-              <.dropdown_menu_content align="end">
-                <.dropdown_menu_item
-                  as="button"
-                  type="button"
-                  class="w-full"
-                  id={"add-to-glossary-plural-#{@message.id}"}
-                  phx-hook="ExLingoGlossaryCapture"
-                  phx-target={@myself}
-                >
-                  <.icon name="book" size="sm" decorative /> {t("Add to glossary")}
-                </.dropdown_menu_item>
-                <.dropdown_menu_item
-                  on-select={JS.push("mark_context_unclear", target: @myself)}
-                  disabled={not is_nil(@message.context_review_requested_at)}
-                >
-                  <.icon name="flag" size="sm" decorative />
-                  {if @message.context_review_requested_at,
-                    do: t("Marked unclear"),
-                    else: t("Mark context unclear")}
-                </.dropdown_menu_item>
-              </.dropdown_menu_content>
-            </.dropdown_menu>
-
-            <.button
-              :if={@ai_available?}
-              type="button"
-              variant="ghost"
-              size="icon"
-              class="size-7 bg-background/80"
-              phx-click="ai_request"
-              phx-value-index={index}
-              phx-target={@myself}
-              title={t("Get AI suggestion")}
-            >
-              <.icon name="auto_awesome" size="sm" label={t("Get AI suggestion")} />
-            </.button>
-          </div>
+          <.dropdown_menu
+            :if={index == 0 or @ai_available?}
+            id={"inline-actions-plural-#{@message.id}-#{index}"}
+            class="absolute right-1.5 top-1.5 z-10"
+          >
+            <.dropdown_menu_trigger>
+              <.button variant="ghost" size="icon" type="button" class="size-7 bg-background/80" title={t("Actions")}>
+                <.icon name="more_horiz" size="sm" label={t("Actions")} />
+              </.button>
+            </.dropdown_menu_trigger>
+            <.dropdown_menu_content align="end">
+              <.dropdown_menu_item
+                :if={@ai_available?}
+                on-select={JS.push("ai_request", target: @myself, value: %{index: index})}
+              >
+                <.icon name="auto_awesome" size="sm" decorative /> {t("Get AI suggestion")}
+              </.dropdown_menu_item>
+              <.dropdown_menu_item
+                :if={index == 0}
+                as="button"
+                type="button"
+                class="w-full"
+                id={"add-to-glossary-plural-#{@message.id}"}
+                phx-hook="ExLingoGlossaryCapture"
+                phx-target={@myself}
+              >
+                <.icon name="book" size="sm" decorative /> {t("Add to glossary")}
+              </.dropdown_menu_item>
+              <.dropdown_menu_item
+                :if={index == 0}
+                on-select={JS.push("mark_context_unclear", target: @myself)}
+                disabled={not is_nil(@message.context_review_requested_at)}
+              >
+                <.icon name="flag" size="sm" decorative />
+                {if @message.context_review_requested_at,
+                  do: t("Marked unclear"),
+                  else: t("Mark context unclear")}
+              </.dropdown_menu_item>
+            </.dropdown_menu_content>
+          </.dropdown_menu>
 
           <.validation_hints
             source={@forms[index]["original_text"]}

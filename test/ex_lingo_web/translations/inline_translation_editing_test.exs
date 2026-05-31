@@ -23,7 +23,7 @@ defmodule ExLingoWeb.Translations.InlineTranslationEditingTest do
     alias ExLingo.Translations
     alias ExLingoWeb.Translations.{PluralTranslationForm, SingularTranslationForm}
 
-    @preloads [:domain, :application_source, :singular_translations, :plural_translations]
+    @preloads [:domain, :singular_translations, :plural_translations]
 
     def mount(_params, %{"message_id" => message_id, "locale_id" => locale_id}, socket) do
       {:ok, message} = Translations.get_message(filter: [id: message_id], preloads: @preloads)

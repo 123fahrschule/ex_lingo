@@ -30,12 +30,6 @@ defmodule ExLingoWeb.Router do
               live "/", Dashboard.DashboardLive, :index, route_opts
               live "/dashboard", Dashboard.DashboardLive, :index, route_opts
 
-              scope "/application_sources", Translations do
-                live "/", ApplicationSourcesLive, :index, route_opts
-                live "/new", ApplicationSourceFormLive, :index, route_opts
-                live "/:id", ApplicationSourceFormLive, :index, route_opts
-              end
-
               scope "/domains", Translations do
                 live "/", DomainsLive, :index, route_opts
                 live "/:id", DomainLive, :index, route_opts
@@ -95,7 +89,6 @@ defmodule ExLingoWeb.Router do
           pipe_through :ex_lingo_api_pipeline
           get "/", ExLingoApiController, :index
 
-          resources "/applications", ApplicationSourcesController, only: [:index, :update]
           resources "/domains", DomainsController, only: [:index, :update]
           resources "/locales", LocalesController, only: [:index, :update]
           resources "/messages", MessagesController, only: [:index, :update]

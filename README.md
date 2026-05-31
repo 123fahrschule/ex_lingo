@@ -202,7 +202,7 @@ Open the generated migration file and set up `up` and `down` functions.
 
 **Current Migration Versions:**
 
-- PostgreSQL: **v10** (adds `msgid_plural` on messages for PO export; v9 added `ex_lingo_message_images`, v8 `ex_lingo_settings`)
+- PostgreSQL: **v11** (removes the application-source tables/columns; v10 added `msgid_plural`, v9 `ex_lingo_message_images`, v8 `ex_lingo_settings`)
 
 If you're upgrading from an earlier version of ExLingo, update your migration version to the latest.
 
@@ -213,7 +213,7 @@ defmodule MyApp.Repo.Migrations.AddExLingoTranslationsTable do
   use Ecto.Migration
 
   def up do
-    ExLingo.Migration.up(version: 10)
+    ExLingo.Migration.up(version: 11)
   end
 
   # We specify `version: 1` because we want to rollback all the way down including the first migration.
@@ -229,7 +229,7 @@ To use a dedicated PostgreSQL schema, pass the same prefix to the migration and 
 
 ```elixir
 # migration
-def up, do: ExLingo.Migration.up(version: 10, prefix: "ex_lingo")
+def up, do: ExLingo.Migration.up(version: 11, prefix: "ex_lingo")
 def down, do: ExLingo.Migration.down(version: 1, prefix: "ex_lingo")
 
 # config/config.exs
@@ -244,7 +244,7 @@ config :my_app, ExLingo,
 If your database user is not allowed to create schemas and the schema is managed externally, disable automatic schema creation explicitly:
 
 ```elixir
-def up, do: ExLingo.Migration.up(version: 10, prefix: "ex_lingo", create_schema: false)
+def up, do: ExLingo.Migration.up(version: 11, prefix: "ex_lingo", create_schema: false)
 ```
 
 After that run:
@@ -338,7 +338,7 @@ With Gettext version >= `0.26`, ExLingo uses a custom backend adapter system (`E
 
 ### Translation glossary
 
-ExLingo can store approved terminology in `ex_lingo_glossary_entries`. Each glossary entry defines a source locale, target locale, source term, target term, optional usage guidance, and optional scope by domain or application source.
+ExLingo can store approved terminology in `ex_lingo_glossary_entries`. Each glossary entry defines a source locale, target locale, source term, target term, optional usage guidance, and an optional domain scope.
 
 The glossary is core translation data. Provider plugins can use it, but the terminology is not tied to a specific AI provider.
 

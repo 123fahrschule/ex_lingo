@@ -9,15 +9,13 @@ defmodule ExLingo.Translations.GlossaryEntries.MatchGlossaryEntriesTest do
 
     {:ok, domain} = Translations.create_domain(%{name: "training_#{suffix}"})
     {:ok, other_domain} = Translations.create_domain(%{name: "billing_#{suffix}"})
-    {:ok, application_source} = Translations.create_application_source(%{name: "admin_#{suffix}"})
 
     {:ok, message} =
       Translations.create_message(%{
         msgid: "Download certificate",
         message_type: :singular,
         domain_id: domain.id,
-        context: "context_#{suffix}",
-        application_source_id: application_source.id
+        context: "context_#{suffix}"
       })
 
     %{

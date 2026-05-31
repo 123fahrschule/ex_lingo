@@ -7,7 +7,6 @@
           {t("Source")}
         </.sortable_table_head>
         <.table_head>{t("Translation")}</.table_head>
-        <.table_head :if={!@application_sources_empty?}>{t("Application")}</.table_head>
         <.table_head class="w-px whitespace-nowrap text-right">{t("Actions")}</.table_head>
       </.table_row>
     </.table_header>
@@ -112,15 +111,6 @@
             />
           </div>
         </.table_cell>
-        <.table_cell :if={!@application_sources_empty?} class="align-top">
-          <.badge
-            variant={if is_nil(message.application_source), do: "outline", else: "default"}
-            class="uppercase"
-            style={unless is_nil(message.application_source), do: "background-color:#{message.application_source.color};"}
-          >
-            {if is_nil(message.application_source), do: t("None"), else: message.application_source.name}
-          </.badge>
-        </.table_cell>
         <.table_cell class="w-px whitespace-nowrap align-top text-right">
           <div class="flex items-center justify-end gap-2">
             <.badge
@@ -205,7 +195,7 @@
       </.table_row>
 
       <.table_row :if={source_refs != []} data-row-group={message.id}>
-        <.table_cell colspan={column_count(@application_sources_empty?)} class="py-0 align-top">
+        <.table_cell colspan={column_count()} class="py-0 align-top">
           <details class="text-body-xs text-muted-foreground">
             <summary class="cursor-pointer py-2">
               {t("Source Positions")} ({length(source_refs)})
@@ -222,7 +212,7 @@
       </.table_row>
 
       <.table_row :if={@open_message_id == message.id} data-row-group={message.id} class="bg-muted/30">
-        <.table_cell colspan={column_count(@application_sources_empty?)} class="p-4">
+        <.table_cell colspan={column_count()} class="p-4">
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <h4 class="text-body-sm font-medium">{t("Context images")}</h4>

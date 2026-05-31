@@ -29,10 +29,7 @@ defmodule ExLingoWeb.Translations.GlossaryEntriesTable do
   end
 
   def scope_label(glossary_entry) do
-    [
-      relation_label(t("Domain"), glossary_entry.domain),
-      relation_label(t("Application"), glossary_entry.application_source)
-    ]
+    [relation_label(t("Domain"), glossary_entry.domain)]
     |> Enum.reject(&is_nil/1)
     |> case do
       [] -> t("Global")

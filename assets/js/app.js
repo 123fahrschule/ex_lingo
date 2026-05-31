@@ -24,6 +24,7 @@ import "../../deps/cognit/assets/js/ui/components/switch.js";
 import "../../deps/cognit/assets/js/ui/components/dropdown_menu.js";
 import "../../deps/cognit/assets/js/copy_button.js";
 import { FlashMessage } from "../../deps/cognit/assets/js/hooks/flash_message.js";
+import { LocaleSelect } from "../../deps/cognit/assets/js/hooks/locale_select.js";
 import { Pagination } from "../../deps/cognit/assets/js/hooks/pagination.js";
 import { Sidebar } from "../../deps/cognit/assets/js/hooks/sidebar.js";
 import { SidebarMenu } from "../../deps/cognit/assets/js/hooks/sidebar_menu.js";
@@ -40,37 +41,22 @@ Alpine.start();
 
 let Hooks = {};
 
-const LocaleSelect = {
-  mounted() {
-    this.el.addEventListener("set-locale", (event) => {
-      this.setLocale(event.detail.locale);
-    });
-  },
+// Cognit (>= 0.2.x) namespaces its LiveView hooks under "Cognit.*"; SaladUI
+// stays unprefixed. These names must match what the cognit components render.
+Hooks["Cognit.FlashMessage"] = FlashMessage;
+Hooks["Cognit.LocaleSelect"] = LocaleSelect;
+Hooks["Cognit.Pagination"] = Pagination;
+Hooks["Cognit.Sidebar"] = Sidebar;
+Hooks["Cognit.SidebarMenu"] = SidebarMenu;
+Hooks.SaladUI = SaladUIHook;
 
-  setLocale(locale) {
-    const expiryDate = new Date();
-    expiryDate.setTime(expiryDate.getTime() + 365 * 24 * 60 * 60 * 1000);
-    document.cookie = `app_locale=${locale};expires=${expiryDate.toUTCString()};path=/`;
-
-    const url = new URL(window.location.href);
-    url.searchParams.set("locale", locale);
-    window.location.assign(url.toString());
-  },
-};
-
-Hooks.FlashMessage = FlashMessage;
 Hooks.ExLingoColorPicker = ExLingoColorPicker;
 Hooks.ExLingoGlossaryCapture = ExLingoGlossaryCapture;
 Hooks.ExLingoInlineEdit = ExLingoInlineEdit;
 Hooks.ExLingoListContext = ExLingoListContext;
 Hooks.ExLingoRowGroupHover = ExLingoRowGroupHover;
 Hooks.ExLingoSaveIndicator = ExLingoSaveIndicator;
-Hooks.LocaleSelect = LocaleSelect;
 Hooks.PoExport = PoExport;
-Hooks.Pagination = Pagination;
-Hooks.Sidebar = Sidebar;
-Hooks.SidebarMenu = SidebarMenu;
-Hooks.SaladUI = SaladUIHook;
 Hooks.Select = Select;
 Hooks.Toggle = Toggle;
 

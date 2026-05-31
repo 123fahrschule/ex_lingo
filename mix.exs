@@ -43,7 +43,9 @@ defmodule ExLingo.MixProject do
       {:phoenix_live_view, "~> 1.1"},
       {:phoenix_html, "~> 4.3"},
       {:phoenix_html_helpers, "~> 1.0"},
-      {:cognit, github: "123fahrschule/cognit", tag: "0.2.13"},
+      # Optional so host apps can pin/bump cognit at their own pace; ExLingo
+      # still fetches this tag for its own dev/test and prebuilt dashboard assets.
+      {:cognit, github: "123fahrschule/cognit", tag: "0.2.24", optional: true},
       {:tailwind, "~> 0.4.1", runtime: Mix.env() == :dev},
       {:jason, "~> 1.4"},
       {:cloak, "~> 1.1"},

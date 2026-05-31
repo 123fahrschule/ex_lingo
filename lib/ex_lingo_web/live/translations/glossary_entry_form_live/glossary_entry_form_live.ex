@@ -103,8 +103,7 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
       "target_locale" => params["target_locale"],
       "source_term" => params["source_term"],
       "target_term" => params["target_term"],
-      "domain_id" => params["domain_id"],
-      "application_source_id" => params["application_source_id"]
+      "domain_id" => params["domain_id"]
     }
     |> Enum.reject(fn {_k, v} -> is_nil(v) end)
     |> Map.new()
@@ -127,12 +126,7 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
   defp assign_scope_options(socket) do
     %{entries: domains} = Translations.list_domains(per_page: @scope_options_limit)
 
-    %{entries: application_sources} =
-      Translations.list_application_sources(per_page: @scope_options_limit)
-
-    socket
-    |> assign(:domains, domains)
-    |> assign(:application_sources, application_sources)
+    assign(socket, :domains, domains)
   end
 
   defp get_glossary_entry(id) do
@@ -140,7 +134,7 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
       {:ok, id} ->
         Translations.get_glossary_entry(
           filter: [id: id],
-          preloads: [:domain, :application_source]
+          preloads: [:domain]
         )
 
       _ ->
@@ -153,7 +147,6 @@ defmodule ExLingoWeb.Translations.GlossaryEntryFormLive do
     |> normalize_locale("source_locale")
     |> normalize_locale("target_locale")
     |> normalize_optional_id("domain_id")
-    |> normalize_optional_id("application_source_id")
   end
 
   defp normalize_locale(attrs, key) do

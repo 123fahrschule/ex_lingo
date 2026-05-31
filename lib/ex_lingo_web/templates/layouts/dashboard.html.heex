@@ -30,7 +30,7 @@
   </head>
   <body class="ex-lingo-dashboard">
     <.sidebar_provider>
-      <.sidebar id="sidebar" collapsible="icon" state={sidebar_state(@conn)}>
+      <.sidebar id="cognit-sidebar" collapsible="icon" state={sidebar_state(@conn)}>
         <.sidebar_header>
           <.app_side_nav title="ExLingo" />
         </.sidebar_header>
@@ -53,11 +53,6 @@
                 <.sidebar_menu_item>
                   <.sidebar_menu_button href={dashboard_path(@conn, "/domains")}>
                     <.icon name="folder_managed" decorative /> <span>{t("Domains")}</span>
-                  </.sidebar_menu_button>
-                </.sidebar_menu_item>
-                <.sidebar_menu_item>
-                  <.sidebar_menu_button href={dashboard_path(@conn, "/application_sources")}>
-                    <.icon name="apps" decorative /> <span>{t("Applications")}</span>
                   </.sidebar_menu_button>
                 </.sidebar_menu_item>
                 <.sidebar_menu_item>

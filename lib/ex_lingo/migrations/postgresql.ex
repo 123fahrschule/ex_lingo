@@ -6,7 +6,7 @@ defmodule ExLingo.Migrations.Postgresql do
   use Ecto.Migration
 
   @initial_version 1
-  @current_version 10
+  @current_version 11
   @default_prefix "public"
 
   @doc false

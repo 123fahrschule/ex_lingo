@@ -8,7 +8,7 @@ defmodule ExLingoWeb.Translations.GlossaryRedirect do
 
   @doc """
   Returns a URL-encoded query string with `source_locale`, `target_locale`,
-  `source_term`, `target_term`, optional `domain_id`/`application_source_id`,
+  `source_term`, `target_term`, optional `domain_id`,
   and `return_to`.
 
   `payload` is the client event payload: `%{"source_term" => _, "target_term" => _}`.
@@ -28,7 +28,6 @@ defmodule ExLingoWeb.Translations.GlossaryRedirect do
       "return_to" => return_to
     }
     |> maybe_put("domain_id", Map.get(message, :domain_id))
-    |> maybe_put("application_source_id", Map.get(message, :application_source_id))
     |> URI.encode_query()
   end
 

@@ -18,7 +18,6 @@
         <.table_row>
           <.table_head>{t("Message")}</.table_head>
           <.table_head>{t("Domain")}</.table_head>
-          <.table_head>{t("Application")}</.table_head>
           <.table_head>{t("Source Positions")}</.table_head>
           <.table_head>{t("Marked")}</.table_head>
         </.table_row>
@@ -38,11 +37,6 @@
           <.table_cell>
             <.badge variant={if message.domain, do: "default", else: "outline"} class="uppercase">
               {if message.domain, do: message.domain.name, else: t("None")}
-            </.badge>
-          </.table_cell>
-          <.table_cell>
-            <.badge variant={if message.application_source, do: "default", else: "outline"} class="uppercase">
-              {if message.application_source, do: message.application_source.name, else: t("Global")}
             </.badge>
           </.table_cell>
           <.table_cell>

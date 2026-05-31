@@ -27,7 +27,7 @@ defmodule ExLingo.Translations.GlossaryEntries.Services.MatchGlossaryEntries do
       ],
       source_text: source_text,
       message: message,
-      preloads: [:domain, :application_source]
+      preloads: [:domain]
     ]
     |> Translations.list_matching_glossary_entries()
     |> Enum.sort_by(&scope_specificity/1, :desc)
@@ -41,7 +41,6 @@ defmodule ExLingo.Translations.GlossaryEntries.Services.MatchGlossaryEntries do
   end
 
   defp scope_specificity(%GlossaryEntry{} = entry) do
-    [entry.domain_id, entry.application_source_id]
-    |> Enum.count(&(!is_nil(&1)))
+    if is_nil(entry.domain_id), do: 0, else: 1
   end
 end

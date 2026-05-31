@@ -92,23 +92,6 @@
             </.form_control>
             <.form_message field={@form[:domain_id]} translate={false} />
           </.form_item>
-
-          <.form_item>
-            <.form_label field={@form[:application_source_id]}>{t("Application scope")}</.form_label>
-            <.form_control>
-              <select
-                id={@form[:application_source_id].id}
-                name={@form[:application_source_id].name}
-                class={select_class}
-              >
-                <option value="">{t("Global")}</option>
-                <option :for={application_source <- @application_sources} value={application_source.id} selected={to_string(application_source.id) == to_string(@form[:application_source_id].value)}>
-                  {application_source.name}
-                </option>
-              </select>
-            </.form_control>
-            <.form_message field={@form[:application_source_id]} translate={false} />
-          </.form_item>
         </div>
 
         <div class="flex justify-end gap-2 pt-4">

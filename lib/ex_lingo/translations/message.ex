@@ -7,15 +7,14 @@ defmodule ExLingo.Translations.Message do
   import Ecto.Changeset
 
   alias ExLingo.Translations.{
-    ApplicationSource,
     Domain,
     PluralTranslation,
     SingularTranslation
   }
 
   @required_fields ~w(msgid message_type)a
-  @optional_fields ~w(msgid_plural context domain_id application_source_id source_references context_review_requested_at context_review_context)a
-  @relations ~w(domain singular_translations plural_translations application_source)a
+  @optional_fields ~w(msgid_plural context domain_id source_references context_review_requested_at context_review_context)a
+  @relations ~w(domain singular_translations plural_translations)a
   @max_msgid_length 10_000
 
   @type t() :: ExLingo.Translations.MessageSpec.t()
@@ -32,7 +31,6 @@ defmodule ExLingo.Translations.Message do
     field :context_review_context, :string
 
     belongs_to :domain, Domain
-    belongs_to :application_source, ApplicationSource
 
     has_many :singular_translations, SingularTranslation
     has_many :plural_translations, PluralTranslation

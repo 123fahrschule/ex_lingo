@@ -7,7 +7,7 @@
   data-list-context={Jason.encode!(@list_context_payload || %{})}
   data-context-prefixes={Jason.encode!(@list_context_prefixes || [])}
 >
-  <.live_component module={FiltersBar} filters={@filters} not_translated_default={@not_translated_default} stale_default={@stale_default} application_sources_empty?={@application_sources_empty?} locale_id={@locale.id} id="filters-bar" />
-  <.live_component module={MessagesTable} messages={@messages} filters={@filters} sort={@sort} locale={@locale} application_sources_empty?={@application_sources_empty?} stale_message_ids={@stale_message_ids} fuzzy_matches={@fuzzy_matches} possible_duplicate_summaries={@possible_duplicate_summaries} id="messages-table" />
+  <.live_component module={FiltersBar} filters={@filters} not_translated_default={@not_translated_default} stale_default={@stale_default} locale_id={@locale.id} id="filters-bar" />
+  <.live_component module={MessagesTable} messages={@messages} filters={@filters} sort={@sort} locale={@locale} stale_message_ids={@stale_message_ids} fuzzy_matches={@fuzzy_matches} possible_duplicate_summaries={@possible_duplicate_summaries} id="messages-table" />
   <Pagination.render metadata={@messages_metadata} on_page_change="page_changed" />
 </div>

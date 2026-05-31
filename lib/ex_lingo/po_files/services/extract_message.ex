@@ -53,8 +53,7 @@ defmodule ExLingo.PoFiles.Services.ExtractMessage do
     [
       msgid: attrs[:msgid],
       context: attrs[:context],
-      domain_id: nullable_filter(attrs[:domain_id]),
-      application_source_id: nullable_filter(attrs[:application_source_id])
+      domain_id: nullable_filter(attrs[:domain_id])
     ]
   end
 
