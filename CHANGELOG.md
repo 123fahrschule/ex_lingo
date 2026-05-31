@@ -1,21 +1,31 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.0.0] - 2026-05-31
 
 ### Breaking Changes
 - Rename the project identity from Kanta to ExLingo, including OTP app name, package metadata, module namespaces, file paths, migrations, routes, docs, and asset package names.
 - Remove non-PostgreSQL storage adapter support. ExLingo now supports PostgreSQL repositories only.
+- Remove the application-source concept entirely. Migration v11 drops `ex_lingo_application_sources` and the `application_source_id` columns and narrows the message unique key to `(domain_id, context, msgid)`; this migration is destructive, and its narrowed unique index requires PostgreSQL 15+.
 
 ### Added
 - Add CircleCI configuration for dependency audits, asset builds, formatting, compilation, Credo, Dialyzer, and test execution with PostgreSQL.
-- Add Cognit `0.2.13` as the standard UI component library for the ExLingo dashboard.
+- Add Cognit as the standard UI component library for the ExLingo dashboard.
 - Add favicon assets generated from the Cognit brand logo.
 - Add core glossary storage and dashboard management UI for approved translation terminology.
 - Add AI translation suggestions with a provider plugin contract and an OpenAI provider implementation.
 - Add PostgreSQL schema prefix configuration for ExLingo data, including automatic schema creation during ExLingo migrations.
 - Add imported PO source references to messages and display message ID, scope, and source positions in the translation form.
 - Add an unclear-text review flow so translators can flag vague gettext contexts and developers can review the affected source positions.
+- Add a Settings dashboard (`/settings`) backed by a single `ex_lingo_settings` row, with S3 credentials encrypted at rest via Cloak.
+- Add fully editable AI prompt templates (global and per-locale, cascading) with documented placeholders surfaced in both the README and the Settings UI, and send translation context to the AI provider.
+- Add configurable translation-quality validation thresholds (length ratio, placeholder, punctuation) cascading database → config → default.
+- Add a configurable S3 folder prefix so one bucket can be shared across services.
+- Add S3-backed context image uploads for messages (browser presigned upload, thumbnails, deletion, and lifecycle cleanup on merge/delete).
+- Add PO export from the database to `.po` files, with in-place overwrite via the File System Access API and a ZIP download fallback.
+- Add an `msgid_plural` column captured on import and used during export.
+- Add possible-duplicate detection with confidence scoring and a dashboard summary.
+- Add inline translation editing with keyboard shortcuts, save indicators, quick glossary capture from selected text, and inline quality warnings.
 
 ### Changed
 - Rework the dashboard, translation tables, filters, forms, tabs, pagination, and app shell to use Cognit components, typography, tokens, and icons.
@@ -31,6 +41,9 @@ All notable changes to this project will be documented in this file.
 - Relax the Gettext dependency constraint to support host applications on Gettext `0.26.x` and `1.x`.
 - Rebuild distributable JavaScript and CSS assets with the updated dependency set.
 - Treat gettext context as message metadata instead of a managed dashboard entity; context remains visible during translation and searchable with message text.
+- Upgrade Cognit to `0.2.24` (namespaced `Cognit.*` LiveView hooks) and depend on it optionally so host applications can bump Cognit independently.
+- Make the dashboard locale switch follow Cognit's shared `app_locale` cookie convention instead of a parallel `?locale=` mechanism, while still honouring the host's locale handoff.
+- Persist the sidebar collapsed/expanded state across reloads and navigation.
 
 ### Fixed
 - Update Nebulex cache configuration for the current adapter packages.
