@@ -5,6 +5,15 @@ defmodule ExLingo.Migrations.Postgresql.V11 do
   Removes the application-source concept: drops `ex_lingo_application_sources`
   and the `application_source_id` columns on messages and glossary entries, and
   narrows the message uniqueness key to `(domain_id, context, msgid)`.
+
+  > #### PostgreSQL 15+ {: .info}
+  >
+  > The narrowed unique index uses `nulls_distinct: false` so that messages with
+  > a NULL `domain_id`/`context` are still de-duplicated, which requires
+  > PostgreSQL 15 or newer. If the existing data contains rows that collide on
+  > `(domain_id, context, msgid)` once `application_source_id` is dropped, index
+  > creation fails loudly — resolve the collisions before re-running rather than
+  > deleting rows blindly.
   """
 
   use Ecto.Migration
@@ -25,7 +34,7 @@ defmodule ExLingo.Migrations.Postgresql.V11 do
                    )
 
     execute """
-      ALTER TABLE #{quoted_prefix}.#{@ex_lingo_messages}
+      ALTER TABLE IF EXISTS #{quoted_prefix}.#{@ex_lingo_messages}
         DROP COLUMN IF EXISTS application_source_id;
     """
 

@@ -166,15 +166,12 @@ defmodule ExLingoWeb do
         do: dashboard_path(socket, path)
 
       def dashboard_path(%Phoenix.LiveView.Socket{} = socket, path) do
-        path = ExLingoWeb.I18n.append_locale(path, ExLingoWeb.I18n.locale_from_socket(socket))
         socket.router.__ex_lingo_dashboard_prefix__() <> "/" <> path
       end
 
       def dashboard_path(%Plug.Conn{} = conn, "/" <> path), do: dashboard_path(conn, path)
 
       def dashboard_path(%Plug.Conn{} = conn, path) do
-        path = ExLingoWeb.I18n.append_locale(path, ExLingoWeb.I18n.locale_from_conn(conn))
-
         unverified_path(
           conn,
           ExLingoWeb.Router,

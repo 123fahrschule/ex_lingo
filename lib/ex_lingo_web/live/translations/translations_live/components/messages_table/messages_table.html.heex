@@ -21,7 +21,11 @@
         class={[
           "align-top",
           source_refs != [] && "border-b-0",
-          message_stale?(message, @stale_message_ids) && "bg-warning-50/80"
+          cond do
+            @open_message_id == message.id -> "bg-muted/30"
+            message_stale?(message, @stale_message_ids) -> "bg-warning-50/80"
+            true -> nil
+          end
         ]}
       >
         <.table_cell class="align-top">
@@ -194,7 +198,11 @@
         </.table_cell>
       </.table_row>
 
-      <.table_row :if={source_refs != []} data-row-group={message.id}>
+      <.table_row
+        :if={source_refs != []}
+        data-row-group={message.id}
+        class={@open_message_id == message.id && "bg-muted/30"}
+      >
         <.table_cell colspan={column_count()} class="py-0 align-top">
           <details class="text-body-xs text-muted-foreground">
             <summary class="cursor-pointer py-2">

@@ -11,6 +11,22 @@
     background-color: hsl(var(--muted) / 0.5);
   }
 
+  /*
+   * Pure-CSS grouping (no JS hook needed): a message's main row carries
+   * [data-inline-row]; its trailing source-positions / image rows do not, so
+   * the sibling chains below stop at the next message's main row. Hovering the
+   * main row tints its detail rows; hovering a detail row tints the rows it
+   * belongs with. Mirrors .ex-lingo-row-group-hover so the group reads as one
+   * unit regardless of which row the pointer is over.
+   */
+  tr[data-inline-row]:hover + tr:not([data-inline-row]),
+  tr[data-inline-row]:hover + tr:not([data-inline-row]) + tr:not([data-inline-row]),
+  tr[data-inline-row]:has(+ tr:not([data-inline-row]):hover),
+  tr[data-inline-row]:has(+ tr:not([data-inline-row]) + tr:not([data-inline-row]):hover),
+  tr[data-inline-row] + tr:not([data-inline-row]):has(+ tr:not([data-inline-row]):hover) {
+    background-color: hsl(var(--muted) / 0.5);
+  }
+
   .locale-gradient--solid {
     background: var(--locale-color-1, #000000);
   }

@@ -312,11 +312,9 @@ defmodule ExLingoWeb.I18n do
       "Aus dem ausgewählten Quell-/Zieltext einen Glossareintrag erstellen"
   }
 
-  def on_mount(_arg, params, session, socket) do
+  def on_mount(_arg, _params, session, socket) do
     locale =
-      params
-      |> get_locale()
-      |> Kernel.||(get_locale(session))
+      get_locale(session)
       |> Kernel.||(Map.get(session, "ex_lingo_locale"))
       |> put_locale()
 
@@ -350,10 +348,15 @@ defmodule ExLingoWeb.I18n do
   def locale_from_socket(%Phoenix.LiveView.Socket{}), do: current_locale()
 
   def locale_from_conn(conn) do
-    get_locale(conn.params) ||
-      get_locale(conn.assigns) ||
+    # Cognit sources first: conn.assigns[:locale] (set by the host's
+    # Cognit.LocalePlug) and the shared `app_locale` cookie both reflect the
+    # host's locale *and* an in-dashboard switch. The legacy `?locale=` param
+    # stays last as a fallback so existing handoff links keep working without
+    # letting a stale param override an explicit cognit choice.
+    get_locale(conn.assigns) ||
+      cookie_locale(conn.cookies) ||
       session_locale(conn) ||
-      get_locale(conn.cookies) ||
+      get_locale(conn.params) ||
       @default_locale
   end
 
@@ -374,19 +377,6 @@ defmodule ExLingoWeb.I18n do
     message
     |> translate(current_locale())
     |> interpolate(bindings)
-  end
-
-  def append_locale(path, locale \\ current_locale()) when is_binary(path) do
-    uri = URI.parse(path)
-
-    query =
-      uri.query
-      |> decode_query()
-      |> Map.put("locale", normalize_locale(locale))
-
-    uri
-    |> Map.put(:query, URI.encode_query(query))
-    |> URI.to_string()
   end
 
   defp translate(message, "de"), do: Map.get(@de, message, message)
@@ -420,14 +410,19 @@ defmodule ExLingoWeb.I18n do
 
   defp get_locale(_), do: nil
 
+  # Cognit's LocaleSelect dropdown persists the chosen locale to the `app_locale`
+  # cookie (its standard convention) and reloads. Reading that cookie here lets
+  # the stock cognit dropdown drive ExLingo's UI locale — no separate hook.
+  defp cookie_locale(%{} = cookies) do
+    cookies["app_locale"] || cookies[:app_locale] || get_locale(cookies)
+  end
+
+  defp cookie_locale(_), do: nil
+
   defp session_locale(conn) do
     Plug.Conn.get_session(conn, :locale) ||
       Plug.Conn.get_session(conn, "locale")
   rescue
     ArgumentError -> nil
   end
-
-  defp decode_query(nil), do: %{}
-  defp decode_query(""), do: %{}
-  defp decode_query(query), do: URI.decode_query(query)
 end

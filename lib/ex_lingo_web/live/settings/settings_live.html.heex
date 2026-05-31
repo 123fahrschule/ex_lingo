@@ -29,7 +29,7 @@
 
         <div :if={@locales != []} class="space-y-4">
           <h3 class="text-body-sm font-medium">{t("Per-locale overrides")}</h3>
-          <div class="grid gap-4 md:grid-cols-2">
+          <div class="space-y-4">
             <.card :for={locale <- @locales}>
               <.card_content class="pt-6 space-y-2">
                 <label
@@ -42,7 +42,7 @@
                   id={"ai_prompt_#{locale.iso639_code}"}
                   name={"ai[ai_prompt_template_per_locale][#{locale.iso639_code}]"}
                   value={locale_prompt(@setting, locale.iso639_code)}
-                  rows="5"
+                  rows="12"
                   class="font-mono"
                   placeholder={t("Empty = use global template")}
                 />

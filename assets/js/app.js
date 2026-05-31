@@ -36,6 +36,25 @@ let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
 
+// The host (e.g. absence) hands its current locale to the dashboard via a
+// `?locale=` query param. Cognit's locale system is cookie-based, and its
+// LocalePlug prioritises the param over the cookie — so a lingering `?locale=`
+// would keep overriding an in-dashboard switch on every reload. Consume the
+// handoff once into Cognit's shared `app_locale` cookie and strip the param,
+// so from here on the cognit cookie is the single source of truth.
+(function consumeLocaleHandoff() {
+  const url = new URL(window.location.href);
+  const handoff = url.searchParams.get("locale");
+  if (!handoff) return;
+
+  const expiry = new Date();
+  expiry.setTime(expiry.getTime() + 365 * 24 * 60 * 60 * 1000);
+  document.cookie = `app_locale=${handoff};expires=${expiry.toUTCString()};path=/`;
+
+  url.searchParams.delete("locale");
+  window.history.replaceState({}, "", url.toString());
+})();
+
 window.Alpine = Alpine;
 Alpine.start();
 
