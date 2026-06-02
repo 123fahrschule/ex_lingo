@@ -12,10 +12,6 @@ defmodule ExLingoWeb.Translations.GlossaryEntriesTable do
     {:ok, assign(socket, assigns)}
   end
 
-  def handle_event("edit_glossary_entry", %{"id" => id}, socket) do
-    {:noreply, push_navigate(socket, to: dashboard_path(socket, "/glossary/#{id}"))}
-  end
-
   def handle_event("delete_glossary_entry", %{"id" => id}, socket) do
     with {:ok, glossary_entry} <- Translations.get_glossary_entry(filter: [id: id]),
          {:ok, _deleted} <- Translations.delete_glossary_entry(glossary_entry) do

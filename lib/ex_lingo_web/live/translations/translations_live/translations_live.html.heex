@@ -11,3 +11,9 @@
   <.live_component module={MessagesTable} messages={@messages} filters={@filters} sort={@sort} locale={@locale} stale_message_ids={@stale_message_ids} fuzzy_matches={@fuzzy_matches} possible_duplicate_summaries={@possible_duplicate_summaries} id="messages-table" />
   <Pagination.render metadata={@messages_metadata} on_page_change="page_changed" />
 </div>
+
+<.glossary_entry_flyout
+  form={@glossary_entry_form}
+  editing?={@glossary_entry_editing?}
+  domains={@domains}
+/>

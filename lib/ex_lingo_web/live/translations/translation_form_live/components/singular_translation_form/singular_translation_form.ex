@@ -15,10 +15,10 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
   alias ExLingo.Translations
   alias ExLingo.Translations.SingularTranslation
   alias ExLingo.Translations.Validations
-  alias ExLingoWeb.Translations.GlossaryRedirect
+  alias ExLingoWeb.Translations.Components.GlossaryEntryFlyout
 
   import ExLingoWeb.Translations.TranslationFormHelpers,
-    only: [ai_request_opts: 0, error_message: 1, get_query: 1]
+    only: [ai_request_opts: 0, error_message: 1]
 
   import ExLingoWeb.Translations.TranslationValidationHints,
     only: [validation_hints: 1, length_border_class: 1]
@@ -69,12 +69,12 @@ defmodule ExLingoWeb.Translations.SingularTranslationForm do
   end
 
   def handle_event("open_glossary_for_selection", payload, socket) do
-    message = socket.assigns.message
-    locale = socket.assigns.locale
-    return_to = "/locales/#{locale.id}/translations" <> get_query(socket.assigns)
-    query = GlossaryRedirect.query_params(message, locale, payload, return_to)
+    attrs =
+      GlossaryEntryFlyout.prefill_attrs(socket.assigns.message, socket.assigns.locale, payload)
 
-    {:noreply, push_navigate(socket, to: dashboard_path(socket, "/glossary/new?" <> query))}
+    send(self(), {:open_glossary_flyout, attrs})
+
+    {:noreply, socket}
   end
 
   def handle_event("ai_request", _params, socket) do

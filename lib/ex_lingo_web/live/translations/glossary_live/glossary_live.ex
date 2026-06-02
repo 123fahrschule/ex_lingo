@@ -5,6 +5,8 @@ defmodule ExLingoWeb.Translations.GlossaryLive do
 
   alias ExLingo.Translations
   alias ExLingo.Translations.GlossaryEntry
+  import ExLingoWeb.Translations.Components.GlossaryEntryFlyout, only: [glossary_entry_flyout: 1]
+
   alias ExLingoWeb.Components.Shared.Pagination
   alias ExLingoWeb.ListContext
   alias ExLingoWeb.Translations.GlossaryEntriesTable

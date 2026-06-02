@@ -37,8 +37,6 @@ defmodule ExLingoWeb.Router do
 
               scope "/glossary", Translations do
                 live "/", GlossaryLive, :index, route_opts
-                live "/new", GlossaryEntryFormLive, :index, route_opts
-                live "/:id", GlossaryEntryFormLive, :index, route_opts
               end
 
               scope "/possible_duplicates", Translations do

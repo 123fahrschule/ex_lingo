@@ -3,9 +3,12 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
 
   import ExLingo.Utils.ParamParsers, only: [parse_id_filter: 1]
 
+  import ExLingoWeb.Translations.Components.GlossaryEntryFlyout, only: [glossary_entry_flyout: 1]
+
   alias ExLingo.PoFiles.MessagesExtractorAgent
   alias ExLingo.PoFiles.Services.StaleDetection.Result
   alias ExLingo.Translations
+  alias ExLingo.Translations.GlossaryEntry
   alias ExLingo.Translations.SingularTranslations.Finders.ListSingularTranslations
   alias ExLingo.Translations.PluralTranslations.Finders.ListPluralTranslations
   alias ExLingoWeb.ListContext
@@ -38,6 +41,9 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
           )
           |> assign(:stale_message_ids, stale_result.stale_message_ids)
           |> assign(:fuzzy_matches, stale_result.fuzzy_matches_map)
+          |> assign(:glossary_entry_form, nil)
+          |> assign(:glossary_entry_editing?, false)
+          |> assign(:domains, list_glossary_domains())
           |> assign(get_assigns_from_params(params))
 
         _ ->
@@ -181,6 +187,33 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
      )}
   end
 
+  def handle_event("validate_glossary_entry", %{"glossary_entry" => attrs}, socket) do
+    form =
+      %GlossaryEntry{}
+      |> Translations.change_glossary_entry(normalize_glossary_attrs(attrs))
+      |> Map.put(:action, :insert)
+      |> to_form()
+
+    {:noreply, assign(socket, :glossary_entry_form, form)}
+  end
+
+  def handle_event("submit_glossary_entry", %{"glossary_entry" => attrs}, socket) do
+    case Translations.create_glossary_entry(normalize_glossary_attrs(attrs)) do
+      {:ok, _glossary_entry} ->
+        {:noreply,
+         socket
+         |> assign(:glossary_entry_form, nil)
+         |> put_flash(:info, t("Glossary entry created."))}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :glossary_entry_form, to_form(changeset))}
+    end
+  end
+
+  def handle_event("close_glossary_entry_editor", _params, socket) do
+    {:noreply, assign(socket, :glossary_entry_form, nil)}
+  end
+
   def handle_info(:refresh_messages, socket) do
     # Re-detect system-wide stale messages with fuzzy matching
     %Result{stale_message_ids: stale_message_ids, fuzzy_matches_map: fuzzy_matches_map} =
@@ -199,6 +232,44 @@ defmodule ExLingoWeb.Translations.TranslationsLive do
       )
 
     {:noreply, socket}
+  end
+
+  def handle_info({:open_glossary_flyout, attrs}, socket) do
+    form =
+      %GlossaryEntry{}
+      |> Translations.change_glossary_entry(normalize_glossary_attrs(attrs))
+      |> to_form()
+
+    {:noreply,
+     socket
+     |> assign(:glossary_entry_form, form)
+     |> assign(:glossary_entry_editing?, false)}
+  end
+
+  defp list_glossary_domains do
+    %{entries: domains} = Translations.list_domains(per_page: 100)
+    domains
+  end
+
+  defp normalize_glossary_attrs(attrs) do
+    attrs
+    |> normalize_glossary_locale("source_locale")
+    |> normalize_glossary_locale("target_locale")
+    |> normalize_glossary_optional_id("domain_id")
+  end
+
+  defp normalize_glossary_locale(attrs, key) do
+    Map.update(attrs, key, nil, fn
+      nil -> nil
+      value -> value |> String.trim() |> String.downcase()
+    end)
+  end
+
+  defp normalize_glossary_optional_id(attrs, key) do
+    Map.update(attrs, key, nil, fn
+      "" -> nil
+      value -> value
+    end)
   end
 
   defp get_locale(id) do
