@@ -6,7 +6,7 @@ defmodule ExLingo.MixProject do
       app: :ex_lingo,
       description: "User-friendly translations manager for Elixir/Phoenix projects.",
       package: package(),
-      version: "1.0.0",
+      version: "1.0.1",
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [

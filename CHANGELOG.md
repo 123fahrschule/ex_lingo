@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2026-06-02
+
+### Changed
+- Open the "Add to glossary" quick-capture from the translation editor in the same flyout the glossary section uses, prefilled from the selected text, instead of navigating to a separate page.
+
+### Removed
+- Remove the standalone glossary entry form page and its `/glossary/new` and `/glossary/:id` routes; creating and editing glossary entries now always happen in the flyout.
+
 ## [1.0.0] - 2026-05-31
 
 ### Breaking Changes
