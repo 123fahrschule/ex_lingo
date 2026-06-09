@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2026-06-09
+
+### Changed
+- Upgrade the optional Cognit dependency to `0.5.0` so host applications pinned to the same Cognit release do not need `override: true` to resolve ExLingo.
+
 ## [1.0.1] - 2026-06-02
 
 ### Changed

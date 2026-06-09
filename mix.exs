@@ -6,7 +6,7 @@ defmodule ExLingo.MixProject do
       app: :ex_lingo,
       description: "User-friendly translations manager for Elixir/Phoenix projects.",
       package: package(),
-      version: "1.0.1",
+      version: "1.0.2",
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [
@@ -45,7 +45,7 @@ defmodule ExLingo.MixProject do
       {:phoenix_html_helpers, "~> 1.0"},
       # Optional so host apps can pin/bump cognit at their own pace; ExLingo
       # still fetches this tag for its own dev/test and prebuilt dashboard assets.
-      {:cognit, github: "123fahrschule/cognit", tag: "0.2.24", optional: true},
+      {:cognit, github: "123fahrschule/cognit", tag: "0.5.0", optional: true},
       {:tailwind, "~> 0.4.1", runtime: Mix.env() == :dev},
       {:jason, "~> 1.4"},
       {:cloak, "~> 1.1"},
