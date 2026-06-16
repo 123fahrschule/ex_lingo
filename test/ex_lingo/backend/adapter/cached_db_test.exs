@@ -155,6 +155,50 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
       assert result == {:error, :not_found}
     end
 
+    test "returns :not_found instead of crashing when plural translation text is nil",
+         %{locale: locale, domain: domain} do
+      # Mirrors a catalog message that was synced for a locale but never translated
+      # (e.g. `mix gettext.extract --merge` creating rows with translated_text: nil).
+      {:ok, message} =
+        Translations.create_message(%{
+          message_type: :plural,
+          msgid: "Untranslated plural",
+          context: "default",
+          domain_id: domain.id
+        })
+
+      {:ok, _translation_singular} =
+        Translations.create_plural_translation(%{
+          locale_id: locale.id,
+          message_id: message.id,
+          nplural_index: 0,
+          translated_text: nil
+        })
+
+      {:ok, _translation_plural} =
+        Translations.create_plural_translation(%{
+          locale_id: locale.id,
+          message_id: message.id,
+          nplural_index: 1,
+          translated_text: nil
+        })
+
+      ExLingo.Cache.delete_all()
+
+      result =
+        CachedDB.lngettext(
+          "fr",
+          "test_domain",
+          nil,
+          "Untranslated plural",
+          "%{count} untranslated plurals",
+          5,
+          %{}
+        )
+
+      assert result == {:error, :not_found}
+    end
+
     test "correctly adds count to bindings", %{locale: locale, domain: domain} do
       # Create a specific message for this test
       {:ok, message} =

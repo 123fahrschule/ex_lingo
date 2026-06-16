@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2026-06-16
+
+### Fixed
+- Fall back to the original message instead of raising a `FunctionClauseError` when a plural translation exists in the database but its `translated_text` is `nil` (e.g. catalog rows synced for a locale that was never translated). The plural lookup now guards against `nil` the same way the singular lookup does.
+
 ## [1.0.2] - 2026-06-09
 
 ### Changed
