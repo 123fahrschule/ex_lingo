@@ -1,5 +1,6 @@
 <div class="space-y-1.5">
   <.form
+    id={"inline-singular-form-#{@message.id}"}
     for={@form}
     phx-change="validate"
     phx-submit="save"
@@ -35,8 +36,6 @@
             <.icon name="auto_awesome" size="sm" decorative /> {t("Get AI suggestion")}
           </.dropdown_menu_item>
           <.dropdown_menu_item
-            as="button"
-            type="button"
             class="w-full"
             id={"add-to-glossary-singular-#{@message.id}"}
             phx-hook="ExLingoGlossaryCapture"

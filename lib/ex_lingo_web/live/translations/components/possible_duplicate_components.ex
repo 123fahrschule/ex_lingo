@@ -266,8 +266,7 @@ defmodule ExLingoWeb.Translations.PossibleDuplicateComponents do
   defp formatted_source_references(references) do
     references
     |> List.wrap()
-    |> Enum.map(&source_reference_label/1)
-    |> Enum.join(", ")
+    |> Enum.map_join(", ", &source_reference_label/1)
   end
 
   defp formatted_instruction_source_references([]),

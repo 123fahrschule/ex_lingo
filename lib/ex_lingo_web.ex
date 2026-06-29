@@ -149,6 +149,7 @@ defmodule ExLingoWeb do
     end
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,

@@ -46,14 +46,13 @@ defmodule ExLingo.AI.Providers.OpenAI do
   def suggest_translation(%SuggestionRequest{} = request) do
     opts = config()
     model = request.model || default_model()
+    payload = build_payload(%{request | model: model})
 
     with :ok <- validate_model(model, available_models()),
          {:ok, api_key} <- resolve_api_key(Keyword.get(opts, :api_key, @default_api_key)),
-         payload <- build_payload(%{request | model: model}),
          {:ok, response} <-
-           client(opts).request(endpoint(opts), api_key, payload, request_opts(opts)),
-         {:ok, suggestion} <- parse_response(response) do
-      {:ok, suggestion}
+           client(opts).request(endpoint(opts), api_key, payload, request_opts(opts)) do
+      parse_response(response)
     end
   end
 

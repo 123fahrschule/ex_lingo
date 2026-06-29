@@ -27,8 +27,8 @@ defmodule ExLingo.Utils.GettextRecompiler do
   end
 
   defp build_path do
-    Mix.Project.build_path()
+    apply(Mix.Project, :build_path, [])
   rescue
-    Mix.NoProjectError -> System.tmp_dir!()
+    _ -> System.tmp_dir!()
   end
 end

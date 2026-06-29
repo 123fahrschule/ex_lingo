@@ -88,7 +88,7 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslations do
           occurrence_count: pos_integer(),
           source_texts: [String.t()],
           message_ids: [integer()],
-          occurrences: [Occurrence.t()]
+          occurrences: [occurrence()]
         }
 
   @type occurrence :: %Occurrence{
@@ -252,10 +252,12 @@ defmodule ExLingo.Translations.PossibleDuplicateTranslations do
   defp candidate_groups(grouped, reason, confidence, predicate) do
     grouped
     |> Map.values()
-    |> Enum.filter(&(length(&1) > 1))
-    |> Enum.filter(&compatible_placeholders?/1)
-    |> Enum.filter(predicate)
+    |> Enum.filter(&candidate_group?(&1, predicate))
     |> Enum.map(&candidate(&1, reason, confidence))
+  end
+
+  defp candidate_group?(group, predicate) do
+    length(group) > 1 and compatible_placeholders?(group) and predicate.(group)
   end
 
   defp candidate(occurrences, reason, confidence) do

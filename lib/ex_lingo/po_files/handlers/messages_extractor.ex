@@ -143,7 +143,11 @@ defmodule ExLingo.PoFiles.MessagesExtractor do
     end
   rescue
     exception in ArgumentError ->
-      raise RuntimeError,
-            "could not locate priv/gettext for #{inspect(otp_name)}: #{Exception.message(exception)}"
+      reraise RuntimeError,
+              [
+                message:
+                  "could not locate priv/gettext for #{inspect(otp_name)}: #{Exception.message(exception)}"
+              ],
+              __STACKTRACE__
   end
 end

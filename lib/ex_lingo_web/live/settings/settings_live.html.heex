@@ -13,7 +13,7 @@
     <.card_content>
       <.placeholder_box />
 
-      <.form for={@ai_form} phx-submit="save_ai" class="space-y-6">
+      <.form id="settings-ai-form" for={@ai_form} phx-submit="save_ai" class="space-y-6">
         <.form_item>
           <.form_label field={@ai_form[:ai_prompt_template]}>
             {t("Global prompt template")}
@@ -68,7 +68,7 @@
       </.card_description>
     </.card_header>
     <.card_content>
-      <.form for={@s3_form} phx-submit="save_s3" class="space-y-6">
+      <.form id="settings-s3-form" for={@s3_form} phx-submit="save_s3" class="space-y-6">
         <div class="grid gap-4 md:grid-cols-2">
           <.form_item>
             <.form_label field={@s3_form[:s3_access_key_id]}>{t("Access key ID")}</.form_label>
@@ -146,7 +146,12 @@
       </.card_description>
     </.card_header>
     <.card_content>
-      <.form for={@validations_form} phx-submit="save_validations" class="space-y-6">
+      <.form
+        id="settings-validations-form"
+        for={@validations_form}
+        phx-submit="save_validations"
+        class="space-y-6"
+      >
         <div class="grid gap-4 md:grid-cols-2">
           <.form_item>
             <.form_label field={@validations_form[:validation_length_warning_ratio]}>

@@ -2,6 +2,7 @@
   <div :for={translation <- @translations} class="space-y-1">
     <% index = translation.nplural_index %>
     <.form
+      id={"inline-plural-form-#{@message.id}-#{index}"}
       for={%{}}
       phx-change="validate"
       phx-submit="save"
@@ -52,8 +53,6 @@
               </.dropdown_menu_item>
               <.dropdown_menu_item
                 :if={index == 0}
-                as="button"
-                type="button"
                 class="w-full"
                 id={"add-to-glossary-plural-#{@message.id}"}
                 phx-hook="ExLingoGlossaryCapture"

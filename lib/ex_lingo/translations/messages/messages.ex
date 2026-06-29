@@ -198,40 +198,43 @@ defmodule ExLingo.Translations.Messages do
     keys = image_keys_for(message_ids)
 
     Repo.get_repo()
-    |> then(fn repo ->
-      repo.transaction(fn ->
-        Enum.reduce(message_ids, %{messages_deleted: 0, translations_deleted: 0}, fn message_id,
-                                                                                     acc ->
-          stats = delete_message_counts(message_id)
-
-          %{
-            messages_deleted: acc.messages_deleted + if(stats.message_deleted, do: 1, else: 0),
-            translations_deleted: acc.translations_deleted + stats.translations_deleted
-          }
-        end)
-      end)
-    end)
+    |> then(& &1.transaction(fn -> delete_many_message_counts(message_ids) end))
     |> invalidate_message_cache_on_success()
     |> cleanup_s3_images_on_success(keys)
+  end
+
+  defp delete_many_message_counts(message_ids) do
+    Enum.reduce(message_ids, %{messages_deleted: 0, translations_deleted: 0}, fn message_id,
+                                                                                 acc ->
+      stats = delete_message_counts(message_id)
+
+      %{
+        messages_deleted: acc.messages_deleted + if(stats.message_deleted, do: 1, else: 0),
+        translations_deleted: acc.translations_deleted + stats.translations_deleted
+      }
+    end)
   end
 
   # Removes orphaned S3 objects after the message rows (and their image rows via
   # FK cascade) are gone. Best-effort: failures are logged, never raised, so a
   # storage hiccup can't undo a successful delete.
   defp cleanup_s3_images_on_success({:ok, _result} = result, keys) do
-    if S3.configured?() do
-      Enum.each(keys, fn key ->
-        case S3.delete(key) do
-          {:ok, _} -> :ok
-          error -> Logger.warning("Failed to delete S3 object #{key}: #{inspect(error)}")
-        end
-      end)
-    end
-
+    delete_s3_images(keys)
     result
   end
 
   defp cleanup_s3_images_on_success(result, _keys), do: result
+
+  defp delete_s3_images(keys) do
+    if S3.configured?(), do: Enum.each(keys, &delete_s3_image/1)
+  end
+
+  defp delete_s3_image(key) do
+    case S3.delete(key) do
+      {:ok, _} -> :ok
+      error -> Logger.warning("Failed to delete S3 object #{key}: #{inspect(error)}")
+    end
+  end
 
   defp image_keys_for(message_ids) do
     import Ecto.Query

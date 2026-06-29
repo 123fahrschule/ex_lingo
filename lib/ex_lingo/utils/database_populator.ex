@@ -21,12 +21,14 @@ defmodule ExLingo.Utils.DatabasePopulator do
   def call(repo \\ Repo.get_repo(), resource_name, entries) do
     with {:ok, schema} <- fetch_schema(resource_name),
          true <- is_list(entries) || {:error, {:invalid_entries, entries}} do
-      Enum.reduce_while(entries, {:ok, 0}, fn entry, {:ok, count} ->
-        case populate(repo, schema, entry) do
-          {:ok, _record} -> {:cont, {:ok, count + 1}}
-          {:error, reason} -> {:halt, {:error, reason}}
-        end
-      end)
+      Enum.reduce_while(entries, {:ok, 0}, &populate_entry(repo, schema, &1, &2))
+    end
+  end
+
+  defp populate_entry(repo, schema, entry, {:ok, count}) do
+    case populate(repo, schema, entry) do
+      {:ok, _record} -> {:cont, {:ok, count + 1}}
+      {:error, reason} -> {:halt, {:error, reason}}
     end
   end
 

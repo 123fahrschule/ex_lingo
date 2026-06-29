@@ -75,7 +75,7 @@ jobs:
       - run:
           name: Audit dependencies
           command: |
-            mix deps.audit
+            mix hex.audit
             npm audit --prefix assets --audit-level=high
 
       - run:

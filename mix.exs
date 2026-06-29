@@ -45,15 +45,15 @@ defmodule ExLingo.MixProject do
       {:phoenix_html_helpers, "~> 1.0"},
       # Optional so host apps can pin/bump cognit at their own pace; ExLingo
       # still fetches this tag for its own dev/test and prebuilt dashboard assets.
-      {:cognit, github: "123fahrschule/cognit", tag: "0.5.0", optional: true},
-      {:tailwind, "~> 0.4.1", runtime: Mix.env() == :dev},
+      {:cognit, github: "123fahrschule/cognit", tag: "0.7.0", optional: true},
+      {:tailwind, "~> 0.5.1", runtime: Mix.env() == :dev},
       {:jason, "~> 1.4"},
       {:cloak, "~> 1.1"},
       {:cloak_ecto, "~> 1.3"},
       {:ex_aws, "~> 2.5"},
       {:ex_aws_s3, "~> 2.5"},
       {:sweet_xml, "~> 0.7"},
-      {:hackney, "~> 1.20"},
+      {:hackney, "~> 4.4"},
       {:finch, "~> 0.21"},
       {:telemetry, "~> 1.4"},
       {:nebulex, "~> 3.0"},
