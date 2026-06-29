@@ -1,6 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] - 2026-06-29
+
+### Changed
+- Update Hex dependencies to current compatible releases, including Ecto `3.14.0`, Phoenix `1.8.8`, Phoenix LiveView `1.2.3`, Finch `0.23.0`, ExAws `2.7.0`, Hackney `4.4.5`, Nebulex Distributed `3.2.3`, Credo `1.7.19`, ExDoc `0.40.3`, and Tailwind installer `0.5.1`.
+- Upgrade the optional Cognit dependency to `0.7.0` for Phoenix LiveView `1.2` compatibility and rebuild distributable JavaScript and CSS assets.
+- Keep the CircleCI dependency audit step on valid tasks by running `mix hex.audit` for retired Hex packages and `npm audit --audit-level=high` for assets.
+
+### Fixed
+- Add stable IDs to LiveView forms that use form events so LiveView `1.2` form recovery checks no longer emit warnings in tests.
+- Adjust inline glossary dropdown actions for the current Cognit dropdown item API.
+- Resolve Credo and Dialyzer findings exposed by the dependency update while preserving existing behavior.
+
 ## [1.0.3] - 2026-06-16
 
 ### Fixed
