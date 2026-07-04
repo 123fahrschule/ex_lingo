@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2026-07-04
+
+### Fixed
+- Treat plural database translations with `translated_text: nil` as missing so Gettext falls back instead of raising during interpolation.
+- Make PostgreSQL migration rollback tolerate application-source objects already removed by later migrations and use an explicit descending range on rollback.
+
 ## [1.0.4] - 2026-06-29
 
 ### Changed
