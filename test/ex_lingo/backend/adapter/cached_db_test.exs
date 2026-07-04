@@ -236,7 +236,7 @@ defmodule ExLingo.Backend.Adapter.CachedDBTest do
           "One custom item with %{extra}",
           "%{count} custom items with %{extra}",
           3,
-          %{extra: "info"}
+          extra: "info"
         )
 
       assert result == {:ok, "3 éléments personnalisés avec info"}

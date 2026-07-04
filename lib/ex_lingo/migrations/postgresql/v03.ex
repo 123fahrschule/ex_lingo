@@ -70,22 +70,22 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
   end
 
   def down_application_sources(opts) do
-    drop table(@ex_lingo_application_sources, prefix: prefix(opts))
+    drop_if_exists table(@ex_lingo_application_sources, prefix: prefix(opts))
   end
 
   def down_ex_lingo_messages(opts) do
     prefix = prefix(opts)
 
-    drop unique_index(
-           @ex_lingo_messages,
-           [
-             :application_source_id,
-             :domain_id,
-             :context,
-             :msgid
-           ],
-           prefix: prefix
-         )
+    drop_if_exists unique_index(
+                     @ex_lingo_messages,
+                     [
+                       :application_source_id,
+                       :domain_id,
+                       :context,
+                       :msgid
+                     ],
+                     prefix: prefix
+                   )
 
     create_if_not_exists unique_index(@ex_lingo_messages, [:domain_id, :context, :msgid],
                            prefix: prefix,
@@ -93,7 +93,7 @@ defmodule ExLingo.Migrations.Postgresql.V03 do
                          )
 
     alter table(@ex_lingo_messages, prefix: prefix) do
-      remove(:application_source_id)
+      remove_if_exists(:application_source_id)
     end
   end
 

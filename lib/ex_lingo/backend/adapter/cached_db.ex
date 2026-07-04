@@ -101,7 +101,7 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
                nplural_index: nplural_index
              ]
            ),
-         {:ok, interpolated} <- apply_bindings(text, Map.put(bindings, :count, n)) do
+         {:ok, interpolated} <- apply_bindings(text, put_count_binding(bindings, n)) do
       {:ok, interpolated}
     else
       {:ok, %PluralTranslation{translated_text: nil}} -> {:error, :not_found}
@@ -126,8 +126,18 @@ defmodule ExLingo.Backend.Adapter.CachedDB do
     {:error, {:unexpected_lookup_result, error}}
   end
 
-  @spec apply_bindings(String.t(), Keyword.t() | map()) ::
+  defp put_count_binding(bindings, n) when is_list(bindings) do
+    bindings
+    |> Map.new()
+    |> Map.put(:count, n)
+  end
+
+  defp put_count_binding(bindings, n) when is_map(bindings), do: Map.put(bindings, :count, n)
+
+  @spec apply_bindings(String.t() | nil, Keyword.t() | map()) ::
           {:ok, String.t()} | {:error, term()}
+  defp apply_bindings(nil, _bindings), do: {:error, :not_found}
+
   defp apply_bindings(text, bindings) when is_list(bindings) do
     apply_bindings(text, Map.new(bindings))
   end

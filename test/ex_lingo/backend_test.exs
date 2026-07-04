@@ -218,6 +218,42 @@ defmodule ExLingo.BackendTest do
       assert Gettext.dpngettext(Backend, "default", nil, "One apple", "%{count} apples", 2, %{}) ==
                "2 mele"
     end
+
+    test "fallback for Gettext when DB plural translation text is nil" do
+      {:ok, locale} = Translations.get_locale(filter: [iso639_code: "it"])
+      {:ok, domain} = Translations.get_domain(filter: [name: "default"])
+
+      {:ok, message} =
+        Translations.create_message(%{
+          message_type: :plural,
+          msgid: "One apple",
+          context: "default",
+          domain_id: domain.id
+        })
+
+      {:ok, _singular_form} =
+        Translations.create_plural_translation(%{
+          locale_id: locale.id,
+          message_id: message.id,
+          nplural_index: 0,
+          translated_text: nil
+        })
+
+      {:ok, _plural_form} =
+        Translations.create_plural_translation(%{
+          locale_id: locale.id,
+          message_id: message.id,
+          nplural_index: 1,
+          translated_text: nil
+        })
+
+      ExLingo.Cache.delete_all()
+
+      Gettext.put_locale("it")
+
+      assert Gettext.dpngettext(Backend, "default", nil, "One apple", "%{count} apples", 0, %{}) ==
+               "0 mele"
+    end
   end
 
   test "handles missing translations gracefully" do
