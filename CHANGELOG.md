@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - An encrypted value that cannot be decrypted (key changed, damaged or foreign data) now loads as `nil` and logs a warning, instead of loading as the atom `:error` after a failed authentication check (a value in a foreign or truncated format used to make reading the whole settings row raise). The stored bytes are never modified by a read or by editing other settings, so restoring the original `:settings_encryption_key` makes the value readable again; the S3 secret is treated as not set until it is entered anew.
 - Remove `ExLingo.Vault` and its GenServer from the supervision tree; the encryption key is read from the application environment on each call.
+- Update locked Hex dependencies to releases that fix published security advisories: Phoenix `1.8.15`, Phoenix LiveView `1.2.12`, Plug `1.20.3`, Mint `1.11.0`, HPAX `1.1.0`, Postgrex `0.22.4` and LazyHTML `0.1.13`, together with their transitive updates.
 
 ## [1.0.5] - 2026-07-04
 
