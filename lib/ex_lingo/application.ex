@@ -10,7 +10,6 @@ defmodule ExLingo.Application do
     children = [
       ExLingo.Registry,
       ExLingo.Cache,
-      ExLingo.Vault,
       {Finch, name: ExLingo.Finch}
     ]
 

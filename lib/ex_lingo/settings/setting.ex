@@ -4,7 +4,7 @@ defmodule ExLingo.Settings.Setting do
 
   Holds the configurable AI translation system prompts (a global default plus
   optional per-locale overrides) and the S3 storage credentials. The S3 secret
-  access key is encrypted at rest via `ExLingo.Vault` (Cloak); it is decrypted
+  access key is encrypted at rest via `ExLingo.Encrypted.Binary` (AES-256-GCM); it is decrypted
   transparently on load and is never rendered back into forms.
   """
 

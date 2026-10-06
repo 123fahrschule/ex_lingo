@@ -1,8 +1,11 @@
 defmodule ExLingo.SettingsTest do
   use ExLingo.Test.DataCase, async: false
 
+  import ExUnit.CaptureLog
+
   alias ExLingo.Settings
   alias ExLingo.Settings.Setting
+  alias ExLingo.Test.Repo
   alias ExLingo.Translations.Validations
 
   setup do
@@ -58,13 +61,55 @@ defmodule ExLingo.SettingsTest do
 
       # The raw column holds ciphertext, never the plaintext.
       [stored] =
-        ExLingo.Test.Repo.all(from(s in "ex_lingo_settings", select: s.s3_secret_access_key))
+        Repo.all(from(s in "ex_lingo_settings", select: s.s3_secret_access_key))
 
       assert is_binary(stored)
       refute stored == "super-secret"
 
       # A fresh load through the schema transparently decrypts.
       assert Settings.get().s3_secret_access_key == "super-secret"
+    end
+
+    test "an S3 secret that cannot be decrypted does not break settings and is never overwritten" do
+      original = Application.get_env(:ex_lingo, :settings_encryption_key)
+      on_exit(fn -> Application.put_env(:ex_lingo, :settings_encryption_key, original) end)
+
+      {:ok, _} = Settings.update(%{"s3_secret_access_key" => "super-secret"})
+
+      raw = fn ->
+        Repo.all(from(s in "ex_lingo_settings", select: s.s3_secret_access_key))
+      end
+
+      [stored] = raw.()
+
+      # The key changes (e.g. rotated SECRET_KEY_BASE): reads must keep working.
+      Application.put_env(:ex_lingo, :settings_encryption_key, "a-different-key")
+      ExLingo.Cache.delete_all()
+
+      {setting, log} = with_log(fn -> Settings.get() end)
+      assert log =~ "could not be decrypted"
+      assert setting.s3_secret_access_key == nil
+      refute Setting.s3_secret_present?(setting)
+
+      # Editing other fields leaves the stored ciphertext byte-for-byte intact.
+      {{:ok, updated}, _log} = with_log(fn -> Settings.update(%{"s3_bucket" => "my-bucket"}) end)
+      assert updated.s3_bucket == "my-bucket"
+      assert raw.() == [stored]
+
+      # Restoring the original key makes the value readable again: no data lost.
+      Application.put_env(:ex_lingo, :settings_encryption_key, original)
+      ExLingo.Cache.delete_all()
+      assert Settings.get().s3_secret_access_key == "super-secret"
+
+      # Entering a new secret under the new key replaces it.
+      Application.put_env(:ex_lingo, :settings_encryption_key, "a-different-key")
+      ExLingo.Cache.delete_all()
+
+      {{:ok, replaced}, _log} =
+        with_log(fn -> Settings.update(%{"s3_secret_access_key" => "fresh-secret"}) end)
+
+      assert replaced.s3_secret_access_key == "fresh-secret"
+      refute raw.() == [stored]
     end
 
     test "stores a custom S3 folder prefix and falls back to the bucket root when blank" do

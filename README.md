@@ -186,7 +186,7 @@ ExLingo encrypts sensitive settings (e.g. the S3 secret access key) at rest. Set
 config :ex_lingo, :settings_encryption_key, System.fetch_env!("EX_LINGO_SETTINGS_KEY")
 ```
 
-The value is hashed (SHA-256) into the AES-256-GCM key used by `ExLingo.Vault`. If it is not configured, a built-in fallback is used so development and tests work out of the box — do not rely on the fallback in production, and note that changing the secret makes previously encrypted values unreadable.
+The value is hashed (SHA-256) into the AES-256-GCM key used by `ExLingo.Encrypted.Binary`. If it is not configured, a built-in fallback is used so development and tests work out of the box — do not rely on the fallback in production, and note that changing the secret makes previously encrypted values unreadable. An unreadable value is treated as not set (a warning is logged) and is never overwritten or deleted: restoring the original secret makes it readable again, and entering a new value replaces it.
 
 You can store ExLingo data in another database by configuring `repo:` with a dedicated Ecto repo, for example `MyApp.ExLingoRepo`. You can also store ExLingo tables in a PostgreSQL schema by setting `prefix: "ex_lingo"` and running the ExLingo migration with the same prefix. When a non-`public` prefix is used, ExLingo creates the PostgreSQL schema automatically during its migration by default.
 
@@ -373,7 +373,7 @@ The dashboard includes a `/settings` page (linked at the bottom of the sidebar) 
 
 - **Translation quality warnings** — the thresholds for the advisory length warnings shown while translating (length warning/error ratios, the short-string threshold, and the absolute character allowances for short strings). Tighten them for mobile UIs and relax them for web. Each value cascades: stored override → `config :ex_lingo, :validations` → built-in default, so leaving a field empty falls back to the configured project default.
 
-- **S3 storage** — credentials for the image context feature (see below), plus a configurable folder prefix so a single bucket can be shared across services with each one writing into its own subfolder (defaults to the bucket root `/`). The secret access key is encrypted at rest with [Cloak](https://hex.pm/packages/cloak_ecto) (AES-256-GCM) through `ExLingo.Vault`; it is decrypted transparently on load and is never rendered back into forms. The encryption key is derived from `config :ex_lingo, :settings_encryption_key`, which host applications should set to a strong, stable secret (a built-in fallback keeps dev/test working). Secrets are never stored in plaintext.
+- **S3 storage** — credentials for the image context feature (see below), plus a configurable folder prefix so a single bucket can be shared across services with each one writing into its own subfolder (defaults to the bucket root `/`). The secret access key is encrypted at rest with AES-256-GCM (OTP `:crypto`) through `ExLingo.Encrypted.Binary`; it is decrypted transparently on load and is never rendered back into forms. The encryption key is derived from `config :ex_lingo, :settings_encryption_key`, which host applications should set to a strong, stable secret (a built-in fallback keeps dev/test working). Secrets are never stored in plaintext.
 
 See [Setting up an S3 bucket](#setting-up-an-s3-bucket) for how to provision the bucket, user, and permissions.
 

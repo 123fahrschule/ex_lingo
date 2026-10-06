@@ -48,8 +48,6 @@ defmodule ExLingo.MixProject do
       {:cognit, github: "123fahrschule/cognit", tag: "0.7.0", optional: true},
       {:tailwind, "~> 0.5.1", runtime: Mix.env() == :dev},
       {:jason, "~> 1.4"},
-      {:cloak, "~> 1.1"},
-      {:cloak_ecto, "~> 1.3"},
       {:ex_aws, "~> 2.5"},
       {:ex_aws_s3, "~> 2.5"},
       {:sweet_xml, "~> 0.7"},
