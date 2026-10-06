@@ -76,7 +76,11 @@ jobs:
           name: Audit dependencies
           command: |
             mix hex.audit
-            npm audit --prefix assets --audit-level=high
+            # Fail on advisories in what ships (runtime dependencies bundled into dist/).
+            npm audit --prefix assets --omit=dev --audit-level=high
+            # Build-time tooling (Tailwind CSS 3 and its dependencies) is reported but does not
+            # block: its remaining advisories are only fixed by the Tailwind CSS 4 major upgrade.
+            npm audit --prefix assets --audit-level=high || echo "Build tooling advisories reported above (non-blocking)"
 
       - run:
           name: Install asset binaries
