@@ -1,6 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.6] - 2026-10-06
+
+### Security
+- Remove the `cloak` and `cloak_ecto` dependencies, which have had no release since April 2024 and carry open advisories (EEF-CVE-2026-95105: AES-CTR without authentication; EEF-CVE-2026-94206: PBKDF2 field) with no fixed release.
+- Encrypt the S3 secret access key with AES-256-GCM directly over OTP's `:crypto`. `ExLingo.Encrypted.Binary` and the `:settings_encryption_key` setting keep their names, and the stored format (`<<1, 10, "AES.GCM.V1">> <> iv <> tag <> ciphertext`, AAD `AES256GCM`, key = SHA-256 of the secret) is unchanged, so existing values stay readable and no data migration is needed.
+
+### Changed
+- An encrypted value that cannot be decrypted (key changed, damaged or foreign data) now loads as `nil` and logs a warning, instead of loading as the atom `:error` after a failed authentication check (a value in a foreign or truncated format used to make reading the whole settings row raise). The stored bytes are never modified by a read or by editing other settings, so restoring the original `:settings_encryption_key` makes the value readable again; the S3 secret is treated as not set until it is entered anew.
+- Remove `ExLingo.Vault` and its GenServer from the supervision tree; the encryption key is read from the application environment on each call.
+- Update locked Hex dependencies to releases that fix published security advisories: Phoenix `1.8.15`, Phoenix LiveView `1.2.12`, Plug `1.20.3`, Mint `1.11.0`, HPAX `1.1.0`, Postgrex `0.22.4` and LazyHTML `0.1.13`, together with their transitive updates.
+- Update the locked npm build dependencies (`@babel/core`, `postcss`, `browserslist`, `nanoid`, `source-map-js` and others) to releases that fix published advisories. The remaining `npm audit` findings come from Tailwind CSS 3 (`braces`, `chokidar`, `micromatch`, `fast-glob`, `postcss-selector-parser`) and are fixed only by the Tailwind CSS 4 major upgrade; the CircleCI audit step now fails on advisories in runtime npm dependencies (`--omit=dev`) and reports build-tooling advisories without failing.
+
 ## [1.0.5] - 2026-07-04
 
 ### Fixed

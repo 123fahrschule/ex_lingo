@@ -6,7 +6,7 @@ defmodule ExLingo.MixProject do
       app: :ex_lingo,
       description: "User-friendly translations manager for Elixir/Phoenix projects.",
       package: package(),
-      version: "1.0.5",
+      version: "1.0.6",
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [
@@ -48,8 +48,6 @@ defmodule ExLingo.MixProject do
       {:cognit, github: "123fahrschule/cognit", tag: "0.7.0", optional: true},
       {:tailwind, "~> 0.5.1", runtime: Mix.env() == :dev},
       {:jason, "~> 1.4"},
-      {:cloak, "~> 1.1"},
-      {:cloak_ecto, "~> 1.3"},
       {:ex_aws, "~> 2.5"},
       {:ex_aws_s3, "~> 2.5"},
       {:sweet_xml, "~> 0.7"},
